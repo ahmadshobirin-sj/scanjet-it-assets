@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-    "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+    "inline-flex items-center justify-center cursor-pointer gap-2 whitespace-nowrap rounded-md font-medium transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0 outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
     {
         variants: {
             intent: {
@@ -99,32 +99,32 @@ const buttonVariants = cva(
             {
                 intent: "primary",
                 variant: "light",
-                className: "bg-primary/10 text-primary hover:bg-primary/20 focus-visible:ring-primary",
+                className: "border border-primary bg-primary/10 text-primary hover:bg-primary/20 focus-visible:ring-primary",
             },
             {
                 intent: "secondary",
                 variant: "light",
-                className: "bg-secondary/10 text-secondary-foreground hover:bg-secondary/20 focus-visible:ring-secondary",
+                className: "border border-secondary bg-secondary/10 text-secondary-foreground hover:bg-secondary/20 focus-visible:ring-secondary",
             },
             {
                 intent: "destructive",
                 variant: "light",
-                className: "bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:ring-destructive",
+                className: "border border-destructive bg-destructive/10 text-destructive hover:bg-destructive/20 focus-visible:ring-destructive",
             },
             {
                 intent: "warning",
                 variant: "light",
-                className: "bg-yellow-100 text-yellow-800 hover:bg-yellow-200 focus-visible:ring-yellow-500",
+                className: "border border-yellow-500 bg-yellow-100 text-yellow-800 hover:bg-yellow-200 focus-visible:ring-yellow-500",
             },
             {
                 intent: "success",
                 variant: "light",
-                className: "bg-green-100 text-green-800 hover:bg-green-200 focus-visible:ring-green-600",
+                className: "border border-green-600 bg-green-100 text-green-800 hover:bg-green-200 focus-visible:ring-green-600",
             },
             {
                 intent: "info",
                 variant: "light",
-                className: "bg-blue-100 text-blue-800 hover:bg-blue-200 focus-visible:ring-blue-500",
+                className: "border border-blue-500 bg-blue-100 text-blue-800 hover:bg-blue-200 focus-visible:ring-blue-500",
             },
 
             // Ghost styles
