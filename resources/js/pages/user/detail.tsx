@@ -57,7 +57,7 @@ const UserDetailPage = forwardRef<UserDetailPageRef, { user: User | null, onClos
                                 )) : '-'}</InfoListContent>
                             </InfoList>
                         </InfoListGroup>
-                        <InfoListGroup title="Personal Information" columns={1}>
+                        <InfoListGroup title="Personal Information" columns={2}>
                             <InfoList direction="column">
                                 <InfoListLabel>Name</InfoListLabel>
                                 <InfoListContent>{user?.name || '-'}</InfoListContent>
