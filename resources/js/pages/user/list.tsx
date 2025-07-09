@@ -81,7 +81,6 @@ function UserListPage() {
     // Event handlers with proper typing
     const handlePaginationChange = useCallback((pagination: PaginationState) => {
         setTableState(prev => ({ ...prev, pagination }))
-        // updateTableState({ pageIndex: pagination.pageIndex, pageSize: pagination.pageSize });
     }, [setTableState]);
 
     const handleSortingChange = useCallback((sorting: SortingState) => {
