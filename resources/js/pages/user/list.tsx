@@ -77,8 +77,6 @@ function UserListPage() {
         updateTableState(tableState);
     }, [tableState])
 
-
-    // Event handlers with proper typing
     const handlePaginationChange = useCallback((pagination: PaginationState) => {
         setTableState(prev => ({ ...prev, pagination }))
     }, [setTableState]);
