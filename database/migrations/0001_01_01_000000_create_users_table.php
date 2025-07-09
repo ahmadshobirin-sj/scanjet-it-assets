@@ -15,11 +15,11 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('msgraph_user_id')->nullable()->default('');
             $table->string('preferred_language')->nullable()->default('');
-            $table->string('user_principal_name')->default('');
+            $table->string('user_principal_name')->nullable()->default('');
             $table->string('name')->nullable()->default('')->index();
             $table->string('email')->unique();
             $table->json('business_phones')->nullable();
-            $table->string('given_name')->default('');
+            $table->string('given_name')->nullable()->default('');
             $table->string('job_title')->nullable()->default('');
             $table->string('mobile_phone')->nullable()->default('');
             $table->string('office_location')->nullable()->default('');
