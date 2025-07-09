@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\DTOs\TableStateDTO;
-use App\Enums\UserRole;
 use App\Http\Requests\User\StoreRequest;
 use App\Http\Requests\User\UpdateRequest;
 use App\Http\Resources\UserResource;
@@ -11,8 +10,6 @@ use App\Models\User;
 use App\Services\UserService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -37,7 +34,6 @@ class UserController extends Controller
     {
         $this->authorize('view', $user);
 
-        return;
     }
 
     public function store(StoreRequest $request)

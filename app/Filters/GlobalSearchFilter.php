@@ -2,9 +2,9 @@
 
 namespace App\Filters;
 
-use Spatie\QueryBuilder\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Schema;
+use Spatie\QueryBuilder\Filters\Filter;
 
 class GlobalSearchFilter implements Filter
 {
@@ -26,6 +26,7 @@ class GlobalSearchFilter implements Filter
         $columns = Schema::getColumnListing($table);
         $searchable = array_filter($columns, function ($column) use ($table) {
             $type = Schema::getColumnType($table, $column);
+
             return in_array($type, ['string', 'text', 'varchar']);
         });
 

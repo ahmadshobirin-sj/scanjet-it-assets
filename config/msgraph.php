@@ -44,17 +44,17 @@ return [
     /*
     set the authorize url
     */
-    'urlAuthorize' => 'https://login.microsoftonline.com/' . env('MSGRAPH_TENANT_ID', 'common') . '/oauth2/v2.0/authorize',
+    'urlAuthorize' => 'https://login.microsoftonline.com/'.env('MSGRAPH_TENANT_ID', 'common').'/oauth2/v2.0/authorize',
 
     /*
     set the token url
     */
-    'urlAccessToken' => 'https://login.microsoftonline.com/' . env('MSGRAPH_TENANT_ID', 'common') . '/oauth2/v2.0/token',
+    'urlAccessToken' => 'https://login.microsoftonline.com/'.env('MSGRAPH_TENANT_ID', 'common').'/oauth2/v2.0/token',
 
     /*
     set the resource url
     */
-    'urlResourceOwnerDetails' => 'https://login.microsoftonline.com/' . env('MSGRAPH_TENANT_ID', 'common') . '/oauth2/v2.0/resource',
+    'urlResourceOwnerDetails' => 'https://login.microsoftonline.com/'.env('MSGRAPH_TENANT_ID', 'common').'/oauth2/v2.0/resource',
 
     /*
     set the scopes to be used, Microsoft Graph API will accept up to 20 scopes

@@ -41,7 +41,6 @@ class UserPolicy
         return $user->can('user.update');
     }
 
-
     /**
      * Determine whether the user can delete the model.
      */
@@ -51,8 +50,10 @@ class UserPolicy
             if ($user->id === $model->id) {
                 return false;
             }
+
             return true;
         }
+
         return false;
     }
 }

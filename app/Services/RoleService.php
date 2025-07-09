@@ -14,7 +14,7 @@ class RoleService
     {
         return QueryBuilder::for(Role::class)
             ->allowedFilters([
-                AllowedFilter::custom('search', new GlobalSearchFilter()),
+                AllowedFilter::custom('search', new GlobalSearchFilter),
             ])
             ->allowedSorts(['name', 'email', 'created_at'])
             ->allowedFields(['name'])

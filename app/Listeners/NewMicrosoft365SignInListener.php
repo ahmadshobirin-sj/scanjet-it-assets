@@ -5,7 +5,6 @@ namespace App\Listeners;
 use App\Models\User;
 use Dcblogdev\MsGraph\MsGraph;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
 
 class NewMicrosoft365SignInListener
 {

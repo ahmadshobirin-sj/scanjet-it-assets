@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
-use Dcblogdev\MsGraph\Facades\MsGraph;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['guest'])->group(function () {

@@ -7,8 +7,11 @@ use Illuminate\Http\Request;
 class TableStateDTO
 {
     protected array $sort;
+
     protected array $filters;
+
     protected int $perPage;
+
     protected int $page;
 
     public function __construct(
@@ -80,24 +83,28 @@ class TableStateDTO
     public function setSort(array $sort): self
     {
         $this->sort = $sort;
+
         return $this;
     }
 
     public function setFilters(array $filters): self
     {
         $this->filters = $filters;
+
         return $this;
     }
 
     public function setPerPage(int $perPage): self
     {
         $this->perPage = $perPage;
+
         return $this;
     }
 
     public function setPage(int $page): self
     {
         $this->page = $page;
+
         return $this;
     }
 }

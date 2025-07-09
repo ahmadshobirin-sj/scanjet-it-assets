@@ -2,11 +2,9 @@
 
 namespace App\Services;
 
-use App\DTOs\TableStateDTO;
 use App\Enums\UserRole;
 use App\Filters\GlobalSearchFilter;
 use App\Models\User;
-use Beta\Microsoft\Graph\Ediscovery\Model\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -16,14 +14,13 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class UserService
 {
-
     public function getAll(Request $request)
     {
         return QueryBuilder::for(User::class)
             ->allowedFilters([
                 AllowedFilter::custom('search', new GlobalSearchFilter(['password'])),
                 AllowedFilter::partial('name'),
-                AllowedFilter::partial('email')
+                AllowedFilter::partial('email'),
             ])
             ->allowedSorts(['name', 'email', 'created_at'])
             ->allowedFields(['name'])
@@ -42,6 +39,7 @@ class UserService
         return DB::transaction(function () use ($data) {
             $user = User::create(Arr::only($data, $this->attributes()));
             $user->assignRole(UserRole::INACTIVE);
+
             return $user;
         });
     }
@@ -50,12 +48,13 @@ class UserService
     {
         return DB::transaction(function () use ($user, $data) {
             $user->update(Arr::only($data, $this->attributes()));
+
             return $user;
         });
     }
 
     public function delete(User $user): void
     {
-        DB::transaction(fn() => $user->delete());
+        DB::transaction(fn () => $user->delete());
     }
 }

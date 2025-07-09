@@ -2,26 +2,28 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Permission;
-use App\Models\User;
-use App\Models\Role;
 use App\Enums\UserRole;
+use App\Models\Permission;
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Console\Command;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use ReflectionClass;
 use ReflectionMethod;
 
 class SetupAuth extends Command
 {
     protected $signature = 'auth:setup {--guard=web : The guard name for permissions and roles}';
+
     protected $description = 'Setup complete authentication system: sync permissions from policies, roles, and create super admin user';
 
     public function handle()
     {
         $policyPath = app_path('Policies');
-        if (!is_dir($policyPath)) {
+        if (! is_dir($policyPath)) {
             $this->error("Policy directory not found at {$policyPath}");
+
             return 1;
         }
 
@@ -53,12 +55,14 @@ class SetupAuth extends Command
         $permissions = [];
 
         foreach ($files as $file) {
-            if (!Str::endsWith($file, 'Policy.php')) continue;
+            if (! Str::endsWith($file, 'Policy.php')) {
+                continue;
+            }
 
-            $className = 'App\\Policies\\' . Str::before($file, '.php');
+            $className = 'App\\Policies\\'.Str::before($file, '.php');
 
-            if (!class_exists($className)) {
-                require_once $policyPath . '/' . $file;
+            if (! class_exists($className)) {
+                require_once $policyPath.'/'.$file;
             }
 
             $reflect = new ReflectionClass($className);
@@ -92,12 +96,12 @@ class SetupAuth extends Command
         $stats = [
             'inserted' => 0,
             'deleted' => 0,
-            'existing' => count(array_intersect($newPermissions, $existingPermissions))
+            'existing' => count(array_intersect($newPermissions, $existingPermissions)),
         ];
 
         DB::transaction(function () use ($toInsert, $toDelete, $guardName, &$stats) {
             // Bulk insert new permissions
-            if (!empty($toInsert)) {
+            if (! empty($toInsert)) {
                 $insertData = array_map(function ($permission) use ($guardName) {
                     return [
                         'id' => Str::uuid()->toString(),
@@ -113,7 +117,7 @@ class SetupAuth extends Command
             }
 
             // Bulk delete removed permissions
-            if (!empty($toDelete)) {
+            if (! empty($toDelete)) {
                 Permission::where('guard_name', $guardName)
                     ->whereIn('name', $toDelete)
                     ->delete();
@@ -137,7 +141,7 @@ class SetupAuth extends Command
         $stats = [
             'inserted' => 0,
             'deleted' => 0,
-            'existing' => count(array_intersect($roleNames, $existingRoles))
+            'existing' => count(array_intersect($roleNames, $existingRoles)),
         ];
 
         DB::transaction(function () use ($toInsert, $toDelete, $guardName, &$stats) {
@@ -151,7 +155,7 @@ class SetupAuth extends Command
             }
 
             // Bulk delete removed roles
-            if (!empty($toDelete)) {
+            if (! empty($toDelete)) {
                 Role::where('guard_name', $guardName)
                     ->whereIn('name', $toDelete)
                     ->delete();
@@ -168,8 +172,9 @@ class SetupAuth extends Command
             ->where('guard_name', $guardName)
             ->first();
 
-        if (!$superAdminRole) {
+        if (! $superAdminRole) {
             $this->error('Super Admin role not found!');
+
             return;
         }
 
@@ -185,8 +190,9 @@ class SetupAuth extends Command
     {
         $email = env('EMAIL_ADMINISTRATOR');
 
-        if (!$email) {
+        if (! $email) {
             $this->error('Super Admin email not set in .env file (EMAIL_ADMINISTRATOR)');
+
             return;
         }
 
@@ -229,7 +235,7 @@ class SetupAuth extends Command
             $permissionStats['inserted'] === 0 && $permissionStats['deleted'] === 0 &&
             $roleStats['inserted'] === 0 && $roleStats['deleted'] === 0
         ) {
-            $this->info("✨ All permissions and roles are already up to date!");
+            $this->info('✨ All permissions and roles are already up to date!');
         }
     }
 }

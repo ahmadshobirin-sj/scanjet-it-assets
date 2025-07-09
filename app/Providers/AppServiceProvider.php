@@ -2,10 +2,10 @@
 
 namespace App\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use App\Listeners\NewMicrosoft365SignInListener;
 use Dcblogdev\MsGraph\Events\NewMicrosoft365SignInEvent;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
