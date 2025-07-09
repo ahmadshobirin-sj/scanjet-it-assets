@@ -47,7 +47,7 @@ function UserListPage() {
                 return (
                     <div className="flex flex-wrap gap-1">
                         {row.original.roles.map((role) => (
-                            <Badge key={role.id} intent={UserRoleStyle.getIntent(role.name) as any} variant="light" size="sm" className="text-xs">
+                            <Badge key={role.id} intent={UserRoleStyle.getIntent(role.name) as any} variant="fill" size="sm" className="text-xs">
                                 {role.name}
                             </Badge>
                         ))}
