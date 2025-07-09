@@ -134,7 +134,7 @@ function UserListPage() {
         setUserSelected(row);
         userDetailPage.current?.open();
     }, [])
-    console.log(tableState);
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Users" />
