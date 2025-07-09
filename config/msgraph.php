@@ -22,13 +22,13 @@ return [
     /*
     * Set the url to trigger the oauth process this url should call return MsGraph::connect();
     */
-    'redirectUri' => env('MSGRAPH_OAUTH_URL', 'connect'),
+    'redirectUri' => env('MSGRAPH_REDIRECT_URI', 'connect'),
 
     /*
     * set the url to be redirected to once the token has been saved
     */
 
-    'msgraphLandingUri' => env('MSGRAPH_LANDING_URL'),
+    'msgraphLandingUri' => env('MSGRAPH_LANDING_ENDPOINT'),
 
     /*
     set the tenant authorize url
