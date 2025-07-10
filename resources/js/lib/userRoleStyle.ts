@@ -10,7 +10,7 @@ export class UserRoleStyle {
             case 'Inactive':
                 return 'secondary';
             default:
-                return 'secondary';
+                return 'warning';
         }
     }
 }
