@@ -24,6 +24,7 @@
         "typescript-eslint": "^8.23.0"
     },
     "dependencies": {
+        "@fontsource-variable/inter": "^5.2.6",
         "@headlessui/react": "^2.2.0",
         "@inertiajs/react": "^2.0.0",
         "@radix-ui/react-alert-dialog": "^1.1.14",
