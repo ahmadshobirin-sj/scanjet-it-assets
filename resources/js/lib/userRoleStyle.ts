@@ -4,7 +4,7 @@ export class UserRoleStyle {
     static getIntent(role: UserRole): string {
         switch (role) {
             case 'Admin':
-                return 'info';
+                return 'success';
             case 'Super Admin':
                 return 'primary';
             case 'Inactive':
