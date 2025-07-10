@@ -1,3 +1,4 @@
+// import { router } from '@inertiajs/react'
 import { useEffect } from 'react'
 
 export const useBeforeUnloadPrompt = (shouldWarn: boolean) => {
@@ -12,4 +13,16 @@ export const useBeforeUnloadPrompt = (shouldWarn: boolean) => {
     window.addEventListener('beforeunload', handler)
     return () => window.removeEventListener('beforeunload', handler)
   }, [shouldWarn])
+
+//   useEffect(() => {
+//     const cancelNavigation = (event: any) => {
+//       if (shouldWarn && !window.confirm('You have unsaved changes. Are you sure you want to leave this page?')) {
+//         event.preventDefault()
+//       }
+//     }
+
+//     const unsubscribe = router.on('before', cancelNavigation)
+
+//     return unsubscribe
+//   }, [shouldWarn])
 }
