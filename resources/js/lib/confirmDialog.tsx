@@ -1,4 +1,3 @@
-// lib/confirm-delete-dialog.tsx
 import {
     AlertDialog,
     AlertDialogContent,
@@ -68,7 +67,7 @@ export function ConfirmDialog() {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
-                    <Button onClick={handleConfirm}>Continue</Button>
+                    <Button onClick={handleConfirm} intent="destructive">Continue</Button>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
