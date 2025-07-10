@@ -43,7 +43,9 @@ export const DataGridToolbar = <TData,>({ table, inputValue, onGlobalFilterChang
                                             column.toggleVisibility(!!value)
                                         }
                                     >
-                                        {column.id}
+                                        <>
+                                            {column.columnDef.header}
+                                        </>
                                     </DropdownMenuCheckboxItem>
                                 )
                             })}
