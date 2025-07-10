@@ -6,8 +6,8 @@ use App\DTOs\TableStateDTO;
 use App\Http\Requests\User\StoreRequest;
 use App\Http\Requests\User\UpdateRequest;
 use App\Http\Resources\UserResource;
+use App\Http\Services\UserService;
 use App\Models\User;
-use App\Services\UserService;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -33,7 +33,6 @@ class UserController extends Controller
     public function show(User $user)
     {
         $this->authorize('view', $user);
-
     }
 
     public function store(StoreRequest $request)

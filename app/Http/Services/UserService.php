@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Services;
+namespace App\Http\Services;
 
 use App\Enums\UserRole;
-use App\Filters\GlobalSearchFilter;
+use App\Http\Filters\GlobalSearchFilter;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -55,6 +55,6 @@ class UserService
 
     public function delete(User $user): void
     {
-        DB::transaction(fn () => $user->delete());
+        DB::transaction(fn() => $user->delete());
     }
 }
