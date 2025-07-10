@@ -35,6 +35,10 @@ export interface ResponseCollection<T> {
     meta: MetaResponseCollection;
 }
 
+export interface ResponseResource<T> {
+    data: T;
+}
+
 export interface User {
   id: string;
   name: string;
