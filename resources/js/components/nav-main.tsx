@@ -2,7 +2,7 @@ import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, Sideba
 import { NavGroup } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
-import { ChevronDown } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { isActivePath } from '@/lib/menu';
 
 export function NavMain({ items = [] }: { items: NavGroup[] }) {
@@ -16,7 +16,7 @@ export function NavMain({ items = [] }: { items: NavGroup[] }) {
                         <SidebarGroupLabel asChild>
                             <CollapsibleTrigger className="cursor-pointer text-sm">
                                 {group.title}
-                                <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible-group:rotate-180" />
+                                <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible-group:rotate-90" />
                             </CollapsibleTrigger>
                         </SidebarGroupLabel>
                         <CollapsibleContent>
@@ -30,7 +30,7 @@ export function NavMain({ items = [] }: { items: NavGroup[] }) {
                                                         <SidebarMenuButton tooltip={item.title}>
                                                             {item.icon && <item.icon className="size-4" />}
                                                             <span>{item.title}</span>
-                                                            <ChevronDown className="ml-auto transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                                                            <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                                                         </SidebarMenuButton>
                                                     </CollapsibleTrigger>
                                                 </SidebarMenuButton>
