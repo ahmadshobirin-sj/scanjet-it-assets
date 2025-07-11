@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import useDidUpdate from '@/hooks/use-did-update';
 import UserDetailPage, { UserDetailPageRef } from './detail';
 import { useBreadcrumb } from '@/hooks/use-breadcrumb';
+import { usePermission } from '@/hooks/use-permissions';
 
 function UserListPage() {
     const { props: { user, table }, component } = usePage<SharedData & { user: ResponseCollection<User>; table: TableServerState }>();
@@ -25,6 +26,7 @@ function UserListPage() {
     const userDetailPage = useRef<UserDetailPageRef>(null);
     const [userSelected, setUserSelected] = useState<User | null>(null);
     const breadcrumbs = useBreadcrumb(component)
+    const { can } = usePermission()
 
     const columns: ColumnDef<User>[] = [
         {
@@ -136,7 +138,7 @@ function UserListPage() {
                     subtitle="List of all users"
                     actions={
                         <>
-                            <UserCreatePage />
+                            {can('user.create') && <UserCreatePage />}
                         </>
                     }
                 />
@@ -153,19 +155,9 @@ function UserListPage() {
                     onGlobalFilterChange={handleFilterChange}
                     onPaginationChange={handlePaginationChange}
                     actionsRow={() => ([
-                        {
-                            name: 'View',
-                            event: handleViewDetail
-                        },
-                        {
-                            name: 'Edit',
-                            event: handleUpdateRow
-                        },
-                        {
-                            name: 'Delete',
-                            color: 'destructive',
-                            event: handleDeleteRow
-                        }
+                        ...(can('user.view') ? [{ name: 'View', event: handleViewDetail }] : []),
+                        ...(can('user.update') ? [{ name: 'Edit', event: handleUpdateRow }] : []),
+                        ...(can('user.delete') ? [{ name: 'Delete', color: 'destructive', event: handleDeleteRow }] : []),
                     ])}
                 />
 
