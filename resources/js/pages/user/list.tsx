@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { DataGrid, type DataGridState } from '@/components/data-grid';
 import AppLayout from '@/layouts/app-layout';
 import { spatieToTanstackState, tanstackToSpatieParams } from '@/lib/normalize-table-state';
-import { BreadcrumbItem, SharedData } from '@/types';
+import { SharedData } from '@/types';
 import type { ResponseCollection, TableServerState, User } from '@/types/model';
 import { Head, router, usePage } from '@inertiajs/react';
 import { ColumnDef, PaginationState, SortingState } from '@tanstack/react-table';
@@ -16,20 +16,15 @@ import { confirmDialog } from '@/lib/confirmDialog';
 import { toast } from 'sonner';
 import useDidUpdate from '@/hooks/use-did-update';
 import UserDetailPage, { UserDetailPageRef } from './detail';
-
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Users',
-        href: '/user',
-    },
-];
+import { useBreadcrumb } from '@/hooks/use-breadcrumb';
 
 function UserListPage() {
-    const { props: { user, table } } = usePage<SharedData & { user: ResponseCollection<User>; table: TableServerState }>();
+    const { props: { user, table }, component } = usePage<SharedData & { user: ResponseCollection<User>; table: TableServerState }>();
     const [tableState, setTableState] = useState(spatieToTanstackState(table));
     const userUpdateRef = useRef<UserUpdatePageRef>(null);
     const userDetailPage = useRef<UserDetailPageRef>(null);
     const [userSelected, setUserSelected] = useState<User | null>(null);
+    const breadcrumbs = useBreadcrumb(component)
 
     const columns: ColumnDef<User>[] = [
         {
