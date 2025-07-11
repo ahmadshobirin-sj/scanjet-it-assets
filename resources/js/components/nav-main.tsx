@@ -1,10 +1,12 @@
 import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem } from '@/components/ui/sidebar';
 import { NavGroup } from '@/types';
-import { Link } from '@inertiajs/react';
+import { Link, usePage } from '@inertiajs/react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 import { ChevronDown } from 'lucide-react';
+import { isActivePath } from '@/lib/menu';
 
 export function NavMain({ items = [] }: { items: NavGroup[] }) {
+    const page = usePage();
 
     return (
         <>
@@ -50,7 +52,7 @@ export function NavMain({ items = [] }: { items: NavGroup[] }) {
                                         </Collapsible>
                                     ) : (
                                         <SidebarMenuItem key={index + '-' + subIndex}>
-                                            <SidebarMenuButton asChild>
+                                            <SidebarMenuButton asChild isActive={isActivePath(page.url, item.href)}>
                                                 <Link href={item.href || '#'} preserveState preserveScroll>
                                                     {item.icon && <item.icon className="size-4" />}
                                                     <span>{item.title}</span>
