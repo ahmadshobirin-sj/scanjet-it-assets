@@ -1,16 +1,13 @@
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
+import { useBreadcrumb } from '@/hooks/use-breadcrumb';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
-
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Dashboard',
-        href: '/',
-    },
-];
+import { SharedData, type BreadcrumbItem } from '@/types';
+import { Head, usePage } from '@inertiajs/react';
 
 export default function Dashboard() {
+    const { component } = usePage<SharedData>();
+    const breadcrumbs = useBreadcrumb(component)
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Dashboard" />
