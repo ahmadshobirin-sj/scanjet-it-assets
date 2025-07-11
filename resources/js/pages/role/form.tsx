@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { useBeforeUnloadPrompt } from '@/hooks/use-before-unload-prompt'
+import { useBreadcrumb } from '@/hooks/use-breadcrumb'
 import AppLayout from '@/layouts/app-layout'
 import { camelCaseToWords } from '@/lib/utils'
 import { SharedData } from '@/types'
@@ -23,7 +24,8 @@ interface RoleFormPageProps {
 }
 
 const RoleFormPage: FC<RoleFormPageProps> = ({ viewType }) => {
-    const { props: { permissions, role } } = usePage<SharedData & { permissions: ResponseCollection<Permission>, role?: ResponseResource<Role> }>()
+    const { props: { permissions, role }, component } = usePage<SharedData & { permissions: ResponseCollection<Permission>, role?: ResponseResource<Role> }>()
+    const breadcrumbs = useBreadcrumb(component)
 
     const { data, setData, post, put, processing, errors, reset, isDirty, setDefaults } = useForm<{
         name: string;
@@ -171,7 +173,7 @@ const RoleFormPage: FC<RoleFormPageProps> = ({ viewType }) => {
     }
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={titlePage} />
             <AppContainer className="space-y-6">
                 <AppTitle
