@@ -38,7 +38,9 @@ class UserService
     {
         return DB::transaction(function () use ($data) {
             $user = User::create(Arr::only($data, $this->attributes()));
-            $user->assignRole(UserRole::INACTIVE);
+            $user->assignRole(
+                Arr::get($data, 'roles')
+            );
 
             return $user;
         });
@@ -48,6 +50,10 @@ class UserService
     {
         return DB::transaction(function () use ($user, $data) {
             $user->update(Arr::only($data, $this->attributes()));
+
+            $user->syncRoles(
+                Arr::get($data, 'roles')
+            );
 
             return $user;
         });
