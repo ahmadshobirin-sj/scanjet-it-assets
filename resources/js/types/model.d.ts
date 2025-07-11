@@ -53,6 +53,8 @@ export interface User {
   roles: Role[];
   created_at: string;
   updated_at: string;
+  f_created_at: string;
+  f_updated_at: string;
 }
 
 export interface Role {
@@ -61,6 +63,8 @@ export interface Role {
     permissions: Permission[];
     created_at: string;
     updated_at: string;
+    f_created_at: string;
+    f_updated_at: string;
 }
 
 export interface Permission {
