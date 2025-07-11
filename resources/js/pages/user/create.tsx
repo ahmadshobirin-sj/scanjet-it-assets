@@ -3,17 +3,23 @@ import { FormMessage } from '@/components/ui/form-message'
 import { GroupForm, GroupFormItem } from '@/components/ui/group-form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import MultipleSelector, { Option } from '@/components/ui/multiple-selector'
 import { Sheet, SheetBody, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { useBeforeUnloadPrompt } from '@/hooks/use-before-unload-prompt'
 import useControlledModal from '@/hooks/use-controlled-modal'
-import { useForm } from '@inertiajs/react'
+import { UserRoleStyle } from '@/lib/userRoleStyle'
+import { SharedData } from '@/types'
+import { ResponseCollection, Role } from '@/types/model'
+import { useForm, usePage } from '@inertiajs/react'
 import { Plus } from 'lucide-react'
-import { FormEvent, useEffect, useState } from 'react'
+import { FormEvent, useMemo } from 'react'
 import { toast } from 'sonner'
 
 
 const UserCreatePage = () => {
-    const { data, setData, post, processing, errors, reset, isDirty } = useForm({
+    const { props: { roles } } = usePage<SharedData & { roles: ResponseCollection<Role> }>()
+
+    const { data, setData, post, processing, errors, reset, isDirty, transform } = useForm<{ email: string, roles: Option[] }>({
         email: '',
         roles: []
     });
@@ -37,6 +43,10 @@ const UserCreatePage = () => {
     }
 
     const postData = () => {
+        transform((data) => ({
+            ...data,
+            roles: data.roles.map(role => role.value)
+        }))
         post('/user/create', {
             onSuccess: (res) => {
                 reset()
@@ -53,12 +63,28 @@ const UserCreatePage = () => {
         })
     }
 
+    const rolesOptions: Option[] = useMemo(() => {
+        return roles.data.map(role => ({
+            label: role.name,
+            value: role.id,
+            badgeColor: UserRoleStyle.getIntent(role.name)
+        }));
+    }, [roles.data]);
+
+    const handleChangeRoles = (values: Option[]) => {
+        setData('roles', values);
+    }
+
+    const handleChangeEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setData('email', e.target.value);
+    }
+
     return (
         <Sheet onOpenChange={handleChange} open={open}>
             <SheetTrigger asChild>
                 <Button variant="fill" leading={<Plus />} onClick={() => setOpen(true)}>New user</Button>
             </SheetTrigger>
-            <SheetContent>
+            <SheetContent className="w-full sm:max-w-lg">
                 <SheetHeader>
                     <SheetTitle>New user</SheetTitle>
                     <SheetDescription>
@@ -69,9 +95,16 @@ const UserCreatePage = () => {
                     <GroupForm onSubmit={onSubmit}>
                         <GroupFormItem>
                             <Label htmlFor="email">Email</Label>
-                            <Input id="email" autoComplete="off" value={data.email} onChange={(e) => setData('email', e.target.value)} />
+                            <Input id="email" autoComplete="off" value={data.email} onChange={handleChangeEmail} />
                             {
                                 errors.email && <FormMessage error>{errors.email}</FormMessage>
+                            }
+                        </GroupFormItem>
+                        <GroupFormItem>
+                            <Label htmlFor="roles">Roles</Label>
+                            <MultipleSelector options={rolesOptions} onChange={handleChangeRoles} />
+                            {
+                                errors.roles && <FormMessage error>{errors.roles}</FormMessage>
                             }
                         </GroupFormItem>
                         <input type="submit" hidden />
