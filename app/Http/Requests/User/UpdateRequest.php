@@ -24,6 +24,8 @@ class UpdateRequest extends FormRequest
     {
         return [
             'email' => ['required', 'email:dns', Rule::unique('users')->ignore($this->user)],
+            'roles' => ['required', 'array'],
+            'roles.*' => ['string', 'exists:roles,id'],
         ];
     }
 }
