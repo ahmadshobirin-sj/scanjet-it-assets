@@ -15,17 +15,12 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { confirmDialog } from "@/lib/confirmDialog";
 import { toast } from "sonner";
-
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Roles',
-        href: '/role',
-    },
-];
+import { useBreadcrumb } from "@/hooks/use-breadcrumb";
 
 const RoleListPage = () => {
-    const { props: { roles, table, success, errors } } = usePage<SharedData & { roles: ResponseCollection<Role>; table: TableServerState }>()
+    const { props: { roles, table, success, errors }, component } = usePage<SharedData & { roles: ResponseCollection<Role>; table: TableServerState }>()
     const [tableState, setTableState] = useState(spatieToTanstackState(table));
+    const breadcrumbs = useBreadcrumb(component)
 
     const columns: ColumnDef<Role>[] = [
         {
