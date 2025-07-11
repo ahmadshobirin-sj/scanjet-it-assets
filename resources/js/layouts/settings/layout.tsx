@@ -10,7 +10,6 @@ const sidebarNavItems: NavItem[] = [
     {
         title: 'Appearance',
         href: '/settings/appearance',
-        icon: null,
     },
 ];
 
@@ -34,12 +33,13 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                                 key={`${item.href}-${index}`}
                                 size="sm"
                                 variant="ghost"
+                                intent="secondary"
                                 asChild
                                 className={cn('w-full justify-start', {
                                     'bg-muted': currentPath === item.href,
                                 })}
                             >
-                                <Link href={item.href} prefetch>
+                                <Link href={item.href || '#'} prefetch>
                                     {item.title}
                                 </Link>
                             </Button>
@@ -53,6 +53,6 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                     <section className="max-w-xl space-y-12">{children}</section>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
