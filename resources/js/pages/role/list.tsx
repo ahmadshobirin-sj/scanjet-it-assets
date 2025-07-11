@@ -16,11 +16,13 @@ import { Plus } from "lucide-react";
 import { confirmDialog } from "@/lib/confirmDialog";
 import { toast } from "sonner";
 import { useBreadcrumb } from "@/hooks/use-breadcrumb";
+import { usePermission } from "@/hooks/use-permissions";
 
 const RoleListPage = () => {
     const { props: { roles, table, success, errors }, component } = usePage<SharedData & { roles: ResponseCollection<Role>; table: TableServerState }>()
     const [tableState, setTableState] = useState(spatieToTanstackState(table));
     const breadcrumbs = useBreadcrumb(component)
+    const { can } = usePermission()
 
     const columns: ColumnDef<Role>[] = [
         {
@@ -120,9 +122,11 @@ const RoleListPage = () => {
                     subtitle="List of roles in the system"
                     actions={
                         <>
-                            <Button leading={<Plus />} variant="fill" onClick={() => router.visit(route('role.create'))}>
-                                New Role
-                            </Button>
+                            {can('role.create') && (
+                                <Button leading={<Plus />} variant="fill" onClick={() => router.visit(route('role.create'))}>
+                                    New Role
+                                </Button>
+                            )}
                         </>
                     }
                 />
@@ -140,19 +144,9 @@ const RoleListPage = () => {
                     onGlobalFilterChange={handleFilterChange}
                     onPaginationChange={handlePaginationChange}
                     actionsRow={() => ([
-                        {
-                            name: 'View',
-                            event: handleView,
-                        },
-                        {
-                            name: 'Edit',
-                            event: handleEdit
-                        },
-                        {
-                            name: 'Delete',
-                            color: 'destructive',
-                            event: handleDelete
-                        }
+                        ...(can('role.view') ? [{ name: 'View', event: handleView }] : []),
+                        ...(can('role.update') ? [{ name: 'Edit', event: handleEdit }] : []),
+                        ...(can('role.delete') ? [{ name: 'Delete', color: 'destructive', event: handleDelete }] : []),
                     ])}
                 />
             </AppContainer>
