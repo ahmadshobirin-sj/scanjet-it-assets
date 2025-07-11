@@ -7,21 +7,32 @@ export interface Auth {
 
 export interface BreadcrumbItem {
     title: string;
-    href: string;
+    href?: string;
+}
+
+export interface NavItem {
+    title: string;
+    href?: string;
+    icon?: LucideIcon;
+    isActive?: boolean;
+    items?: NavItem[];
+    hidden?: boolean;
+    external?: boolean;
+    badge?: string;
+    meta?: {
+        permission?: string;
+    };
+}
+
+export interface MetaNav {
+    pageTitle?: string;
+    breadcrumbs?: BreadcrumbItem[];
 }
 
 export interface NavGroup {
     title: string;
     items: NavItem[];
 }
-
-export interface NavItem {
-    title: string;
-    href: string;
-    icon?: LucideIcon | null;
-    isActive?: boolean;
-}
-
 export interface SharedData {
     name: string;
     quote: { message: string; author: string };
@@ -46,4 +57,6 @@ export interface AuthUser {
     mobile_phone: string;
     created_at: string;
     updated_at: string;
+    roles: string[];
+    permissions: string[];
 }
