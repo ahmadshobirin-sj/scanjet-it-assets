@@ -30,3 +30,8 @@ export function filterNavGroups(groups: NavGroup[], permissions?: string[]): Nav
         })
         .filter((group) => group.items.length > 0);
 }
+
+export function isActivePath(current: string, target?: string): boolean {
+    if (target === '/') return current === '/';
+    return current === target || current.startsWith(target + '/');
+}
