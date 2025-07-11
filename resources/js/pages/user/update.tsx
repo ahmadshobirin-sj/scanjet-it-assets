@@ -3,12 +3,15 @@ import { FormMessage } from '@/components/ui/form-message'
 import { GroupForm, GroupFormItem } from '@/components/ui/group-form'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import MultipleSelector, { Option } from '@/components/ui/multiple-selector'
 import { Sheet, SheetBody, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { useBeforeUnloadPrompt } from '@/hooks/use-before-unload-prompt'
 import useControlledModal from '@/hooks/use-controlled-modal'
-import { User } from '@/types/model'
-import { useForm } from '@inertiajs/react'
-import { FormEvent, forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { UserRoleStyle } from '@/lib/userRoleStyle'
+import { SharedData } from '@/types'
+import { ResponseCollection, Role, User } from '@/types/model'
+import { useForm, usePage } from '@inertiajs/react'
+import { FormEvent, forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 export type UserUpdatePageRef = {
@@ -18,11 +21,21 @@ export type UserUpdatePageRef = {
 }
 
 const UserUpdatePage = forwardRef<UserUpdatePageRef, { user: User | null, onClose?: () => void }>(({ user, onClose }, ref) => {
+    const { props: { roles } } = usePage<SharedData & { roles: ResponseCollection<Role> }>()
     const sheetRef = useRef<HTMLDivElement>(null)
-
-    const { data, setData, put, processing, errors, reset, isDirty, setDefaults } = useForm({
+    const { data, setData, put, processing, errors, reset, isDirty, setDefaults, transform } = useForm<{ email: string, roles: Option[] }>({
         email: '',
+        roles: []
     });
+
+    const rolesOptions: Option[] = useMemo(() => {
+        return roles.data.map(role => ({
+            label: role.name,
+            value: role.id,
+            badgeColor: UserRoleStyle.getIntent(role.name)
+        }));
+    }, [roles.data]);
+
 
     const { open, setOpen, handleChange } = useControlledModal({
         shouldConfirmClose: () => isDirty,
@@ -40,6 +53,7 @@ const UserUpdatePage = forwardRef<UserUpdatePageRef, { user: User | null, onClos
         if (open && user) {
             handleSetDefaults({
                 email: user.email,
+                roles: rolesOptions.filter(option => user.roles.some(role => role.id === option.value))
             })
         }
     }, [open, user])
@@ -63,6 +77,10 @@ const UserUpdatePage = forwardRef<UserUpdatePageRef, { user: User | null, onClos
     }
 
     const postData = () => {
+        transform((data) => ({
+            ...data,
+            roles: data.roles.map(role => role.value)
+        }))
         put(route('user.update', user?.id), {
             onSuccess: (res) => {
                 reset()
@@ -85,6 +103,15 @@ const UserUpdatePage = forwardRef<UserUpdatePageRef, { user: User | null, onClos
         getSheetElement: () => sheetRef.current,
     }), [setOpen])
 
+    const handleChangeRoles = (values: Option[]) => {
+        setData('roles', values);
+    }
+
+    const handleChangeEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setData('email', e.target.value);
+    }
+
+
     return (
         <Sheet onOpenChange={handleChange} open={open}>
             <SheetContent ref={sheetRef}>
@@ -98,9 +125,16 @@ const UserUpdatePage = forwardRef<UserUpdatePageRef, { user: User | null, onClos
                     <GroupForm onSubmit={onSubmit}>
                         <GroupFormItem>
                             <Label htmlFor="email">Email</Label>
-                            <Input id="email" autoComplete="off" value={data.email} onChange={(e) => setData('email', e.target.value)} />
+                            <Input id="email" autoComplete="off" value={data.email} onChange={handleChangeEmail} />
                             {
                                 errors.email && <FormMessage error>{errors.email}</FormMessage>
+                            }
+                        </GroupFormItem>
+                        <GroupFormItem>
+                            <Label htmlFor="roles">Roles</Label>
+                            <MultipleSelector value={data.roles} options={rolesOptions} onChange={handleChangeRoles} />
+                            {
+                                errors.roles && <FormMessage error>{errors.roles}</FormMessage>
                             }
                         </GroupFormItem>
                         <input type="submit" hidden />
