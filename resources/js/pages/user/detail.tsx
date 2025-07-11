@@ -50,7 +50,7 @@ const UserDetailPage = forwardRef<UserDetailPageRef, { user: User | null, onClos
                             </InfoList>
                             <InfoList direction="column">
                                 <InfoListLabel>Role</InfoListLabel>
-                                <InfoListContent>{user?.roles && user.roles.length > 0 ? user.roles.map((role) => (
+                                <InfoListContent className="flex gap-1 flex-wrap">{user?.roles && user.roles.length > 0 ? user.roles.map((role) => (
                                     <Badge key={role.id} intent={UserRoleStyle.getIntent(role.name) as any} variant="fill" size="md" className="text-xs">
                                         {role.name}
                                     </Badge>
