@@ -23,6 +23,8 @@ class StoreRequest extends FormRequest
     {
         return [
             'email' => ['required', 'email:dns'],
+            'roles' => ['required', 'array'],
+            'roles.*' => ['string', 'exists:roles,id'],
         ];
     }
 }
