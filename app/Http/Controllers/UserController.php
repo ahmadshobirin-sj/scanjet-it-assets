@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\DTOs\TableStateDTO;
 use App\Http\Requests\User\StoreRequest;
 use App\Http\Requests\User\UpdateRequest;
+use App\Http\Resources\RoleResource;
 use App\Http\Resources\UserResource;
 use App\Http\Services\UserService;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -26,6 +28,7 @@ class UserController extends Controller
 
         return Inertia::render('user/list', [
             'user' => UserResource::collection($this->userService->getAll($request)),
+            'roles' => RoleResource::collection(Role::all()),
             'table' => $tableState->toArray(),
         ]);
     }
