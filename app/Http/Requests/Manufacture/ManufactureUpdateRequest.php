@@ -23,7 +23,7 @@ class ManufactureUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "name" => ['string', Rule::unique('manufactures')->ignore($this->manufacture)],
+            "name" => ['string', 'required', Rule::unique('manufactures')->ignore($this->manufacture)],
             "address" => 'string|nullable',
             "phone" => 'string|nullable',
             "email" => 'string|email|nullable',
