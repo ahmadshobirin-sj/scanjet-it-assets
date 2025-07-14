@@ -65,7 +65,7 @@ const RoleFormPage: FC<RoleFormPageProps> = ({ viewType }) => {
         }[] = [];
         for (const permission of permissions) {
             const splitPermission = permission.name.split('.');
-            const groupName = splitPermission[0];
+            const groupName = splitPermission[0].split('_').join(' ');
             const permissionPrefix = camelCaseToWords(splitPermission[splitPermission.length - 1]);
             const group = groups.find((g) => g.name === groupName);
             if (!group) {
