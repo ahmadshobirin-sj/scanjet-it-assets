@@ -18,6 +18,7 @@ class RoleService
     public function getAll(Request $request)
     {
         return QueryBuilder::for(Role::class)
+            ->with(['permissions'])
             ->withCount('permissions')
             ->allowedFilters([
                 AllowedFilter::custom('search', new GlobalSearchFilter()),
@@ -30,9 +31,11 @@ class RoleService
 
     public function getById(string $id): Role
     {
-        return QueryBuilder::for(Role::class)
+        $role = QueryBuilder::for(Role::class)
+            ->with(['permissions'])
             ->withCount('permissions')
             ->findOrFail($id);
+        return $role;
     }
 
     public function create(array $data): Role

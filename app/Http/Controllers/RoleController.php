@@ -68,6 +68,8 @@ class RoleController extends Controller
 
         $permissions = PermissionResource::collection(Permission::all());
 
+        $role->load('permissions');
+
         return Inertia::render('role/detail', [
             'role' => new RoleResource($role),
             'permissions' => $permissions,
@@ -79,6 +81,8 @@ class RoleController extends Controller
         $this->authorize('update', $role);
 
         $permissions = PermissionResource::collection(Permission::all());
+
+        $role->load('permissions');
 
         return Inertia::render('role/edit', [
             'role' => new RoleResource($role),

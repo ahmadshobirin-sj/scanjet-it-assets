@@ -13,8 +13,6 @@ class Role extends ModelsRole
     use HasUuids;
     use HasFormattedTimestamp;
 
-    protected $with = ['permissions'];
-
     public function getColor(): string
     {
         return match ($this->name) {
