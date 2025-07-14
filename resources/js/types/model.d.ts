@@ -75,9 +75,24 @@ export interface Permission {
     updated_at: string;
 }
 
-
 export enum UserRole {
     ADMIN = 'Admin',
     SUPER_ADMIN = 'Super Admin',
     INACTIVE = 'Inactive',
+}
+
+export interface Manufacture {
+    id: string;
+    name: string;
+    address: string;
+    phone: string;
+    email: string;
+    website: string;
+    contact_person_name: string;
+    contact_person_phone: string;
+    contact_person_email: string;
+    created_at: string;
+    updated_at: string;
+    f_created_at: string;
+    f_updated_at: string;
 }
