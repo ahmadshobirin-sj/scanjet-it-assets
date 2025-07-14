@@ -8,6 +8,7 @@ Route::middleware(['MsGraphAuthenticated'])->group(function () {
 });
 
 require __DIR__ . '/manufacture.php';
+require __DIR__ . '/asset_category.php';
 require __DIR__ . '/settings.php';
 require __DIR__ . '/user.php';
 require __DIR__ . '/role.php';
