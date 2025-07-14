@@ -101,7 +101,7 @@ class ManufactureController extends Controller
                 'message' => 'Manufacture deleted successfully.',
             ]);
         } catch (\Throwable $e) {
-            return redirect()->back()->withErrors(["message" => "Failed to delete manufacture", "error" => $e->getMessage()]);
+            return redirect(url()->previous())->withErrors(["message" => "Failed to delete manufacture", "error" => $e->getMessage()]);
         }
     }
 }
