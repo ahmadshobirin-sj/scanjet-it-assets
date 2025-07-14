@@ -39,7 +39,7 @@ export function NavMain({ items = [] }: { items: NavGroup[] }) {
                                                         {item.items.map((subItem, subSubIndex) => (
                                                             <SidebarMenuSubItem key={index + '-' + subIndex + '-' + subSubIndex}>
                                                                 <SidebarMenuSubButton asChild>
-                                                                    <Link href={subItem.href || '#'} preserveState preserveScroll>
+                                                                    <Link href={subItem.href || '#'} preserveState>
                                                                         {subItem.icon && <span><subItem.icon className="size-4" /></span>}
                                                                         <span>{subItem.title}</span>
                                                                     </Link>
@@ -53,7 +53,7 @@ export function NavMain({ items = [] }: { items: NavGroup[] }) {
                                     ) : (
                                         <SidebarMenuItem key={index + '-' + subIndex}>
                                             <SidebarMenuButton asChild isActive={isActivePath(page.url, item.href)}>
-                                                <Link href={item.href || '#'} preserveState preserveScroll>
+                                                <Link href={item.href || '#'} preserveState>
                                                     {item.icon && <item.icon className="size-4" />}
                                                     <span>{item.title}</span>
                                                 </Link>
