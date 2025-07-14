@@ -13,7 +13,7 @@ import AppLayout from '@/layouts/app-layout'
 import { camelCaseToWords } from '@/lib/utils'
 import { SharedData } from '@/types'
 import { Permission, ResponseCollection, ResponseResource, Role } from '@/types/model'
-import { Head, router, useForm, usePage } from '@inertiajs/react'
+import { router, useForm, usePage } from '@inertiajs/react'
 import { CheckedState } from '@radix-ui/react-checkbox'
 import { SquarePen } from 'lucide-react'
 import { FC, useEffect, useMemo } from 'react'
@@ -174,7 +174,6 @@ const RoleFormPage: FC<RoleFormPageProps> = ({ viewType }) => {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={titlePage} />
             <AppContainer className="space-y-6">
                 <AppTitle
                     title={titlePage}
