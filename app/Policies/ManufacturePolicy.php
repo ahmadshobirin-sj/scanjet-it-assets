@@ -45,6 +45,6 @@ class ManufacturePolicy
      */
     public function delete(User $user, Manufacture $manufacture): bool
     {
-        return $user->can('manufacture.viewAny');
+        return $user->can('manufacture.delete');
     }
 }
