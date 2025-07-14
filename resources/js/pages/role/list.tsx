@@ -6,9 +6,9 @@ import useDidUpdate from "@/hooks/use-did-update";
 import AppLayout from "@/layouts/app-layout";
 import { spatieToTanstackState, tanstackToSpatieParams } from "@/lib/normalize-table-state";
 import { UserRoleStyle } from "@/lib/userRoleStyle";
-import { BreadcrumbItem, SharedData } from "@/types";
+import { SharedData } from "@/types";
 import { ResponseCollection, Role, TableServerState } from "@/types/model";
-import { Head, router, usePage } from "@inertiajs/react";
+import { router, usePage } from "@inertiajs/react";
 import { ColumnDef, PaginationState, SortingState } from "@tanstack/react-table";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -118,7 +118,6 @@ const RoleListPage = () => {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Roles" />
             <AppContainer className="space-y-6">
                 <AppTitle
                     title="Roles"
