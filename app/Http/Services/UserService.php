@@ -16,17 +16,19 @@ class UserService
 {
     public function getAll(Request $request)
     {
-        return QueryBuilder::for(User::class)
+        $users = QueryBuilder::for(User::query())
             ->allowedFilters([
                 AllowedFilter::custom('search', new GlobalSearchFilter(['password'])),
                 AllowedFilter::partial('name'),
                 AllowedFilter::partial('email'),
             ])
+            ->with(['roles'])
             ->allowedSorts(['name', 'email', 'created_at'])
-            ->allowedFields(['name'])
             ->defaultSort(['-created_at'])
             ->paginate($request->input('per_page', 10))
             ->appends($request->query());
+
+        return $users;
     }
 
     public function attributes(): array

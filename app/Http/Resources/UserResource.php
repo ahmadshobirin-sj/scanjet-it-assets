@@ -25,13 +25,7 @@ class UserResource extends JsonResource
             'mobile_phone' => $this->mobile_phone,
             'job_title' => $this->job_title,
             'office_location' => $this->office_location,
-            'roles' => $this->roles->map(function ($role) {
-                return [
-                    'id' => $role->id,
-                    'name' => $role->name,
-                    'guard_name' => $role->guard_name,
-                ];
-            }),
+            'roles' => RoleResource::collection($this->whenLoaded('roles')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
             'f_created_at' => $this->f_created_at,
