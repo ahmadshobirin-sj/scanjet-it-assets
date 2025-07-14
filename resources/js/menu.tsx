@@ -1,5 +1,5 @@
 import { NavGroup } from '@/types';
-import { LayoutGrid, ShieldUser, SquareUser } from 'lucide-react';
+import { Building2, LayoutGrid, ShieldUser, SquareUser } from 'lucide-react';
 
 export const mainNavItemsRaw: NavGroup[] = [
     {
@@ -10,6 +10,14 @@ export const mainNavItemsRaw: NavGroup[] = [
                 href: route('dashboard', undefined, false),
                 icon: LayoutGrid,
             },
+            {
+                title: 'Manufactures',
+                href: route('manufacture.index', undefined, false),
+                icon: Building2,
+                meta: {
+                    permission: 'manufacture.viewAny',
+                }
+            }
         ],
     },
     {
