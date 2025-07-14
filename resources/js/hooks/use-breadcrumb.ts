@@ -29,6 +29,20 @@ export function useBreadcrumb(component: string): BreadcrumbItem[] {
                 { title: 'Roles', href: route('role.index') },
                 { title: 'Update' },
             ]
+        case 'manufacture/list':
+            return [
+                { title: 'Manufactures', href: route('manufacture.index') },
+            ]
+        case 'manufacture/create':
+            return [
+                { title: 'Manufactures', href: route('manufacture.index') },
+                { title: 'Create', },
+            ]
+        case 'manufacture/detail':
+            return [
+                { title: 'Manufactures', href: route('manufacture.index') },
+                { title: 'Detail' },
+            ]
         default:
             return []
     }
