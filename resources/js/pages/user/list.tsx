@@ -6,7 +6,7 @@ import AppLayout from '@/layouts/app-layout';
 import { spatieToTanstackState, tanstackToSpatieParams } from '@/lib/normalize-table-state';
 import { SharedData } from '@/types';
 import type { ResponseCollection, TableServerState, User } from '@/types/model';
-import { Head, router, usePage } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 import { ColumnDef, PaginationState, SortingState } from '@tanstack/react-table';
 import { useCallback, useRef, useState } from 'react';
 import UserCreatePage from './create';
@@ -134,7 +134,6 @@ function UserListPage() {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Users" />
             <AppContainer className="space-y-6">
                 <AppTitle
                     title="Users"
