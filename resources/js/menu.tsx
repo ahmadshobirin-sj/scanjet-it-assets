@@ -21,6 +21,19 @@ export const mainNavItemsRaw: NavGroup[] = [
         ],
     },
     {
+        title: 'Assets',
+        items: [
+            {
+                title: 'Asset categories',
+                href: route('asset_category.index', undefined, false),
+                icon: LayoutGrid,
+                meta: {
+                    permission: 'asset_category.viewAny',
+                }
+            },
+        ],
+    },
+    {
         title: 'Manage',
         items: [
             {
