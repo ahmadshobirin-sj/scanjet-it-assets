@@ -23,7 +23,7 @@ class ManufactureStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "name" => 'string|unique:manufactures,name',
+            "name" => 'string|required|unique:manufactures,name',
             "address" => 'string|nullable',
             "phone" => 'string|nullable',
             "email" => 'string|email|nullable',
