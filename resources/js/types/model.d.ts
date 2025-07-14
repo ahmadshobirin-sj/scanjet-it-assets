@@ -96,3 +96,13 @@ export interface Manufacture {
     f_created_at: string;
     f_updated_at: string;
 }
+
+export interface AssetCategory {
+    id: string;
+    name: string;
+    description: string;
+    created_at: string;
+    updated_at: string;
+    f_created_at: string;
+    f_updated_at: string;
+}
