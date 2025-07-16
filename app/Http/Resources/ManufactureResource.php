@@ -25,9 +25,7 @@ class ManufactureResource extends JsonResource
             "contact_person_phone" => $this->contact_person_phone,
             "contact_person_email" => $this->contact_person_email,
             "created_at" => $this->created_at,
-            "updated_at" => $this->updated_at,
-            "f_created_at" => $this->f_created_at,
-            "f_updated_at" => $this->f_updated_at,
+            "updated_at" => $this->updated_at
         ];
     }
 }
