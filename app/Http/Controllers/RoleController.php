@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\DTOs\TableStateDTO;
 use App\Http\Requests\Role\RoleStoreRequest;
+use App\Http\Requests\Role\RoleUpdateRequest;
 use App\Http\Resources\Permissions\PermissionResource;
 use App\Http\Resources\RoleResource;
 use App\Http\Services\RoleService;
@@ -90,7 +91,7 @@ class RoleController extends Controller
         ]);
     }
 
-    public function update(RoleStoreRequest $request, Role $role)
+    public function update(RoleUpdateRequest $request, Role $role)
     {
         $this->authorize('update', $role);
 
