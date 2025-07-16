@@ -27,7 +27,7 @@ class RoleStoreRequest extends FormRequest
                 'required',
                 'string',
                 'max:255',
-                Rule::unique('roles')->ignore($this->role),
+                'unique:roles,name',
             ],
             'permissions' => [
                 'array',
