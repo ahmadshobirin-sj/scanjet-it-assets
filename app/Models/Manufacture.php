@@ -21,4 +21,9 @@ class Manufacture extends Model
         'contact_person_phone',
         'contact_person_email',
     ];
+
+    public function assets()
+    {
+        return $this->hasMany(Asset::class, 'manufacture_id');
+    }
 }
