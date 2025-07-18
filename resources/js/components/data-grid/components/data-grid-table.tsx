@@ -14,8 +14,8 @@ export const DataGridTable = <TData,>({ table, isTableEmpty, emptyText }: DataGr
         <div className="overflow-x-auto border border-secondary rounded-lg">
             <Table>
                 <TableHeader>
-                    {table.getHeaderGroups().map((headerGroup) => (
-                        <TableRow key={headerGroup.id}>
+                    {table.getHeaderGroups().map((headerGroup, index) => (
+                        <TableRow key={`${headerGroup.id}-${index}`}>
                             {headerGroup.headers.map((header) => (
                                 <TableHead
                                     key={header.id}
@@ -50,8 +50,8 @@ export const DataGridTable = <TData,>({ table, isTableEmpty, emptyText }: DataGr
                     ))}
                 </TableHeader>
                 <TableBody>
-                    {table.getRowModel().rows.length > 0 ? table.getRowModel().rows.map((row) => (
-                        <TableRow key={row.id}>
+                    {table.getRowModel().rows.length > 0 ? table.getRowModel().rows.map((row, index) => (
+                        <TableRow key={`${row.id}-${index}`}>
                             {row.getVisibleCells().map((cell) => (
                                 <TableCell key={cell.id}>
                                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
