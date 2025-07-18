@@ -78,6 +78,8 @@ interface MultipleSelectorProps {
     >;
     /** hide the clear all button. */
     hideClearAllButton?: boolean;
+    /** Enable single value mode - only one option can be selected */
+    single?: boolean;
 }
 
 export interface MultipleSelectorRef {
@@ -193,6 +195,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
             commandProps,
             inputProps,
             hideClearAllButton = false,
+            single = false,
         }: MultipleSelectorProps,
         ref: React.Ref<MultipleSelectorRef>,
     ) => {
@@ -200,7 +203,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
         const [open, setOpen] = React.useState(false);
         const [onScrollbar, setOnScrollbar] = React.useState(false);
         const [isLoading, setIsLoading] = React.useState(false);
-        const dropdownRef = React.useRef<HTMLDivElement>(null); // Added this
+        const dropdownRef = React.useRef<HTMLDivElement>(null);
 
         const [selected, setSelected] = React.useState<Option[]>(value || []);
         const [options, setOptions] = React.useState<GroupOption>(
@@ -208,6 +211,12 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
         );
         const [inputValue, setInputValue] = React.useState('');
         const debouncedSearchTerm = useDebounce(inputValue, delay || 500);
+
+        // Override maxSelected to 1 when single mode is enabled
+        const effectiveMaxSelected = single ? 1 : maxSelected;
+
+        // Cache onsearch results
+        const searchCache = React.useRef<Record<string, Option[]>>({});
 
         React.useImperativeHandle(
             ref,
@@ -321,13 +330,23 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
 
         useEffect(() => {
             /** async search */
-
             const doSearch = async () => {
-                setIsLoading(true);
-                const res = await onSearch?.(debouncedSearchTerm);
-                setOptions(transToGroupOption(res || [], groupBy));
-                setIsLoading(false);
-            };
+                if (searchCache.current[debouncedSearchTerm]) {
+                    setOptions(transToGroupOption(searchCache.current[debouncedSearchTerm], groupBy))
+                    setIsLoading(false)
+                    return
+                }
+
+                setIsLoading(true)
+
+                try {
+                    const res = await onSearch?.(debouncedSearchTerm)
+                    searchCache.current[debouncedSearchTerm] = res || []
+                    setOptions(transToGroupOption(res || [], groupBy))
+                } finally {
+                    setIsLoading(false)
+                }
+            }
 
             const exec = async () => {
                 if (!onSearch || !open) return;
@@ -363,14 +382,20 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                         e.stopPropagation();
                     }}
                     onSelect={(value: string) => {
-                        if (selected.length >= maxSelected) {
+                        if (selected.length >= effectiveMaxSelected) {
                             onMaxSelected?.(selected.length);
                             return;
                         }
                         setInputValue('');
-                        const newOptions = [...selected, { value, label: value }];
+                        const newOption = { value, label: value };
+                        const newOptions = single ? [newOption] : [...selected, newOption];
                         setSelected(newOptions);
                         onChange?.(newOptions);
+                        // Close dropdown in single mode after selection
+                        if (single) {
+                            setOpen(false);
+                            inputRef.current?.blur();
+                        }
                     }}
                 >
                     {`Create "${inputValue}"`}
@@ -566,7 +591,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                             }}
                         >
                             {isLoading ? (
-                                <>{loadingIndicator}</>
+                                <>{loadingIndicator || <p className="text-sm text-muted-foreground text-center">Loading...</p>}</>
                             ) : (
                                 <>
                                     {EmptyItem()}
@@ -586,14 +611,19 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                                                                 e.stopPropagation();
                                                             }}
                                                             onSelect={() => {
-                                                                if (selected.length >= maxSelected) {
+                                                                if (selected.length >= effectiveMaxSelected && !single) {
                                                                     onMaxSelected?.(selected.length);
                                                                     return;
                                                                 }
                                                                 setInputValue('');
-                                                                const newOptions = [...selected, option];
+                                                                const newOptions = single ? [option] : [...selected, option];
                                                                 setSelected(newOptions);
                                                                 onChange?.(newOptions);
+                                                                // Close dropdown in single mode after selection
+                                                                if (single) {
+                                                                    setOpen(false);
+                                                                    inputRef.current?.blur();
+                                                                }
                                                             }}
                                                             className={cn(
                                                                 'cursor-pointer',
