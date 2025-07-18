@@ -93,8 +93,6 @@ export interface Manufacture {
     contact_person_email: string;
     created_at: string;
     updated_at: string;
-    f_created_at: string;
-    f_updated_at: string;
 }
 
 export interface AssetCategory {
@@ -105,4 +103,39 @@ export interface AssetCategory {
     updated_at: string;
     f_created_at: string;
     f_updated_at: string;
+}
+
+export type AssetStatus = 'available' | 'assigned' | 'maintenance' | 'lost' | 'scrapped';
+
+export interface Asset {
+    id: string;
+    name: string;
+    location: string | null;
+    serial_number: string | null;
+    purchase_date: string | null;
+    warranty_expired: string | null;
+    last_maintenance: string | null;
+    status: AssetStatus;
+    assigned_at: string | null;
+    category: AssetCategory;
+    manufacture: Manufacture;
+    assigned_user: AssetAssignedUser | null;
+    note: string | null;
+    reference_link: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
+export type AssetColumn = Omit<Asset, 'category' | 'manufacture' | 'assignedUser'> & {
+    'category.name': string | null;
+    'manufacture.name': string | null;
+};
+
+
+export interface AssetAssignedUser {
+    id: string;
+    name: string;
+    email: string;
+    job_title: string;
+    office_location: string;
 }
