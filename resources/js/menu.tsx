@@ -11,21 +11,40 @@ export const mainNavItemsRaw: NavGroup[] = [
                 icon: LayoutGrid,
             },
             {
+                title: 'Asset assignment',
+                icon: LayoutGrid,
+            }
+        ],
+    },
+    {
+        title: 'Manage assets',
+        items: [
+            {
+                title: 'Assets',
+                icon: LayoutGrid,
+                href: route('asset.index', undefined, false),
+                meta: {
+                    permission: 'asset_category.viewAny',
+                }
+            },
+            {
+                title: 'Categories',
+                href: route('asset_category.index', undefined, false),
+                icon: LayoutGrid,
+                meta: {
+                    permission: 'asset_category.viewAny',
+                }
+            },
+            {
                 title: 'Manufactures',
                 href: route('manufacture.index', undefined, false),
                 icon: Building2,
                 meta: {
                     permission: 'manufacture.viewAny',
                 }
-            }
-        ],
-    },
-    {
-        title: 'Assets',
-        items: [
+            },
             {
-                title: 'Asset categories',
-                href: route('asset_category.index', undefined, false),
+                title: 'Logs',
                 icon: LayoutGrid,
                 meta: {
                     permission: 'asset_category.viewAny',
