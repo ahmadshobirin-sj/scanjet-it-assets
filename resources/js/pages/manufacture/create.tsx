@@ -214,7 +214,7 @@ const ManufactureCreatePage = () => {
                                     {errors.contact_person_email && <FormMessage>{errors.contact_person_email}</FormMessage>}
                                 </GroupFormItem>
                             </GroupFormGroup>
-                            <input type="hidden" />
+                            <input type="submit" hidden />
                         </GroupForm>
                     </CardContent>
                 </Card>
