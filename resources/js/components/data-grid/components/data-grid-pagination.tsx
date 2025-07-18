@@ -40,8 +40,8 @@ export const DataGridPagination = <TData,>({
                         <SelectValue placeholder="Size" />
                     </SelectTrigger>
                     <SelectContent>
-                        {pageSizeOptions.map((size) => (
-                            <SelectItem key={size} value={size.toString()}>{size}</SelectItem>
+                        {pageSizeOptions.map((size, index) => (
+                            <SelectItem key={index} value={size.toString()}>{size}</SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
