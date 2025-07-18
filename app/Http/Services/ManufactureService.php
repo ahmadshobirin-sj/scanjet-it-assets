@@ -14,11 +14,12 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 class ManufactureService
 {
-    public function getAll(Request $request)
+    public function getAll()
     {
         return QueryBuilder::for(Manufacture::class)
             ->allowedFilters([
                 AllowedFilter::custom('search', new GlobalSearchFilter()),
+                'name',
             ])
             ->allowedSorts([
                 'name',
@@ -32,8 +33,8 @@ class ManufactureService
                 'created_at'
             ])
             ->defaultSort(['-created_at'])
-            ->paginate($request->input('per_page', 10))
-            ->appends($request->query());
+            ->paginate(request()->input('per_page', 10))
+            ->appends(request()->query());
     }
 
     public function create(array $data): Manufacture
