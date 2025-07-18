@@ -11,6 +11,7 @@ export type {
 // Hook exports
 export { useTableState } from './hooks/use-table-state';
 export { useTableColumns } from './hooks/use-table-columns';
+export { useTableResolver, type TransformColumnFn, type TransformersTableResolver } from './hooks/use-table-resolver';
 
 // Component exports (for advanced usage)
 export { DataGridToolbar } from './components/data-grid-toolbar';
