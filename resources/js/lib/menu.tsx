@@ -13,12 +13,12 @@ export function filterItems(items: NavItem[], permissions?: string[]): NavItem[]
             return item;
         })
         .filter((item) => {
+            if (!permissions) return true;
             const itemPermission = item.meta?.permission;
-            return (
-                !item.hidden &&
-                (!item.items || item.items.length > 0) &&
-                (permissions && itemPermission ? permissions.includes(itemPermission) : true)
-            );
+
+            const hasPermission = !itemPermission || itemPermission.some((p: string) => permissions?.includes(p));
+
+            return !item.hidden && (!item.items || item.items.length > 0) && hasPermission;
         });
 }
 
