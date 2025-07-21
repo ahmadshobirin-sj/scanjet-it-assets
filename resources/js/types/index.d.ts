@@ -20,7 +20,7 @@ export interface NavItem {
     external?: boolean;
     badge?: string;
     meta?: {
-        permission?: string;
+        permission?: string[];
     };
 }
 
