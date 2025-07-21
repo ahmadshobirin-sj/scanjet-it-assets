@@ -18,13 +18,14 @@ trait HasTable
             ->allowedSorts($table->sorts())
             ->defaultSort($table->defaultSort());
 
-        if (!empty($table->with())) {
+        if (! empty($table->with())) {
             $query->with($table->with());
         }
 
-        if (!empty($table->toggleableColumns())) {
+        if (! empty($table->toggleableColumns())) {
             $query->allowedFields($table->toggleableColumns());
         }
+
         return $table->customizeQuery($query);
     }
 

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\DTOs\TableStateDTO;
 use App\Http\Requests\Asset\AssetStoreRequest;
 use App\Http\Requests\Asset\AssetUpdateRequest;
 use App\Http\Resources\Asset\AssetResource;
@@ -10,8 +9,6 @@ use App\Http\Services\AssetCategoryService;
 use App\Http\Services\AssetService;
 use App\Http\Services\ManufactureService;
 use App\Models\Asset;
-use App\Models\AssetCategory;
-use App\Models\Manufacture;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -39,9 +36,9 @@ class AssetController extends Controller
 
         $tableSchema = $this->assetService->getTable()->toSchema();
 
-        return Inertia::render("assets/list", [
+        return Inertia::render('assets/list', [
             'assets' => $assets,
-            'table' =>  $tableSchema
+            'table' => $tableSchema,
         ]);
     }
 
@@ -52,13 +49,13 @@ class AssetController extends Controller
     {
         $this->authorize('create', Asset::class);
 
-        $manufactures = Inertia::optional(fn() => $this->manufactureService->getAll($request));
+        $manufactures = Inertia::optional(fn () => $this->manufactureService->getAll($request));
 
-        $categories = Inertia::optional(fn() => $this->assetCategoryService->getAll($request));
+        $categories = Inertia::optional(fn () => $this->assetCategoryService->getAll($request));
 
-        return Inertia::render("assets/create", [
+        return Inertia::render('assets/create', [
             'manufactures' => $manufactures,
-            'categories' => $categories
+            'categories' => $categories,
         ]);
     }
 
@@ -71,6 +68,7 @@ class AssetController extends Controller
 
         try {
             $this->assetService->store($request->validated());
+
             return to_route('asset.index')
                 ->with('success', [
                     'message' => 'Asset created successfully.',
@@ -96,7 +94,7 @@ class AssetController extends Controller
             },
         ]);
 
-        return Inertia::render("assets/detail", [
+        return Inertia::render('assets/detail', [
             'asset' => new AssetResource($asset),
         ]);
     }
@@ -113,14 +111,14 @@ class AssetController extends Controller
             'manufacture',
         ]);
 
-        $manufactures = Inertia::optional(fn() => $this->manufactureService->getAll());
+        $manufactures = Inertia::optional(fn () => $this->manufactureService->getAll());
 
-        $categories = Inertia::optional(fn() => $this->assetCategoryService->getAll());
+        $categories = Inertia::optional(fn () => $this->assetCategoryService->getAll());
 
-        return Inertia::render("assets/edit", [
+        return Inertia::render('assets/edit', [
             'asset' => new AssetResource($asset),
             'manufactures' => $manufactures,
-            'categories' => $categories
+            'categories' => $categories,
         ]);
     }
 
@@ -133,6 +131,7 @@ class AssetController extends Controller
 
         try {
             $this->assetService->update($asset, $request->validated());
+
             return to_route('asset.index')
                 ->with('success', [
                     'message' => 'Asset updated successfully.',
@@ -152,6 +151,7 @@ class AssetController extends Controller
 
         try {
             $this->assetService->delete($asset);
+
             return to_route('asset.index')
                 ->with('success', [
                     'message' => 'Asset deleted successfully.',

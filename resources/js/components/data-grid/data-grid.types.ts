@@ -1,4 +1,4 @@
-import { ColumnDef, PaginationState, SortingState, ColumnFiltersState, RowSelectionState, VisibilityState } from '@tanstack/react-table';
+import { ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, SortingState, VisibilityState } from '@tanstack/react-table';
 
 export interface DataGridState {
     pagination?: PaginationState;

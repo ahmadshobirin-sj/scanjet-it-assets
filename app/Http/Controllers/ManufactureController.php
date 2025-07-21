@@ -53,7 +53,7 @@ class ManufactureController extends Controller
                 'message' => 'Manufacture created successfully.',
             ]);
         } catch (\Throwable $e) {
-            return redirect()->back()->withErrors(["message" => "Failed to create manufacture", "error" => $e->getMessage()]);
+            return redirect()->back()->withErrors(['message' => 'Failed to create manufacture', 'error' => $e->getMessage()]);
         }
     }
 
@@ -86,7 +86,7 @@ class ManufactureController extends Controller
                 'message' => 'Manufacture updated successfully.',
             ]);
         } catch (\Throwable $e) {
-            return redirect()->back()->withErrors(["message" => "Failed to update manufacture", "error" => $e->getMessage()]);
+            return redirect()->back()->withErrors(['message' => 'Failed to update manufacture', 'error' => $e->getMessage()]);
         }
     }
 
@@ -101,7 +101,7 @@ class ManufactureController extends Controller
                 'message' => 'Manufacture deleted successfully.',
             ]);
         } catch (\Throwable $e) {
-            return redirect(url()->previous())->withErrors(["message" => "Failed to delete manufacture", "error" => $e->getMessage()]);
+            return redirect(url()->previous())->withErrors(['message' => 'Failed to delete manufacture', 'error' => $e->getMessage()]);
         }
     }
 }

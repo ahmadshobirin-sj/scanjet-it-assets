@@ -4,7 +4,6 @@ namespace App\Http\Services;
 
 use App\Http\Filters\GlobalSearchFilter;
 use App\Models\AssetCategory;
-use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -17,13 +16,13 @@ class AssetCategoryService
     {
         return QueryBuilder::for(AssetCategory::class)
             ->allowedFilters([
-                AllowedFilter::custom('search', new GlobalSearchFilter()),
+                AllowedFilter::custom('search', new GlobalSearchFilter),
                 'name',
             ])
             ->allowedSorts([
                 'name',
                 'description',
-                'created_at'
+                'created_at',
             ])
             ->defaultSort(['-created_at'])
             ->paginate(request()->input('per_page', 10))
@@ -43,6 +42,7 @@ class AssetCategoryService
     {
         $assetCategory = QueryBuilder::for(AssetCategory::class)
             ->findOrFail($id);
+
         return $assetCategory;
     }
 

@@ -18,10 +18,10 @@ class AssetCategoryResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
-            "created_at" => $this->created_at,
-            "updated_at" => $this->updated_at,
-            "f_created_at" => $this->f_created_at,
-            "f_updated_at" => $this->f_updated_at,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+            'f_created_at' => $this->f_created_at,
+            'f_updated_at' => $this->f_updated_at,
         ];
     }
 }

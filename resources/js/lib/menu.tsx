@@ -1,4 +1,4 @@
-import { NavGroup, NavItem } from "@/types";
+import { NavGroup, NavItem } from '@/types';
 
 export function filterItems(items: NavItem[], permissions?: string[]): NavItem[] {
     return items

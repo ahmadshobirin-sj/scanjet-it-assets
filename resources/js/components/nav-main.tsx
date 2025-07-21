@@ -1,9 +1,18 @@
-import { SidebarGroup, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem } from '@/components/ui/sidebar';
+import {
+    SidebarGroup,
+    SidebarGroupLabel,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+    SidebarMenuSub,
+    SidebarMenuSubButton,
+    SidebarMenuSubItem,
+} from '@/components/ui/sidebar';
+import { isActivePath } from '@/lib/menu';
 import { NavGroup } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 import { ChevronRight } from 'lucide-react';
-import { isActivePath } from '@/lib/menu';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from './ui/collapsible';
 
 export function NavMain({ items = [] }: { items: NavGroup[] }) {
     const page = usePage();
@@ -21,7 +30,7 @@ export function NavMain({ items = [] }: { items: NavGroup[] }) {
                         </SidebarGroupLabel>
                         <CollapsibleContent>
                             <SidebarMenu>
-                                {group.items.map((item, subIndex) => (
+                                {group.items.map((item, subIndex) =>
                                     item.items && item.items.length > 0 ? (
                                         <Collapsible className="group/collapsible" key={index + '-' + subIndex}>
                                             <SidebarMenuItem>
@@ -40,7 +49,11 @@ export function NavMain({ items = [] }: { items: NavGroup[] }) {
                                                             <SidebarMenuSubItem key={index + '-' + subIndex + '-' + subSubIndex}>
                                                                 <SidebarMenuSubButton asChild>
                                                                     <Link href={subItem.href || '#'} preserveState>
-                                                                        {subItem.icon && <span><subItem.icon className="size-4" /></span>}
+                                                                        {subItem.icon && (
+                                                                            <span>
+                                                                                <subItem.icon className="size-4" />
+                                                                            </span>
+                                                                        )}
                                                                         <span>{subItem.title}</span>
                                                                     </Link>
                                                                 </SidebarMenuSubButton>
@@ -59,14 +72,13 @@ export function NavMain({ items = [] }: { items: NavGroup[] }) {
                                                 </Link>
                                             </SidebarMenuButton>
                                         </SidebarMenuItem>
-                                    )
-                                ))}
+                                    ),
+                                )}
                             </SidebarMenu>
                         </CollapsibleContent>
                     </SidebarGroup>
                 </Collapsible>
             ))}
         </>
-
     );
 }

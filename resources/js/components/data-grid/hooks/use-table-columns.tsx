@@ -1,15 +1,15 @@
-import { useMemo } from 'react';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ColumnDef } from '@tanstack/react-table';
 import { EllipsisVertical } from 'lucide-react';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { useMemo } from 'react';
 import { ActionsRow } from '../data-grid.types';
 
 export const useTableColumns = <TData extends Record<string, any>>(
     columns: ColumnDef<TData>[],
     enableRowSelection: boolean,
-    actionsRow?: (row: TData) => ActionsRow<TData>[]
+    actionsRow?: (row: TData) => ActionsRow<TData>[],
 ) => {
     return useMemo<ColumnDef<TData>[]>(() => {
         const baseColumns = [...columns];
@@ -23,11 +23,7 @@ export const useTableColumns = <TData extends Record<string, any>>(
                 />
             ),
             cell: ({ row }) => (
-                <Checkbox
-                    disabled={!row.getCanSelect()}
-                    checked={row.getIsSelected()}
-                    onCheckedChange={row.getToggleSelectedHandler()}
-                />
+                <Checkbox disabled={!row.getCanSelect()} checked={row.getIsSelected()} onCheckedChange={row.getToggleSelectedHandler()} />
             ),
             enableSorting: false,
             enableColumnFilter: false,

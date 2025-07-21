@@ -20,6 +20,7 @@ class NestedRelationSort implements Sort
             $column = $parts[0];
             $mainTable = $query->getModel()->getTable();
             $query->orderBy("{$mainTable}.{$column}", $descending ? 'desc' : 'asc');
+
             return;
         }
 
@@ -29,7 +30,7 @@ class NestedRelationSort implements Sort
         $model = $query->getModel();
         $relation = $this->resolveRelation($model, $relationPath);
 
-        if (!$relation) {
+        if (! $relation) {
             return;
         }
 
@@ -46,12 +47,13 @@ class NestedRelationSort implements Sort
                 SELECT {$relatedTable}.{$column}
                 FROM {$relatedTable}
                 WHERE {$relatedTable}.{$ownerKey} = {$mainTable}.{$foreignKey}
-            ) " . ($descending ? 'DESC' : 'ASC'));
+            ) ".($descending ? 'DESC' : 'ASC'));
+
             return;
         }
 
         // Selain BelongsTo, tetap gunakan join
-        if (!$this->isAlreadyJoined($query, $alias, $relatedTable)) {
+        if (! $this->isAlreadyJoined($query, $alias, $relatedTable)) {
             $this->applyJoin($query, $relation, $alias);
         }
 
@@ -70,7 +72,7 @@ class NestedRelationSort implements Sort
 
         try {
             foreach ($relations as $relationName) {
-                if (!method_exists($currentModel, $relationName)) {
+                if (! method_exists($currentModel, $relationName)) {
                     return null;
                 }
 
@@ -100,7 +102,7 @@ class NestedRelationSort implements Sort
         if ($relation instanceof HasOneOrMany) {
             $query->leftJoin(
                 "{$relatedTable} as {$alias}",
-                "{$alias}." . $relation->getForeignKeyName(),
+                "{$alias}.".$relation->getForeignKeyName(),
                 '=',
                 $relation->getQualifiedParentKeyName()
             );

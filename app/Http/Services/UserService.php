@@ -2,7 +2,6 @@
 
 namespace App\Http\Services;
 
-use App\Enums\UserRole;
 use App\Http\Filters\GlobalSearchFilter;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -63,6 +62,6 @@ class UserService
 
     public function delete(User $user): void
     {
-        DB::transaction(fn() => $user->delete());
+        DB::transaction(fn () => $user->delete());
     }
 }

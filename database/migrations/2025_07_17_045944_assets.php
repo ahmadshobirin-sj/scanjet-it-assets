@@ -11,28 +11,28 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create("assets", function (Blueprint $table) {
-            $table->uuid("id")->primary();
-            $table->string("name");
-            $table->string("location")->nullable();
-            $table->string("serial_number")->unique()->nullable();
-            $table->date("warranty_expired")->nullable();
-            $table->date("last_maintenance")->nullable();
-            $table->text("note")->nullable();
-            $table->date("purchase_date")->nullable();
+        Schema::create('assets', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('name');
+            $table->string('location')->nullable();
+            $table->string('serial_number')->unique()->nullable();
+            $table->date('warranty_expired')->nullable();
+            $table->date('last_maintenance')->nullable();
+            $table->text('note')->nullable();
+            $table->date('purchase_date')->nullable();
 
             $table->uuid('category_id');
             $table->foreign('category_id')->references('id')->on('asset_categories')->onDelete('restrict');
 
             $table->uuid('manufacture_id');
-            $table->foreign("manufacture_id")->references('id')->on("manufactures")->onDelete("restrict");
+            $table->foreign('manufacture_id')->references('id')->on('manufactures')->onDelete('restrict');
 
-            $table->enum("status", ["available", "assigned", "maintenance", "lost", "scrapped"])->default("available");
+            $table->enum('status', ['available', 'assigned', 'maintenance', 'lost', 'scrapped'])->default('available');
 
             $table->string('assigned_user_id')->nullable();
             $table->timestamp('assigned_at')->nullable();
 
-            $table->string("reference_link")->nullable();
+            $table->string('reference_link')->nullable();
 
             $table->timestamps();
         });

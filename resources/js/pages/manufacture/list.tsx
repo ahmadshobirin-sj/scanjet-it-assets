@@ -1,28 +1,30 @@
-import AppContainer from '@/components/app-container'
-import AppTitle from '@/components/app-title'
-import { DataGrid, DataGridState } from '@/components/data-grid'
-import { Button } from '@/components/ui/button'
-import { useBreadcrumb } from '@/hooks/use-breadcrumb'
-import { usePermission } from '@/hooks/use-permissions'
-import AppLayout from '@/layouts/app-layout'
-import { spatieToTanstackState, tanstackToSpatieParams } from '@/lib/normalize-table-state'
-import { SharedData } from '@/types'
-import { Manufacture, ResponseCollection, TableServerState } from '@/types/model'
-import { router, usePage } from '@inertiajs/react'
-import { Plus } from 'lucide-react'
-import React, { useCallback, useEffect, useState } from 'react'
-import { toast } from 'sonner'
-import { columns } from './column'
-import { confirmDialog } from '@/lib/confirmDialog'
-import useDidUpdate from '@/hooks/use-did-update'
-import { PaginationState, SortingState } from '@tanstack/react-table'
+import AppContainer from '@/components/app-container';
+import AppTitle from '@/components/app-title';
+import { DataGrid, DataGridState } from '@/components/data-grid';
+import { Button } from '@/components/ui/button';
+import { useBreadcrumb } from '@/hooks/use-breadcrumb';
+import useDidUpdate from '@/hooks/use-did-update';
+import { usePermission } from '@/hooks/use-permissions';
+import AppLayout from '@/layouts/app-layout';
+import { confirmDialog } from '@/lib/confirmDialog';
+import { spatieToTanstackState, tanstackToSpatieParams } from '@/lib/normalize-table-state';
+import { SharedData } from '@/types';
+import { Manufacture, ResponseCollection, TableServerState } from '@/types/model';
+import { router, usePage } from '@inertiajs/react';
+import { PaginationState, SortingState } from '@tanstack/react-table';
+import { Plus } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { columns } from './column';
 
 const ManufactureListPage = () => {
-    const { props: { manufactures, table, success, errors }, component } = usePage<SharedData & { manufactures: ResponseCollection<Manufacture>; table: TableServerState }>()
+    const {
+        props: { manufactures, table, success, errors },
+        component,
+    } = usePage<SharedData & { manufactures: ResponseCollection<Manufacture>; table: TableServerState }>();
     const [tableState, setTableState] = useState(spatieToTanstackState(table));
-    const breadcrumbs = useBreadcrumb(component)
-    const { can } = usePermission()
-
+    const breadcrumbs = useBreadcrumb(component);
+    const { can } = usePermission();
 
     // Toast notification for success or error messages
     useEffect(() => {
@@ -44,57 +46,65 @@ const ManufactureListPage = () => {
 
     const handleEdit = (row: Manufacture) => {
         router.visit(route('manufacture.edit', { manufacture: row.id }));
-    }
+    };
 
     const handleDelete = (row: Manufacture) => {
         confirmDialog({
             title: 'Delete manufacture',
-            description: <>Are you sure you want to delete manufacture <b>{row.name}</b> This action cannot be undone.</>,
+            description: (
+                <>
+                    Are you sure you want to delete manufacture <b>{row.name}</b> This action cannot be undone.
+                </>
+            ),
             autoCloseAfterConfirm: true,
             onConfirm: () => {
                 router.delete(route('manufacture.destroy', row.id), {
                     preserveScroll: true,
                     preserveState: true,
-                })
-            }
-        })
+                });
+            },
+        });
     };
 
-
-    const updateTableState = useCallback(
-        (tableState: DataGridState) => {
-            const query = tanstackToSpatieParams(tableState);
-            router.get(route('manufacture.index'), query, {
-                preserveState: true,
-                preserveScroll: true,
-            });
-        },
-        [],
-    );
+    const updateTableState = useCallback((tableState: DataGridState) => {
+        const query = tanstackToSpatieParams(tableState);
+        router.get(route('manufacture.index'), query, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    }, []);
 
     useDidUpdate(() => {
         updateTableState(tableState);
-    }, [tableState])
+    }, [tableState]);
 
-    const handlePaginationChange = useCallback((pagination: PaginationState) => {
-        setTableState(prev => ({ ...prev, pagination }))
-    }, [setTableState]);
+    const handlePaginationChange = useCallback(
+        (pagination: PaginationState) => {
+            setTableState((prev) => ({ ...prev, pagination }));
+        },
+        [setTableState],
+    );
 
-    const handleSortingChange = useCallback((sorting: SortingState) => {
-        setTableState(prev => ({ ...prev, sorting }))
-    }, [setTableState]);
+    const handleSortingChange = useCallback(
+        (sorting: SortingState) => {
+            setTableState((prev) => ({ ...prev, sorting }));
+        },
+        [setTableState],
+    );
 
-    const handleFilterChange = useCallback((globalFilter: string) => {
-        setTableState(prev => ({
-            ...prev,
-            globalFilter,
-            pagination: {
-                ...prev.pagination,
-                pageIndex: 0,
-            }
-        }));
-    }, [setTableState])
-
+    const handleFilterChange = useCallback(
+        (globalFilter: string) => {
+            setTableState((prev) => ({
+                ...prev,
+                globalFilter,
+                pagination: {
+                    ...prev.pagination,
+                    pageIndex: 0,
+                },
+            }));
+        },
+        [setTableState],
+    );
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -105,10 +115,7 @@ const ManufactureListPage = () => {
                     actions={
                         <>
                             {can('manufacture.create') && (
-                                <Button
-                                    leading={<Plus />}
-                                    onClick={() => router.visit(route('manufacture.create'))}
-                                >
+                                <Button leading={<Plus />} onClick={() => router.visit(route('manufacture.create'))}>
                                     Create manufacture
                                 </Button>
                             )}
@@ -127,16 +134,16 @@ const ManufactureListPage = () => {
                     onSortingChange={handleSortingChange}
                     onGlobalFilterChange={handleFilterChange}
                     onPaginationChange={handlePaginationChange}
-                    actionsRow={() => ([
+                    actionsRow={() => [
                         ...(can('manufacture.view') ? [{ name: 'View', event: handleView }] : []),
                         ...(can('manufacture.update') ? [{ name: 'Edit', event: handleEdit }] : []),
-                        ...(can('manufacture.delete') ? [{ name: 'Delete', color: 'destructive', event: handleDelete }] : [])
-                    ])}
+                        ...(can('manufacture.delete') ? [{ name: 'Delete', color: 'destructive', event: handleDelete }] : []),
+                    ]}
                     emptyText="No data manufactures available"
                 />
             </AppContainer>
         </AppLayout>
-    )
-}
+    );
+};
 
-export default ManufactureListPage
+export default ManufactureListPage;

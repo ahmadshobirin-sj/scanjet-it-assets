@@ -1,4 +1,4 @@
-import { UserRole } from "@/types/model";
+import { UserRole } from '@/types/model';
 
 export class UserRoleStyle {
     static getIntent(role: UserRole): string {

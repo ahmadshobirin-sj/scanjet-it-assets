@@ -1,10 +1,8 @@
-import { Head, Link } from '@inertiajs/react';
-import AuthLayout from '@/layouts/auth-layout';
 import { Button } from '@/components/ui/button';
-
+import AuthLayout from '@/layouts/auth-layout';
+import { Head } from '@inertiajs/react';
 
 export default function Login() {
-
     return (
         <AuthLayout title="Log in to your account" description="Enter your email and password below to log in">
             <Head title="Log in" />

@@ -1,9 +1,8 @@
-
-import { Search, ChevronsUpDown } from 'lucide-react';
-import { Table as TableType } from '@tanstack/react-table';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Table as TableType } from '@tanstack/react-table';
+import { ChevronsUpDown, Search } from 'lucide-react';
 
 interface DataGridToolbarProps<TData> {
     table: TableType<TData>;
@@ -19,10 +18,10 @@ export const DataGridToolbar = <TData,>({ table, inputValue, onGlobalFilterChang
                 type="text"
                 placeholder="Search all columns..."
                 value={inputValue}
-                className='w-[250px]'
+                className="w-[250px]"
                 onChange={(e) => onGlobalFilterChange(e.target.value)}
             />
-            <div className='ml-auto'>
+            <div className="ml-auto">
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" intent="secondary" className="ml-auto">
@@ -39,15 +38,11 @@ export const DataGridToolbar = <TData,>({ table, inputValue, onGlobalFilterChang
                                         key={column.id}
                                         className="capitalize"
                                         checked={column.getIsVisible()}
-                                        onCheckedChange={(value) =>
-                                            column.toggleVisibility(!!value)
-                                        }
+                                        onCheckedChange={(value) => column.toggleVisibility(!!value)}
                                     >
-                                        <>
-                                            {column.columnDef.header}
-                                        </>
+                                        <>{column.columnDef.header}</>
                                     </DropdownMenuCheckboxItem>
-                                )
+                                );
                             })}
                     </DropdownMenuContent>
                 </DropdownMenu>

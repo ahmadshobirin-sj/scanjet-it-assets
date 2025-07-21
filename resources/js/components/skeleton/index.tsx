@@ -1,1 +1,1 @@
-export { default as SkeletonInput } from './skeleton-input'
+export { default as SkeletonInput } from './skeleton-input';

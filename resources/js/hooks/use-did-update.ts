@@ -1,14 +1,17 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react';
 
 function useDidUpdate(callback: () => void, deps: any[]) {
-  const isFirst = useRef(true);
+    const didMountRef = useRef(false);
 
-  useEffect(() => {
-    if (isFirst.current) {
-      isFirst.current = false;
-      return;
-    }
-    callback();
-  }, deps);
+    useEffect(() => {
+        if (didMountRef.current) {
+            callback();
+        } else {
+            didMountRef.current = true;
+        }
+        // disable lint warning for this hook
+        // we trust the caller to pass correct deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, deps);
 }
 export default useDidUpdate;

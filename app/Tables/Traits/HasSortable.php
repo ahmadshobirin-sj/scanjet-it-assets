@@ -12,8 +12,8 @@ trait HasSortable
     public function sorts(): array
     {
         $columns = collect($this->columns())
-            ->filter(fn(Column $col) => $col->isSortable())
-            ->map(fn(Column $col) => $col->getAllowedSort())
+            ->filter(fn (Column $col) => $col->isSortable())
+            ->map(fn (Column $col) => $col->getAllowedSort())
             ->values()
             ->toArray();
 

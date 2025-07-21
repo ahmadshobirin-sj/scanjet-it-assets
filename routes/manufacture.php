@@ -1,6 +1,5 @@
 <?php
 
-
 use App\Http\Controllers\ManufactureController;
 use Illuminate\Support\Facades\Route;
 

@@ -4,22 +4,31 @@ namespace App\Tables\Columns;
 
 use App\Tables\Sorts\AllowedSort;
 use Closure;
+use Illuminate\Support\Str;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\Filters\Filter;
 use Spatie\QueryBuilder\Sorts\Sort;
-use Illuminate\Support\Str;
 
 class Column
 {
     private string $name;
+
     private ?string $label = null;
+
     private bool $sortable = false;
+
     private ?string $sortType = null;
+
     private Closure|Sort|null $customSort = null;
+
     private bool $filterable = false;
+
     private ?string $filterType = null;
+
     private Closure|Filter|null $customFilter = null;
+
     private bool $globalSearchable = false;
+
     private bool $toggleable = false;
 
     public function __construct(string $name)
@@ -92,60 +101,70 @@ class Column
     public function setName(string $name): self
     {
         $this->name = $name;
+
         return $this;
     }
 
     public function setLabel(?string $label): self
     {
         $this->label = $label;
+
         return $this;
     }
 
     public function setSortable(bool $sortable): self
     {
         $this->sortable = $sortable;
+
         return $this;
     }
 
     public function setSortType(?string $sortType): self
     {
         $this->sortType = $sortType;
+
         return $this;
     }
 
     public function setCustomSort(Closure|Sort|null $customSort): self
     {
         $this->customSort = $customSort;
+
         return $this;
     }
 
     public function setFilterable(bool $filterable): self
     {
         $this->filterable = $filterable;
+
         return $this;
     }
 
     public function setFilterType(?string $filterType): self
     {
         $this->filterType = $filterType;
+
         return $this;
     }
 
     public function setCustomFilter(Closure|Filter|null $customFilter): self
     {
         $this->customFilter = $customFilter;
+
         return $this;
     }
 
     public function setGlobalSearchable(bool $globalSearchable): self
     {
         $this->globalSearchable = $globalSearchable;
+
         return $this;
     }
 
     public function setToggleable(bool $toggleable): self
     {
         $this->toggleable = $toggleable;
+
         return $this;
     }
 
@@ -211,21 +230,22 @@ class Column
     // Utility Methods
     public function getAllowedSort(): AllowedSort
     {
-        if (!$this->isSortable()) {
+        if (! $this->isSortable()) {
             throw new \InvalidArgumentException("Column {$this->name} is not sortable.");
         }
+
         return match ($this->sortType) {
             'field' => AllowedSort::field($this->name),
             'custom' => $this->customSort
                 ? AllowedSort::custom($this->name, $this->customSort)
-                : throw new \InvalidArgumentException("Custom sortType requires customSort closure."),
+                : throw new \InvalidArgumentException('Custom sortType requires customSort closure.'),
             default => throw new \InvalidArgumentException("Unknown sortType: {$this->sortType}")
         };
     }
 
     public function getAllowedFilter(): AllowedFilter
     {
-        if (!$this->isFilterable()) {
+        if (! $this->isFilterable()) {
             throw new \InvalidArgumentException("Column {$this->name} is not filterable.");
         }
 
@@ -235,10 +255,10 @@ class Column
             'scope' => AllowedFilter::scope($this->name),
             'callback' => $this->customFilter
                 ? AllowedFilter::callback($this->name, $this->customFilter)
-                : throw new \InvalidArgumentException("Callback filterType requires customFilter."),
+                : throw new \InvalidArgumentException('Callback filterType requires customFilter.'),
             'custom' => $this->customFilter
                 ? AllowedFilter::callback($this->name, $this->customFilter)
-                : throw new \InvalidArgumentException("Custom filterType requires customFilter."),
+                : throw new \InvalidArgumentException('Custom filterType requires customFilter.'),
             default => throw new \InvalidArgumentException("Unknown filterType: {$this->filterType}")
         };
     }
@@ -262,7 +282,7 @@ class Column
         return [
             'id' => $this->name,
             'accessorKey' => $this->name,
-            'header' => $this->label ?? Str::headline(join(' ', explode('.', $this->name))),
+            'header' => $this->label ?? Str::headline(implode(' ', explode('.', $this->name))),
             'enableSorting' => $this->sortable,
             'enableColumnFilter' => $this->filterable,
             'enableGlobalFilter' => $this->globalSearchable,

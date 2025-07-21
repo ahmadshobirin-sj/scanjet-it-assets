@@ -1,50 +1,57 @@
-import AppContainer from '@/components/app-container'
-import AppTitle from '@/components/app-title'
-import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import { FormMessage } from '@/components/ui/form-message'
-import { GroupFormField, GroupFormItem } from '@/components/ui/group-form'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Switch } from '@/components/ui/switch'
-import { useBeforeUnloadPrompt } from '@/hooks/use-before-unload-prompt'
-import { useBreadcrumb } from '@/hooks/use-breadcrumb'
-import AppLayout from '@/layouts/app-layout'
-import { camelCaseToWords } from '@/lib/utils'
-import { SharedData } from '@/types'
-import { Permission, ResponseCollection, ResponseResource, Role } from '@/types/model'
-import { router, useForm, usePage } from '@inertiajs/react'
-import { CheckedState } from '@radix-ui/react-checkbox'
-import { SquarePen } from 'lucide-react'
-import { FC, useEffect, useMemo } from 'react'
-import { toast } from 'sonner'
+import AppContainer from '@/components/app-container';
+import AppTitle from '@/components/app-title';
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
+import { FormMessage } from '@/components/ui/form-message';
+import { GroupFormField, GroupFormItem } from '@/components/ui/group-form';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { useBeforeUnloadPrompt } from '@/hooks/use-before-unload-prompt';
+import { useBreadcrumb } from '@/hooks/use-breadcrumb';
+import AppLayout from '@/layouts/app-layout';
+import { camelCaseToWords } from '@/lib/utils';
+import { SharedData } from '@/types';
+import { Permission, ResponseCollection, ResponseResource, Role } from '@/types/model';
+import { router, useForm, usePage } from '@inertiajs/react';
+import { CheckedState } from '@radix-ui/react-checkbox';
+import { SquarePen } from 'lucide-react';
+import { FC, useEffect, useMemo } from 'react';
+import { toast } from 'sonner';
 
 interface RoleFormPageProps {
     viewType: 'create' | 'update' | 'detail';
 }
 
 const RoleFormPage: FC<RoleFormPageProps> = ({ viewType }) => {
-    const { props: { permissions, role }, component } = usePage<SharedData & { permissions: ResponseCollection<Permission>, role?: ResponseResource<Role> }>()
-    const breadcrumbs = useBreadcrumb(component)
+    const {
+        props: { permissions, role },
+        component,
+    } = usePage<SharedData & { permissions: ResponseCollection<Permission>; role?: ResponseResource<Role> }>();
+    const breadcrumbs = useBreadcrumb(component);
 
     const { data, setData, post, put, processing, errors, reset, isDirty, setDefaults } = useForm<{
         name: string;
         permissions: string[];
     }>({
         name: '',
-        permissions: []
+        permissions: [],
     });
 
-    useBeforeUnloadPrompt(isDirty)
+    useBeforeUnloadPrompt(isDirty);
 
     useEffect(() => {
         if (viewType !== 'create' && role) {
-            setDefaults('name', role.data.name);
-            setData('name', role.data.name);
-            setDefaults('permissions', role.data.permissions.map((permission) => permission.id));
-            setData('permissions', role.data.permissions.map((permission) => permission.id));
+            const values: typeof data = {
+                name: role.data.name,
+                permissions: role.data.permissions.map((permission) => permission.id),
+            };
+            setDefaults(values);
+            setData(values);
         }
-    }, [viewType, role])
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [viewType, role]);
 
     const titlePage = useMemo(() => {
         if (viewType === 'detail') return 'Role Detail';
@@ -82,10 +89,10 @@ const RoleFormPage: FC<RoleFormPageProps> = ({ viewType }) => {
 
     const permissionsGrouped = useMemo(() => {
         if (permissions) {
-            const grouped = groupData(permissions.data)
-            return grouped
+            const grouped = groupData(permissions.data);
+            return grouped;
         }
-        return []
+        return [];
     }, [permissions]);
 
     const allPermissionChecked = useMemo(() => {
@@ -94,9 +101,12 @@ const RoleFormPage: FC<RoleFormPageProps> = ({ viewType }) => {
         return false;
     }, [data.permissions, permissions]);
 
-    const onAllPermissionChecked = (value: Boolean) => {
+    const onAllPermissionChecked = (value: boolean) => {
         if (value) {
-            setData('permissions', permissions.data.map((permission) => permission.id));
+            setData(
+                'permissions',
+                permissions.data.map((permission) => permission.id),
+            );
         } else {
             setData('permissions', []);
         }
@@ -118,11 +128,14 @@ const RoleFormPage: FC<RoleFormPageProps> = ({ viewType }) => {
         const role = permissionsGrouped.find((role) => role.name === name);
         if (!role) return;
         if (value) {
-            setData('permissions', [...data.permissions, ...role.permissions.map((val) => val.id)])
+            setData('permissions', [...data.permissions, ...role.permissions.map((val) => val.id)]);
         } else {
-            setData('permissions', data.permissions.filter((permission) => {
-                return !role?.permissions.some((val) => val.id === permission);
-            }))
+            setData(
+                'permissions',
+                data.permissions.filter((permission) => {
+                    return !role?.permissions.some((val) => val.id === permission);
+                }),
+            );
         }
     };
 
@@ -130,7 +143,10 @@ const RoleFormPage: FC<RoleFormPageProps> = ({ viewType }) => {
         if (value) {
             setData('permissions', [...data.permissions, permissionId]);
         } else {
-            setData('permissions', data.permissions.filter((id) => id !== permissionId));
+            setData(
+                'permissions',
+                data.permissions.filter((id) => id !== permissionId),
+            );
         }
     };
 
@@ -142,11 +158,11 @@ const RoleFormPage: FC<RoleFormPageProps> = ({ viewType }) => {
                 if (errors.message) {
                     toast.error(errors.message, {
                         ...(errors.error ? { description: errors.error } : {}),
-                    })
+                    });
                 }
-            }
+            },
         });
-    }
+    };
 
     const updateRole = () => {
         put(route('role.update', { role: role?.data.id }), {
@@ -156,12 +172,11 @@ const RoleFormPage: FC<RoleFormPageProps> = ({ viewType }) => {
                 if (errors.message) {
                     toast.error(errors.message, {
                         ...(errors.error ? { description: errors.error } : {}),
-                    })
+                    });
                 }
-            }
+            },
         });
-    }
-
+    };
 
     const handleSubmit = () => {
         if (viewType === 'create') {
@@ -170,7 +185,7 @@ const RoleFormPage: FC<RoleFormPageProps> = ({ viewType }) => {
         if (viewType === 'update') {
             updateRole();
         }
-    }
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -180,32 +195,35 @@ const RoleFormPage: FC<RoleFormPageProps> = ({ viewType }) => {
                     subtitle={subTitlePage}
                     actions={
                         <>
-                            {
-                                viewType === 'detail' ? (
-                                    <Button variant="fill" intent="warning" leading={<SquarePen />} onClick={() => router.visit(route('role.edit', { role: role?.data.id }))}>
-                                        Edit role
+                            {viewType === 'detail' ? (
+                                <Button
+                                    variant="fill"
+                                    intent="warning"
+                                    leading={<SquarePen />}
+                                    onClick={() => router.visit(route('role.edit', { role: role?.data.id }))}
+                                >
+                                    Edit role
+                                </Button>
+                            ) : (
+                                <Button variant="outline" onClick={() => router.visit(route('role.index'))}>
+                                    Cancel
+                                </Button>
+                            )}
+                            {viewType !== 'detail' && (
+                                <>
+                                    <Button onClick={() => reset()} intent="warning">
+                                        Reset
                                     </Button>
-                                ) : (
-                                    <Button variant="outline" onClick={() => router.visit(route('role.index'))}>
-                                        Cancel
+                                    <Button onClick={handleSubmit} loading={processing}>
+                                        Save
                                     </Button>
-                                )
-                            }
-                            {
-                                viewType !== 'detail' && (
-                                    <>
-                                        <Button onClick={() => reset()} intent="warning">Reset</Button>
-                                        <Button onClick={handleSubmit} loading={processing}>
-                                            Save
-                                        </Button>
-                                    </>
-                                )
-                            }
+                                </>
+                            )}
                         </>
                     }
                 />
                 <div>
-                    <div className="flex flex-col sm:flex-row gap-6">
+                    <div className="flex flex-col gap-6 sm:flex-row">
                         <GroupFormItem>
                             <GroupFormField>
                                 <Label htmlFor="name">Role Name</Label>
@@ -218,61 +236,62 @@ const RoleFormPage: FC<RoleFormPageProps> = ({ viewType }) => {
                                     className="w-full"
                                 />
                             </GroupFormField>
-                            {
-                                errors.name && <FormMessage error>{errors.name}</FormMessage>
-                            }
+                            {errors.name && <FormMessage error>{errors.name}</FormMessage>}
                         </GroupFormItem>
                         <GroupFormItem>
                             <GroupFormField direction="row">
-                                <Switch disabled={viewType === 'detail'} intent="primary" id="select-all" size="lg" checked={allPermissionChecked} onCheckedChange={onAllPermissionChecked} />
+                                <Switch
+                                    disabled={viewType === 'detail'}
+                                    intent="primary"
+                                    id="select-all"
+                                    size="lg"
+                                    checked={allPermissionChecked}
+                                    onCheckedChange={onAllPermissionChecked}
+                                />
                                 <Label htmlFor="select-all">Select All</Label>
                             </GroupFormField>
-                            <FormMessage>
-                                Enables/Disables all Permissions for this role
-                            </FormMessage>
+                            <FormMessage>Enables/Disables all Permissions for this role</FormMessage>
                         </GroupFormItem>
                     </div>
                     <div className="mt-6">
                         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                            {
-                                permissionsGrouped.map((group, index) => (
-                                    <div className="rounded-md border px-4" key={index}>
-                                        <div className="flex items-center justify-between gap-2 border-b py-2 capitalize">
-                                            <span className="font-semibold">{group.name}</span>
-                                            <div className="flex items-center gap-2">
-                                                <Label htmlFor={`input-${group.name}`}>Select All</Label>
-                                                <Checkbox
-                                                    id={`input-${group.name}`}
-                                                    disabled={viewType === 'detail'}
-                                                    checked={roleChecked(group.name)}
-                                                    onCheckedChange={(value) => onRoleChecked(value, group.name)}
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-2 py-4">
-                                            {
-                                                group.permissions.map((permission) => (
-                                                    <GroupFormField key={permission.id} direction="row">
-                                                        <Checkbox
-                                                            id={`permission-${permission.name}`}
-                                                            disabled={viewType === 'detail'}
-                                                            checked={data.permissions.includes(permission.id)}
-                                                            onCheckedChange={(value) => handleChangePermission(value, permission.id)}
-                                                        />
-                                                        <Label htmlFor={`permission-${permission.name}`} className="capitalize font-normal">{permission.name}</Label>
-                                                    </GroupFormField>
-                                                ))
-                                            }
+                            {permissionsGrouped.map((group, index) => (
+                                <div className="rounded-md border px-4" key={index}>
+                                    <div className="flex items-center justify-between gap-2 border-b py-2 capitalize">
+                                        <span className="font-semibold">{group.name}</span>
+                                        <div className="flex items-center gap-2">
+                                            <Label htmlFor={`input-${group.name}`}>Select All</Label>
+                                            <Checkbox
+                                                id={`input-${group.name}`}
+                                                disabled={viewType === 'detail'}
+                                                checked={roleChecked(group.name)}
+                                                onCheckedChange={(value) => onRoleChecked(value, group.name)}
+                                            />
                                         </div>
                                     </div>
-                                ))
-                            }
+                                    <div className="grid grid-cols-2 gap-2 py-4">
+                                        {group.permissions.map((permission) => (
+                                            <GroupFormField key={permission.id} direction="row">
+                                                <Checkbox
+                                                    id={`permission-${permission.name}`}
+                                                    disabled={viewType === 'detail'}
+                                                    checked={data.permissions.includes(permission.id)}
+                                                    onCheckedChange={(value) => handleChangePermission(value, permission.id)}
+                                                />
+                                                <Label htmlFor={`permission-${permission.name}`} className="font-normal capitalize">
+                                                    {permission.name}
+                                                </Label>
+                                            </GroupFormField>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>
             </AppContainer>
         </AppLayout>
-    )
-}
+    );
+};
 
-export default RoleFormPage
+export default RoleFormPage;

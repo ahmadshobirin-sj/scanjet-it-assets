@@ -23,8 +23,8 @@ class AssetCategoryUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "name" => ['string', 'required',  Rule::unique('asset_categories')->ignore($this->asset_category)],
-            "description" => 'nullable|string|max:255',
+            'name' => ['string', 'required',  Rule::unique('asset_categories')->ignore($this->asset_category)],
+            'description' => 'nullable|string|max:255',
         ];
     }
 }

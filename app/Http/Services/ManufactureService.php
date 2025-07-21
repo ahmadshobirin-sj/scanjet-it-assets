@@ -4,12 +4,10 @@ namespace App\Http\Services;
 
 use App\Http\Filters\GlobalSearchFilter;
 use App\Models\Manufacture;
-use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Spatie\QueryBuilder\AllowedFilter;
-use Spatie\QueryBuilder\AllowedSort;
 use Spatie\QueryBuilder\QueryBuilder;
 
 class ManufactureService
@@ -18,7 +16,7 @@ class ManufactureService
     {
         return QueryBuilder::for(Manufacture::class)
             ->allowedFilters([
-                AllowedFilter::custom('search', new GlobalSearchFilter()),
+                AllowedFilter::custom('search', new GlobalSearchFilter),
                 'name',
             ])
             ->allowedSorts([
@@ -30,7 +28,7 @@ class ManufactureService
                 'contact_person_name',
                 'contact_person_email',
                 'contact_person_phone',
-                'created_at'
+                'created_at',
             ])
             ->defaultSort(['-created_at'])
             ->paginate(request()->input('per_page', 10))
@@ -50,6 +48,7 @@ class ManufactureService
     {
         $manufacture = QueryBuilder::for(Manufacture::class)
             ->findOrFail($id);
+
         return $manufacture;
     }
 

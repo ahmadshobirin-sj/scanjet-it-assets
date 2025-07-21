@@ -1,8 +1,7 @@
-import React from 'react'
-import RoleFormPage from './form'
+import RoleFormPage from './form';
 
 const RoleCreatePage = () => {
-    return <RoleFormPage viewType="create" />
-}
+    return <RoleFormPage viewType="create" />;
+};
 
-export default RoleCreatePage
+export default RoleCreatePage;

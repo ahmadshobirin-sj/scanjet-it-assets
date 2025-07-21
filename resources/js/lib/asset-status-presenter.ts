@@ -1,6 +1,6 @@
-import { AssetStatus } from "@/types/model";
+import { AssetStatus } from '@/types/model';
 
-export class AssetStatusPresenter  {
+export class AssetStatusPresenter {
     static getIntent(status: AssetStatus): string {
         switch (status) {
             case 'available':

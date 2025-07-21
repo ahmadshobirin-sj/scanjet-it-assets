@@ -7,10 +7,7 @@ import { format, toZonedTime } from 'date-fns-tz';
  * @param formatStr - Format output (default: 'dd MMM yyyy HH:mm')
  * @returns String waktu yang diformat sesuai timezone browser
  */
-export function formatWithBrowserTimezone(
-    dateStr: string | Date | null,
-    formatStr: string = 'dd MMM yyyy HH:mm'
-): string {
+export function formatWithBrowserTimezone(dateStr: string | Date | null, formatStr: string = 'dd MMM yyyy HH:mm'): string {
     if (!dateStr) {
         return '-';
     }
@@ -21,6 +18,9 @@ export function formatWithBrowserTimezone(
         const zonedDate = toZonedTime(date, browserTimezone);
         return format(zonedDate, formatStr, { timeZone: browserTimezone });
     } catch (error) {
+        if (import.meta.env.DEV) {
+            console.error(error);
+        }
         return '-';
     }
 }

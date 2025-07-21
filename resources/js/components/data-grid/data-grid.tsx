@@ -1,13 +1,13 @@
-import { useMemo } from 'react';
-import { useReactTable, getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel } from '@tanstack/react-table';
 import useDidUpdate from '@/hooks/use-did-update';
-import type { DataGridProps } from './data-grid.types';
-import { useTableState } from './hooks/use-table-state';
-import { useTableColumns } from './hooks/use-table-columns';
-import { DataGridToolbar } from './components/data-grid-toolbar';
-import { DataGridTable } from './components/data-grid-table';
-import { DataGridPagination } from './components/data-grid-pagination';
+import { getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
+import { useMemo } from 'react';
 import { DataGridActionsToolbar } from './components/data-grid-actions-toolbar';
+import { DataGridPagination } from './components/data-grid-pagination';
+import { DataGridTable } from './components/data-grid-table';
+import { DataGridToolbar } from './components/data-grid-toolbar';
+import type { DataGridProps } from './data-grid.types';
+import { useTableColumns } from './hooks/use-table-columns';
+import { useTableState } from './hooks/use-table-state';
 
 const DataGrid = <TData extends Record<string, any>>({
     rows = [],
@@ -56,7 +56,7 @@ const DataGrid = <TData extends Record<string, any>>({
         onGlobalFilterChange,
         onColumnFiltersChange,
         onColumnVisibilityChange,
-        debounceDelay
+        debounceDelay,
     );
 
     const finalColumns = useTableColumns(columns, enableRowSelection, actionsRow);
@@ -70,7 +70,7 @@ const DataGrid = <TData extends Record<string, any>>({
             globalFilter,
             rowSelection,
             pagination,
-            columnVisibility
+            columnVisibility,
         },
         ...(rowCount ? { rowCount } : {}),
         ...(rowId ? { getRowId: rowId } : {}),
@@ -140,17 +140,9 @@ const DataGrid = <TData extends Record<string, any>>({
     return (
         <>
             <div className={`w-full ${className}`}>
-                <DataGridToolbar
-                    table={table}
-                    inputValue={inputValue}
-                    onGlobalFilterChange={handleGlobalFilterChange}
-                />
+                <DataGridToolbar table={table} inputValue={inputValue} onGlobalFilterChange={handleGlobalFilterChange} />
 
-                <DataGridTable
-                    table={table}
-                    isTableEmpty={isTableEmpty}
-                    emptyText={emptyText}
-                />
+                <DataGridTable table={table} isTableEmpty={isTableEmpty} emptyText={emptyText} />
 
                 <DataGridPagination
                     table={table}

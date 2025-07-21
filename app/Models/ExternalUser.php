@@ -2,15 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
 class ExternalUser extends Model
 {
     protected $connection = 'mysql_crm';
-    protected $table = 'users';
-    protected $keyType = 'string';
 
+    protected $table = 'users';
+
+    protected $keyType = 'string';
 
     public function assets()
     {

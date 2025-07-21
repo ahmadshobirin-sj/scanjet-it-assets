@@ -16,7 +16,6 @@ trait HasFormattedTimestamp
         return DateHelper::format($this->updated_at, $this->getFormattedTimestampFormat());
     }
 
-
     protected function getFormattedTimestampFormat(): string
     {
         return property_exists($this, 'formatTimestamp') ? $this->formatTimestamp : 'd M Y, H:i';

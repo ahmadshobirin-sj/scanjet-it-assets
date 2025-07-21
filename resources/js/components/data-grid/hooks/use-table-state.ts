@@ -1,5 +1,5 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { PaginationState, SortingState, ColumnFiltersState, RowSelectionState, VisibilityState } from '@tanstack/react-table';
+import { ColumnFiltersState, PaginationState, RowSelectionState, SortingState, VisibilityState } from '@tanstack/react-table';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { DataGridState } from '../data-grid.types';
 
 export const useTableState = (
@@ -12,7 +12,7 @@ export const useTableState = (
     onGlobalFilterChange?: (globalFilter: string) => void,
     onColumnFiltersChange?: (columnFilters: ColumnFiltersState) => void,
     onColumnVisibilityChange?: (columnVisibility: VisibilityState) => void,
-    debounceDelay: number = 300
+    debounceDelay: number = 300,
 ) => {
     // Internal state
     const [internalSorting, setInternalSorting] = useState<SortingState>(initialTableState.sorting || []);
@@ -79,21 +79,29 @@ export const useTableState = (
         }
     };
 
-    const setGlobalFilter = (updater: string | ((prev: string) => string)) => {
-        const newValue = typeof updater === 'function' ? updater(globalFilter) : updater;
-        if (tableState?.globalFilter !== undefined) {
-            onGlobalFilterChange?.(newValue);
-        } else {
-            setInternalGlobalFilter(newValue);
-        }
-    };
+    const hasGlobalFilter = tableState?.globalFilter !== undefined;
 
-    const handleGlobalFilterChange = useCallback((value: string) => {
-        setInputValue(value);
-        debouncedCallback(() => {
-            setGlobalFilter(value);
-        }, debounceDelay);
-    }, [debouncedCallback, debounceDelay, setGlobalFilter]);
+    const setGlobalFilter = useCallback(
+        (updater: string | ((prev: string) => string)) => {
+            const newValue = typeof updater === 'function' ? updater(globalFilter) : updater;
+            if (hasGlobalFilter) {
+                onGlobalFilterChange?.(newValue);
+            } else {
+                setInternalGlobalFilter(newValue);
+            }
+        },
+        [globalFilter, hasGlobalFilter, onGlobalFilterChange, setInternalGlobalFilter],
+    );
+
+    const handleGlobalFilterChange = useCallback(
+        (value: string) => {
+            setInputValue(value);
+            debouncedCallback(() => {
+                setGlobalFilter(value);
+            }, debounceDelay);
+        },
+        [debouncedCallback, debounceDelay, setGlobalFilter],
+    );
 
     const setRowSelection = (updater: RowSelectionState | ((prev: RowSelectionState) => RowSelectionState)) => {
         const newValue = typeof updater === 'function' ? updater(rowSelection) : updater;

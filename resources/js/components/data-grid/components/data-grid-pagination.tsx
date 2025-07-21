@@ -1,7 +1,7 @@
+import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table as TableType } from '@tanstack/react-table';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 
 interface DataGridPaginationProps<TData> {
     table: TableType<TData>;
@@ -11,13 +11,7 @@ interface DataGridPaginationProps<TData> {
     rowCount?: number;
 }
 
-export const DataGridPagination = <TData,>({
-    table,
-    pageSizeOptions,
-    isTableEmpty,
-    serverSide,
-    rowCount
-}: DataGridPaginationProps<TData>) => {
+export const DataGridPagination = <TData,>({ table, pageSizeOptions, isTableEmpty, serverSide, rowCount }: DataGridPaginationProps<TData>) => {
     const { pageIndex, pageSize } = table.getState().pagination;
     const start = pageIndex * pageSize + 1;
     const total = serverSide ? rowCount : table.getFilteredRowModel().rows.length;
@@ -32,16 +26,15 @@ export const DataGridPagination = <TData,>({
             </div>
 
             <div className="flex items-center space-x-2">
-                <Select
-                    value={pageSize.toString()}
-                    onValueChange={(value) => table.setPageSize(Number(value))}
-                >
+                <Select value={pageSize.toString()} onValueChange={(value) => table.setPageSize(Number(value))}>
                     <SelectTrigger className="w-[80px]" disabled={isTableEmpty}>
                         <SelectValue placeholder="Size" />
                     </SelectTrigger>
                     <SelectContent>
                         {pageSizeOptions.map((size, index) => (
-                            <SelectItem key={index} value={size.toString()}>{size}</SelectItem>
+                            <SelectItem key={index} value={size.toString()}>
+                                {size}
+                            </SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
@@ -70,13 +63,7 @@ export const DataGridPagination = <TData,>({
                         Page {pageIndex + 1} of {table.getPageCount()}
                     </span>
 
-                    <Button
-                        size="icon"
-                        variant="outline"
-                        intent="secondary"
-                        onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
-                    >
+                    <Button size="icon" variant="outline" intent="secondary" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
                         <ChevronRight className="h-4 w-4" />
                     </Button>
                     <Button

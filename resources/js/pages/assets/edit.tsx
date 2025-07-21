@@ -1,28 +1,30 @@
-import AppContainer from '@/components/app-container'
-import AppTitle from '@/components/app-title'
-import { CalendarDatePicker } from '@/components/ui/calendar-date-picker'
-import { Card, CardContent } from '@/components/ui/card'
-import { FormMessage } from '@/components/ui/form-message'
-import { GroupForm, GroupFormField, GroupFormGroup, GroupFormItem } from '@/components/ui/group-form'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import MultipleSelector, { Option } from '@/components/ui/multiple-selector'
-import AppLayout from '@/layouts/app-layout'
-import { Asset, AssetCategory, Manufacture, ResponseCollection, ResponseResource } from '@/types/model'
-import { router, useForm, usePage } from '@inertiajs/react'
-import { Globe } from 'lucide-react'
-import { FormField } from './type'
-import { Textarea } from '@/components/ui/textarea'
-import { Button } from '@/components/ui/button'
-import { useBreadcrumb } from '@/hooks/use-breadcrumb'
-import { SharedData } from '@/types'
-import { useEffect } from 'react'
-import { toast } from 'sonner'
-
+import AppContainer from '@/components/app-container';
+import AppTitle from '@/components/app-title';
+import { Button } from '@/components/ui/button';
+import { CalendarDatePicker } from '@/components/ui/calendar-date-picker';
+import { Card, CardContent } from '@/components/ui/card';
+import { FormMessage } from '@/components/ui/form-message';
+import { GroupForm, GroupFormField, GroupFormGroup, GroupFormItem } from '@/components/ui/group-form';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import MultipleSelector, { Option } from '@/components/ui/multiple-selector';
+import { Textarea } from '@/components/ui/textarea';
+import { useBreadcrumb } from '@/hooks/use-breadcrumb';
+import AppLayout from '@/layouts/app-layout';
+import { SharedData } from '@/types';
+import { Asset, AssetCategory, Manufacture, ResponseCollection, ResponseResource } from '@/types/model';
+import { router, useForm, usePage } from '@inertiajs/react';
+import { Globe } from 'lucide-react';
+import { useEffect } from 'react';
+import { toast } from 'sonner';
+import { FormField } from './type';
 
 const AssetUpdatePage = () => {
-    const { component, props: { asset } } = usePage<SharedData & { asset: ResponseResource<Asset> }>()
-    const breadcrumbs = useBreadcrumb(component)
+    const {
+        component,
+        props: { asset },
+    } = usePage<SharedData & { asset: ResponseResource<Asset> }>();
+    const breadcrumbs = useBreadcrumb(component);
 
     const { data, setData, processing, errors, reset, transform, put, setDefaults } = useForm<FormField>({
         name: '',
@@ -32,10 +34,10 @@ const AssetUpdatePage = () => {
         location: '',
         reference_link: '',
         note: '',
-    })
+    });
 
     useEffect(() => {
-        handleSetDefaults({
+        const value: FormField = {
             name: asset.data.name,
             category_id: asset.data.category ? [{ label: asset.data.category.name, value: asset.data.category.id }] : [],
             manufacture_id: asset.data.manufacture ? [{ label: asset.data.manufacture.name, value: asset.data.manufacture.id }] : [],
@@ -45,22 +47,22 @@ const AssetUpdatePage = () => {
             note: asset.data.note || '',
             warranty_expired: asset.data.warranty_expired ? new Date(asset.data.warranty_expired) : undefined,
             purchase_date: asset.data.purchase_date ? new Date(asset.data.purchase_date) : undefined,
-        })
-    }, [])
+        };
 
-    const handleSetDefaults = (value: FormField) => {
-        setDefaults(value)
-        setData(value)
-    }
+        setDefaults(value);
+        setData(value);
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [asset]);
 
     const onSearchCategory = (value: string): Promise<Option[]> => {
         return new Promise((resolve) => {
             router.get(
                 route('asset.edit', {
                     asset: asset.data.id,
-                    'filter': {
-                        'name': value
-                    }
+                    filter: {
+                        name: value,
+                    },
                 }),
                 {},
                 {
@@ -70,26 +72,26 @@ const AssetUpdatePage = () => {
                     preserveState: true,
                     preserveScroll: true,
                     onSuccess: (data) => {
-                        const categories = data.props.categories as ResponseCollection<AssetCategory> || []
+                        const categories = (data.props.categories as ResponseCollection<AssetCategory>) || [];
                         const formatted = categories.data.map((category: any) => ({
                             label: category.name,
                             value: category.id,
-                        }))
-                        resolve(formatted)
+                        }));
+                        resolve(formatted);
                     },
-                }
-            )
-        })
-    }
+                },
+            );
+        });
+    };
 
     const onSearchManufacture = (value: string): Promise<Option[]> => {
         return new Promise((resolve) => {
             router.get(
                 route('asset.edit', {
                     asset: asset.data.id,
-                    'filter': {
-                        'name': value
-                    }
+                    filter: {
+                        name: value,
+                    },
                 }),
                 {},
                 {
@@ -99,46 +101,45 @@ const AssetUpdatePage = () => {
                     preserveState: true,
                     preserveScroll: true,
                     onSuccess: (data) => {
-                        const manufactures = data.props.manufactures as ResponseCollection<Manufacture> || []
+                        const manufactures = (data.props.manufactures as ResponseCollection<Manufacture>) || [];
                         const formatted = manufactures.data.map((manufacture: any) => ({
                             label: manufacture.name,
                             value: manufacture.id,
-                        }))
-                        resolve(formatted)
+                        }));
+                        resolve(formatted);
                     },
-                }
-            )
-        })
-    }
+                },
+            );
+        });
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault()
-        putAsset()
-    }
+        e.preventDefault();
+        putAsset();
+    };
 
     const putAsset = () => {
         transform((data) => ({
             ...data,
             category_id: data.category_id[0]?.value,
             manufacture_id: data.manufacture_id[0]?.value,
-        }))
+        }));
 
         put(route('asset.update', { asset: asset.data.id }), {
             onSuccess: () => {
-                reset()
+                reset();
             },
             onError: (errors) => {
                 if (errors.message) {
                     toast.error(errors.message, {
                         ...(errors.error ? { description: errors.error } : {}),
-                    })
+                    });
                 }
             },
             preserveState: true,
             preserveScroll: true,
-        })
-    }
-
+        });
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -148,15 +149,10 @@ const AssetUpdatePage = () => {
                     subtitle="Update the asset information."
                     actions={
                         <>
-                            <Button
-                                intent="primary"
-                                variant="outline"
-                                onClick={() => router.visit(route('asset.index'))}>
+                            <Button intent="primary" variant="outline" onClick={() => router.visit(route('asset.index'))}>
                                 Cancel
                             </Button>
-                            <Button
-                                intent="warning"
-                                onClick={() => reset()}>
+                            <Button intent="warning" onClick={() => reset()}>
                                 Reset
                             </Button>
                             <Button onClick={putAsset} loading={processing}>
@@ -173,11 +169,7 @@ const AssetUpdatePage = () => {
                                 <GroupFormItem>
                                     <GroupFormField>
                                         <Label htmlFor="name">Name</Label>
-                                        <Input
-                                            id="name"
-                                            value={data.name}
-                                            onChange={(e) => setData('name', e.target.value)}
-                                        />
+                                        <Input id="name" value={data.name} onChange={(e) => setData('name', e.target.value)} />
                                         {errors.name && <FormMessage error>{errors.name}</FormMessage>}
                                     </GroupFormField>
                                 </GroupFormItem>
@@ -210,11 +202,7 @@ const AssetUpdatePage = () => {
                                 <GroupFormItem>
                                     <GroupFormField>
                                         <Label htmlFor="location">Location</Label>
-                                        <Input
-                                            id="location"
-                                            value={data.location}
-                                            onChange={(e) => setData('location', e.target.value)}
-                                        />
+                                        <Input id="location" value={data.location} onChange={(e) => setData('location', e.target.value)} />
                                         {errors.location && <FormMessage error>{errors.location}</FormMessage>}
                                     </GroupFormField>
                                 </GroupFormItem>
@@ -277,11 +265,7 @@ const AssetUpdatePage = () => {
                                 <GroupFormItem>
                                     <GroupFormField>
                                         <Label htmlFor="reference-link">Note</Label>
-                                        <Textarea
-                                            id="reference-link"
-                                            value={data.note}
-                                            onChange={(e) => setData('note', e.target.value)}
-                                        />
+                                        <Textarea id="reference-link" value={data.note} onChange={(e) => setData('note', e.target.value)} />
                                         {errors.note && <FormMessage error>{errors.note}</FormMessage>}
                                     </GroupFormField>
                                 </GroupFormItem>
@@ -292,7 +276,7 @@ const AssetUpdatePage = () => {
                 </Card>
             </AppContainer>
         </AppLayout>
-    )
-}
+    );
+};
 
-export default AssetUpdatePage
+export default AssetUpdatePage;

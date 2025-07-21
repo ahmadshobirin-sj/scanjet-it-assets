@@ -1,7 +1,7 @@
-import { spatieToTanstackState, tanstackToSpatieParams } from "@/lib/normalize-table-state";
-import { TableServer } from "@/types/table";
-import { ColumnDef } from "@tanstack/react-table";
-import { useMemo, useState } from "react";
+import { spatieToTanstackState, tanstackToSpatieParams } from '@/lib/normalize-table-state';
+import { TableServer } from '@/types/table';
+import { ColumnDef } from '@tanstack/react-table';
+import { useMemo, useState } from 'react';
 
 export type TransformColumnFn<TData> = (column: ColumnDef<TData>) => ColumnDef<TData>;
 
@@ -9,9 +9,8 @@ export type TransformersTableResolver<TData> = Record<string, TransformColumnFn<
 
 export const useTableResolver = <TData extends Record<string, any>>(
     table: TableServer<TData>,
-    transformers: TransformersTableResolver<TData> = {}
+    transformers: TransformersTableResolver<TData> = {},
 ) => {
-
     const [tableState, setTableState] = useState(() => spatieToTanstackState(table.state));
 
     const injectedColumns = useMemo<ColumnDef<TData>[]>(() => {

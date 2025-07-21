@@ -13,16 +13,14 @@ trait HasFilter
      */
     /**
      * Return filters including global search filter.
-     *
-     * @return array
      */
     public function filters(): array
     {
         $columns = collect($this->columns());
 
         $globalSearchableColumns = $columns
-            ->filter(fn(Column $col) => $col->isGlobalSearchable())
-            ->map(fn(Column $col) => $col->getName())
+            ->filter(fn (Column $col) => $col->isGlobalSearchable())
+            ->map(fn (Column $col) => $col->getName())
             ->values()
             ->all();
 
@@ -32,7 +30,7 @@ trait HasFilter
             if ($processedColumns === null) {
                 $processedColumns = [
                     'direct' => [],
-                    'relations' => []
+                    'relations' => [],
                 ];
 
                 foreach ($globalSearchableColumns as $column) {
@@ -41,7 +39,7 @@ trait HasFilter
                         $relationColumn = array_pop($parts);
                         $relationPath = implode('.', $parts);
 
-                        if (!isset($processedColumns['relations'][$relationPath])) {
+                        if (! isset($processedColumns['relations'][$relationPath])) {
                             $processedColumns['relations'][$relationPath] = [];
                         }
                         $processedColumns['relations'][$relationPath][] = $relationColumn;
@@ -73,8 +71,8 @@ trait HasFilter
         });
 
         $columnFilters = $columns
-            ->filter(fn(Column $col) => $col->getFilterType() !== null)
-            ->map(fn(Column $col) => $col->getAllowedFilter())
+            ->filter(fn (Column $col) => $col->getFilterType() !== null)
+            ->map(fn (Column $col) => $col->getAllowedFilter())
             ->values();
 
         return collect([$globalSearch])

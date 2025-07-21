@@ -10,8 +10,8 @@ use Spatie\Permission\Models\Role as ModelsRole;
 class Role extends ModelsRole
 {
     use HasFactory;
-    use HasUuids;
     use HasFormattedTimestamp;
+    use HasUuids;
 
     public function getColor(): string
     {

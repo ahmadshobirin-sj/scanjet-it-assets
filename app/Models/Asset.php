@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Asset extends Model
 {
-    use HasUuids;
     use HasFactory;
+    use HasUuids;
 
     protected $keyType = 'string';
 
@@ -27,7 +27,7 @@ class Asset extends Model
         'reference_link',
         'assigned_user_id',
         'assigned_at',
-        'status'
+        'status',
     ];
 
     protected $casts = [
@@ -35,8 +35,6 @@ class Asset extends Model
         'purchase_date' => 'date',
         'assigned_at' => 'datetime',
     ];
-
-
 
     public function category()
     {

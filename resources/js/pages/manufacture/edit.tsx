@@ -1,26 +1,29 @@
-import AppContainer from '@/components/app-container'
-import AppTitle from '@/components/app-title'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { FormMessage } from '@/components/ui/form-message'
-import { GroupForm, GroupFormField, GroupFormGroup, GroupFormItem } from '@/components/ui/group-form'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { PhoneInput } from '@/components/ui/phone-input'
-import { Textarea } from '@/components/ui/textarea'
-import { useBeforeUnloadPrompt } from '@/hooks/use-before-unload-prompt'
-import { useBreadcrumb } from '@/hooks/use-breadcrumb'
-import AppLayout from '@/layouts/app-layout'
-import { SharedData } from '@/types'
-import { Manufacture, ResponseResource } from '@/types/model'
-import { router, useForm, usePage } from '@inertiajs/react'
-import { Globe } from 'lucide-react'
-import { useEffect } from 'react'
-import { toast } from 'sonner'
+import AppContainer from '@/components/app-container';
+import AppTitle from '@/components/app-title';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { FormMessage } from '@/components/ui/form-message';
+import { GroupForm, GroupFormField, GroupFormGroup, GroupFormItem } from '@/components/ui/group-form';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { PhoneInput } from '@/components/ui/phone-input';
+import { Textarea } from '@/components/ui/textarea';
+import { useBeforeUnloadPrompt } from '@/hooks/use-before-unload-prompt';
+import { useBreadcrumb } from '@/hooks/use-breadcrumb';
+import AppLayout from '@/layouts/app-layout';
+import { SharedData } from '@/types';
+import { Manufacture, ResponseResource } from '@/types/model';
+import { router, useForm, usePage } from '@inertiajs/react';
+import { Globe } from 'lucide-react';
+import { useEffect } from 'react';
+import { toast } from 'sonner';
 
 const ManufactureUpdatePage = () => {
-    const { component, props: { manufacture } } = usePage<SharedData & { manufacture: ResponseResource<Manufacture> }>()
-    const breadcrumbs = useBreadcrumb(component)
+    const {
+        component,
+        props: { manufacture },
+    } = usePage<SharedData & { manufacture: ResponseResource<Manufacture> }>();
+    const breadcrumbs = useBreadcrumb(component);
 
     const { data, setData, processing, put, isDirty, errors, reset, setDefaults } = useForm<{
         name: string;
@@ -39,13 +42,13 @@ const ManufactureUpdatePage = () => {
         address: '',
         contact_person_name: '',
         contact_person_phone: '',
-        contact_person_email: ''
-    })
+        contact_person_email: '',
+    });
 
-    useBeforeUnloadPrompt(isDirty)
+    useBeforeUnloadPrompt(isDirty);
 
     useEffect(() => {
-        handleSetDefaults({
+        const value: typeof data = {
             name: manufacture.data.name || '',
             phone: manufacture.data.phone || '',
             email: manufacture.data.email || '',
@@ -53,63 +56,63 @@ const ManufactureUpdatePage = () => {
             address: manufacture.data.address || '',
             contact_person_name: manufacture.data.contact_person_name || '',
             contact_person_phone: manufacture.data.contact_person_phone || '',
-            contact_person_email: manufacture.data.contact_person_email || ''
-        })
-    }, [])
+            contact_person_email: manufacture.data.contact_person_email || '',
+        };
 
-    const handleSetDefaults = (value: typeof data) => {
-        setDefaults(value)
-        setData(value)
-    }
+        setDefaults(value);
+        setData(value);
+
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [manufacture]);
 
     const handleChangeName = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setData('name', e.target.value)
-    }
+        setData('name', e.target.value);
+    };
 
     const handleChangePhone = (value: string) => {
-        setData('phone', value)
-    }
+        setData('phone', value);
+    };
 
     const handleChangeEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setData('email', e.target.value)
-    }
+        setData('email', e.target.value);
+    };
 
     const handleChangeWebsite = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setData('website', e.target.value)
-    }
+        setData('website', e.target.value);
+    };
 
     const handleChangeAddress = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-        setData('address', e.target.value)
-    }
+        setData('address', e.target.value);
+    };
 
     const handleChangeContactPersonName = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setData('contact_person_name', e.target.value)
-    }
+        setData('contact_person_name', e.target.value);
+    };
 
     const handleChangeContactPersonPhone = (value: string) => {
-        setData('contact_person_phone', value)
-    }
+        setData('contact_person_phone', value);
+    };
 
     const handleChangeContactPersonEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setData('contact_person_email', e.target.value)
-    }
+        setData('contact_person_email', e.target.value);
+    };
 
     const handleSubmit = () => {
         put(route('manufacture.update', { manufacture: manufacture.data.id }), {
             onSuccess: () => {
-                reset()
+                reset();
             },
             onError: (errors) => {
                 if (errors.message) {
                     toast.error(errors.message, {
                         ...(errors.error ? { description: errors.error } : {}),
-                    })
+                    });
                 }
             },
             preserveScroll: true,
-            preserveState: true
-        })
-    }
+            preserveState: true,
+        });
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -139,25 +142,14 @@ const ManufactureUpdatePage = () => {
                                 <GroupFormItem>
                                     <GroupFormField>
                                         <Label htmlFor="name">Name</Label>
-                                        <Input
-                                            id="name"
-                                            type="text"
-                                            value={data.name}
-                                            placeholder="ex: Scanjet"
-                                            onChange={handleChangeName}
-                                        />
+                                        <Input id="name" type="text" value={data.name} placeholder="ex: Scanjet" onChange={handleChangeName} />
                                     </GroupFormField>
                                     {errors.name && <FormMessage error>{errors.name}</FormMessage>}
                                 </GroupFormItem>
                                 <GroupFormItem>
                                     <GroupFormField>
                                         <Label htmlFor="phone">Phone</Label>
-                                        <PhoneInput
-                                            id="phone"
-                                            placeholder="ex: +46 123"
-                                            value={data.phone}
-                                            onChange={handleChangePhone}
-                                        />
+                                        <PhoneInput id="phone" placeholder="ex: +46 123" value={data.phone} onChange={handleChangePhone} />
                                     </GroupFormField>
                                     {errors.phone && <FormMessage>{errors.phone}</FormMessage>}
                                 </GroupFormItem>
@@ -193,11 +185,7 @@ const ManufactureUpdatePage = () => {
                                 <GroupFormItem>
                                     <GroupFormField>
                                         <Label htmlFor="address">Address</Label>
-                                        <Textarea
-                                            id="address"
-                                            value={data.address}
-                                            onChange={handleChangeAddress}
-                                        />
+                                        <Textarea id="address" value={data.address} onChange={handleChangeAddress} />
                                     </GroupFormField>
                                     {errors.website && <FormMessage>{errors.website}</FormMessage>}
                                 </GroupFormItem>
@@ -247,7 +235,7 @@ const ManufactureUpdatePage = () => {
                 </Card>
             </AppContainer>
         </AppLayout>
-    )
-}
+    );
+};
 
-export default ManufactureUpdatePage
+export default ManufactureUpdatePage;

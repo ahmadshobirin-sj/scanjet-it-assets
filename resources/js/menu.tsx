@@ -13,7 +13,7 @@ export const mainNavItemsRaw: NavGroup[] = [
             {
                 title: 'Asset assignment',
                 icon: LayoutGrid,
-            }
+            },
         ],
     },
     {
@@ -25,7 +25,7 @@ export const mainNavItemsRaw: NavGroup[] = [
                 href: route('asset.index', undefined, false),
                 meta: {
                     permission: 'asset_category.viewAny',
-                }
+                },
             },
             {
                 title: 'Categories',
@@ -33,7 +33,7 @@ export const mainNavItemsRaw: NavGroup[] = [
                 icon: LayoutGrid,
                 meta: {
                     permission: 'asset_category.viewAny',
-                }
+                },
             },
             {
                 title: 'Manufactures',
@@ -41,14 +41,14 @@ export const mainNavItemsRaw: NavGroup[] = [
                 icon: Building2,
                 meta: {
                     permission: 'manufacture.viewAny',
-                }
+                },
             },
             {
                 title: 'Logs',
                 icon: LayoutGrid,
                 meta: {
                     permission: 'asset_category.viewAny',
-                }
+                },
             },
         ],
     },
@@ -61,7 +61,7 @@ export const mainNavItemsRaw: NavGroup[] = [
                 icon: SquareUser,
                 meta: {
                     permission: 'user.viewAny',
-                }
+                },
             },
             {
                 title: 'Roles',
@@ -69,12 +69,10 @@ export const mainNavItemsRaw: NavGroup[] = [
                 icon: ShieldUser,
                 meta: {
                     permission: 'role.viewAny',
-                }
-            }
-
+                },
+            },
         ],
     },
 ];
 
-export const footerNavItemsRaw: NavGroup[] = [
-];
+export const footerNavItemsRaw: NavGroup[] = [];

@@ -11,10 +11,10 @@ use Spatie\QueryBuilder\QueryBuilder;
 
 abstract class Table
 {
-    use TableState;
     use HasFilter;
     use HasSortable;
     use HasToggleable;
+    use TableState;
 
     /**
      * Return array of Column instances.

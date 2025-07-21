@@ -24,7 +24,7 @@ class AllowedSort extends QueryBuilderAllowedSort
     {
         return $this->isNestedProperty($name)
             ? $name
-            : $query->getModel()->getTable() . '.' . $name;
+            : $query->getModel()->getTable().'.'.$name;
     }
 
     /**

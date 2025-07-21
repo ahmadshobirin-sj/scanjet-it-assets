@@ -1,7 +1,7 @@
-import { DataGridState } from "@/components/data-grid";
-import { DEFAULT_PAGINATION } from "@/constants/table";
-import { TableServerState } from "@/types/model";
-import { SortingState } from "@tanstack/react-table";
+import { DataGridState } from '@/components/data-grid';
+import { DEFAULT_PAGINATION } from '@/constants/table';
+import { TableServerState } from '@/types/model';
+import { SortingState } from '@tanstack/react-table';
 
 export function spatieToTanstackState(state: TableServerState) {
     const pageIndex = Math.max(Number(state?.page || 1) - 1, DEFAULT_PAGINATION.pageIndex);
@@ -25,7 +25,7 @@ export function spatieToTanstackState(state: TableServerState) {
     };
 }
 
-export function tanstackToSpatieParams({ pagination, sorting, columnFilters, globalFilter } : DataGridState): Record<string, string> {
+export function tanstackToSpatieParams({ pagination, sorting, columnFilters, globalFilter }: DataGridState): Record<string, string> {
     const params: Record<string, string> = {};
 
     if (pagination) {
@@ -51,4 +51,3 @@ export function tanstackToSpatieParams({ pagination, sorting, columnFilters, glo
 
     return params;
 }
-

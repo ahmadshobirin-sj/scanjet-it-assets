@@ -41,6 +41,7 @@ class RoleController extends Controller
         $this->authorize('create', Role::class);
 
         $permissions = PermissionResource::collection(Permission::all());
+
         return Inertia::render('role/create', [
             'permissions' => $permissions,
         ]);

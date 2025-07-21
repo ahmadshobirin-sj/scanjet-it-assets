@@ -53,6 +53,6 @@ export default function SettingsLayout({ children }: PropsWithChildren) {
                     <section className="max-w-xl space-y-12">{children}</section>
                 </div>
             </div>
-        </div >
+        </div>
     );
 }

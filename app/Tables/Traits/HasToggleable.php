@@ -12,8 +12,8 @@ trait HasToggleable
     public function toggleableColumns(): array
     {
         return collect($this->columns())
-            ->filter(fn(Column $col) => $col->isToggleable())
-            ->map(fn(Column $col) => $col->getName())
+            ->filter(fn (Column $col) => $col->isToggleable())
+            ->map(fn (Column $col) => $col->getName())
             ->values()
             ->all();
     }

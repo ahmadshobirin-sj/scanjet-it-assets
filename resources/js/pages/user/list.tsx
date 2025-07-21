@@ -1,32 +1,35 @@
 import AppContainer from '@/components/app-container';
 import AppTitle from '@/components/app-title';
-import { Badge } from '@/components/ui/badge';
 import { DataGrid, type DataGridState } from '@/components/data-grid';
+import { Badge } from '@/components/ui/badge';
+import { useBreadcrumb } from '@/hooks/use-breadcrumb';
+import useDidUpdate from '@/hooks/use-did-update';
+import { usePermission } from '@/hooks/use-permissions';
 import AppLayout from '@/layouts/app-layout';
+import { confirmDialog } from '@/lib/confirmDialog';
 import { spatieToTanstackState, tanstackToSpatieParams } from '@/lib/normalize-table-state';
+import { UserRoleStyle } from '@/lib/userRoleStyle';
 import { SharedData } from '@/types';
 import type { ResponseCollection, TableServerState, User } from '@/types/model';
 import { router, usePage } from '@inertiajs/react';
 import { ColumnDef, PaginationState, SortingState } from '@tanstack/react-table';
 import { useCallback, useRef, useState } from 'react';
-import UserCreatePage from './create';
-import { UserRoleStyle } from '@/lib/userRoleStyle';
-import UserUpdatePage, { UserUpdatePageRef } from './update';
-import { confirmDialog } from '@/lib/confirmDialog';
 import { toast } from 'sonner';
-import useDidUpdate from '@/hooks/use-did-update';
+import UserCreatePage from './create';
 import UserDetailPage, { UserDetailPageRef } from './detail';
-import { useBreadcrumb } from '@/hooks/use-breadcrumb';
-import { usePermission } from '@/hooks/use-permissions';
+import UserUpdatePage, { UserUpdatePageRef } from './update';
 
 function UserListPage() {
-    const { props: { user, table }, component } = usePage<SharedData & { user: ResponseCollection<User>; table: TableServerState }>();
+    const {
+        props: { user, table },
+        component,
+    } = usePage<SharedData & { user: ResponseCollection<User>; table: TableServerState }>();
     const [tableState, setTableState] = useState(spatieToTanstackState(table));
     const userUpdateRef = useRef<UserUpdatePageRef>(null);
     const userDetailPage = useRef<UserDetailPageRef>(null);
     const [userSelected, setUserSelected] = useState<User | null>(null);
-    const breadcrumbs = useBreadcrumb(component)
-    const { can } = usePermission()
+    const breadcrumbs = useBreadcrumb(component);
+    const { can } = usePermission();
 
     const columns: ColumnDef<User>[] = [
         {
@@ -49,7 +52,7 @@ function UserListPage() {
                             </Badge>
                         ))}
                     </div>
-                )
+                );
             },
             enableSorting: false,
         },
@@ -57,55 +60,63 @@ function UserListPage() {
             accessorKey: 'created_at',
             header: 'Created At',
             cell: ({ row }) => {
-                return row.original.f_created_at
-            }
-        }
+                return row.original.f_created_at;
+            },
+        },
     ];
 
-
-    const updateTableState = useCallback(
-        (tableState: DataGridState) => {
-            const query = tanstackToSpatieParams(tableState);
-            router.get('/user', query, {
-                preserveState: true,
-            });
-        },
-        [],
-    );
+    const updateTableState = useCallback((tableState: DataGridState) => {
+        const query = tanstackToSpatieParams(tableState);
+        router.get('/user', query, {
+            preserveState: true,
+        });
+    }, []);
 
     useDidUpdate(() => {
         updateTableState(tableState);
-    }, [tableState])
+    }, [tableState]);
 
-    const handlePaginationChange = useCallback((pagination: PaginationState) => {
-        setTableState(prev => ({ ...prev, pagination }))
-    }, [setTableState]);
+    const handlePaginationChange = useCallback(
+        (pagination: PaginationState) => {
+            setTableState((prev) => ({ ...prev, pagination }));
+        },
+        [setTableState],
+    );
 
-    const handleSortingChange = useCallback((sorting: SortingState) => {
-        setTableState(prev => ({ ...prev, sorting }))
-    }, [setTableState]);
+    const handleSortingChange = useCallback(
+        (sorting: SortingState) => {
+            setTableState((prev) => ({ ...prev, sorting }));
+        },
+        [setTableState],
+    );
 
-    const handleFilterChange = useCallback((globalFilter: string) => {
-        setTableState(prev => ({
-            ...prev,
-            globalFilter,
-            pagination: {
-                ...prev.pagination,
-                pageIndex: 0,
-            }
-        }));
-    }, [setTableState])
-
+    const handleFilterChange = useCallback(
+        (globalFilter: string) => {
+            setTableState((prev) => ({
+                ...prev,
+                globalFilter,
+                pagination: {
+                    ...prev.pagination,
+                    pageIndex: 0,
+                },
+            }));
+        },
+        [setTableState],
+    );
 
     const handleUpdateRow = useCallback((row: User) => {
         setUserSelected(row);
         userUpdateRef.current?.open();
-    }, [])
+    }, []);
 
     const handleDeleteRow = useCallback((row: User) => {
         confirmDialog({
             title: 'Delete User',
-            description: <>Are you sure you want to delete user <b>{row.email}</b> This action cannot be undone.</>,
+            description: (
+                <>
+                    Are you sure you want to delete user <b>{row.email}</b> This action cannot be undone.
+                </>
+            ),
             autoCloseAfterConfirm: true,
             onConfirm: () => {
                 router.delete(route('user.destroy', row.id), {
@@ -121,29 +132,21 @@ function UserListPage() {
                                 ...(errors.error ? { description: errors.error } : {}),
                             });
                         }
-                    }
-                })
-            }
-        })
-    }, [])
+                    },
+                });
+            },
+        });
+    }, []);
 
     const handleViewDetail = useCallback((row: User) => {
         setUserSelected(row);
         userDetailPage.current?.open();
-    }, [])
+    }, []);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <AppContainer className="space-y-6">
-                <AppTitle
-                    title="Users"
-                    subtitle="List of all users"
-                    actions={
-                        <>
-                            {can('user.create') && <UserCreatePage />}
-                        </>
-                    }
-                />
+                <AppTitle title="Users" subtitle="List of all users" actions={<>{can('user.create') && <UserCreatePage />}</>} />
                 <DataGrid
                     rows={user?.data || []}
                     columns={columns}
@@ -156,11 +159,11 @@ function UserListPage() {
                     onSortingChange={handleSortingChange}
                     onGlobalFilterChange={handleFilterChange}
                     onPaginationChange={handlePaginationChange}
-                    actionsRow={() => ([
+                    actionsRow={() => [
                         ...(can('user.view') ? [{ name: 'View', event: handleViewDetail }] : []),
                         ...(can('user.update') ? [{ name: 'Edit', event: handleUpdateRow }] : []),
                         ...(can('user.delete') ? [{ name: 'Delete', color: 'destructive', event: handleDeleteRow }] : []),
-                    ])}
+                    ]}
                 />
 
                 <UserUpdatePage user={userSelected} ref={userUpdateRef} onClose={() => setUserSelected(null)} />

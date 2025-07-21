@@ -1,4 +1,4 @@
-import { Option } from "@/components/ui/multiple-selector";
+import { Option } from '@/components/ui/multiple-selector';
 
 export type FormField = {
     name: string;
@@ -10,4 +10,4 @@ export type FormField = {
     purchase_date?: Date;
     note?: string;
     reference_link?: string;
-}
+};

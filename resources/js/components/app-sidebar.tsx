@@ -2,11 +2,10 @@ import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { SharedData, type NavItem } from '@/types';
-import { Link, usePage } from '@inertiajs/react';
-import { LayoutGrid, ShieldUser, Users } from 'lucide-react';
-import AppLogo from './app-logo';
 import { useMenu } from '@/hooks/use-menu';
+import { SharedData } from '@/types';
+import { Link, usePage } from '@inertiajs/react';
+import AppLogo from './app-logo';
 
 export function AppSidebar() {
     const { mainNavItems, footerNavItems } = useMenu();

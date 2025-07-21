@@ -1,5 +1,5 @@
-import { footerNavItemsRaw, mainNavItemsRaw } from '@/menu';
 import { filterNavGroups } from '@/lib/menu';
+import { footerNavItemsRaw, mainNavItemsRaw } from '@/menu';
 import { SharedData } from '@/types';
 import { usePage } from '@inertiajs/react';
 

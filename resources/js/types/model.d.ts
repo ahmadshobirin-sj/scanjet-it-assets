@@ -40,21 +40,21 @@ export interface ResponseResource<T> {
 }
 
 export interface User {
-  id: string;
-  name: string;
-  email: string;
-  given_name: string;
-  surname: string;
-  user_principal_name: string;
-  business_phones: string[] | null;
-  mobile_phone: string;
-  job_title: string;
-  office_location: string;
-  roles: Role[];
-  created_at: string;
-  updated_at: string;
-  f_created_at: string;
-  f_updated_at: string;
+    id: string;
+    name: string;
+    email: string;
+    given_name: string;
+    surname: string;
+    user_principal_name: string;
+    business_phones: string[] | null;
+    mobile_phone: string;
+    job_title: string;
+    office_location: string;
+    roles: Role[];
+    created_at: string;
+    updated_at: string;
+    f_created_at: string;
+    f_updated_at: string;
 }
 
 export interface Role {
@@ -130,7 +130,6 @@ export type AssetColumn = Omit<Asset, 'category' | 'manufacture' | 'assignedUser
     'category.name': string | null;
     'manufacture.name': string | null;
 };
-
 
 export interface AssetAssignedUser {
     id: string;

@@ -1,21 +1,24 @@
-import AppContainer from '@/components/app-container'
-import AppTitle from '@/components/app-title'
-import { DataGrid } from '@/components/data-grid'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { InfoList, InfoListContainer, InfoListContent, InfoListGroup, InfoListLabel } from '@/components/ui/info-list'
-import { useBreadcrumb } from '@/hooks/use-breadcrumb'
-import AppLayout from '@/layouts/app-layout'
-import { AssetStatusPresenter } from '@/lib/asset-status-presenter'
-import { formatWithBrowserTimezone } from '@/lib/date'
-import { SharedData } from '@/types'
-import type { Asset, ResponseResource } from '@/types/model'
-import { router, usePage } from '@inertiajs/react'
+import AppContainer from '@/components/app-container';
+import AppTitle from '@/components/app-title';
+import { DataGrid } from '@/components/data-grid';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { InfoList, InfoListContainer, InfoListContent, InfoListGroup, InfoListLabel } from '@/components/ui/info-list';
+import { useBreadcrumb } from '@/hooks/use-breadcrumb';
+import AppLayout from '@/layouts/app-layout';
+import { AssetStatusPresenter } from '@/lib/asset-status-presenter';
+import { formatWithBrowserTimezone } from '@/lib/date';
+import { SharedData } from '@/types';
+import type { Asset, ResponseResource } from '@/types/model';
+import { router, usePage } from '@inertiajs/react';
 
 const AssetsDetailPage = () => {
-    const { component, props: { asset } } = usePage<SharedData & { asset: ResponseResource<Asset> }>()
-    const breadcrumbs = useBreadcrumb(component)
+    const {
+        component,
+        props: { asset },
+    } = usePage<SharedData & { asset: ResponseResource<Asset> }>();
+    const breadcrumbs = useBreadcrumb(component);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -24,9 +27,7 @@ const AssetsDetailPage = () => {
                     title="Detail Asset"
                     subtitle="View asset information."
                     actions={
-                        <Button
-                            intent="warning"
-                            onClick={() => router.visit(route('asset.edit', { asset: asset.data.id }))}>
+                        <Button intent="warning" onClick={() => router.visit(route('asset.edit', { asset: asset.data.id }))}>
                             Edit
                         </Button>
                     }
@@ -84,20 +85,18 @@ const AssetsDetailPage = () => {
                                     </InfoListContent>
                                 </InfoList>
                             </InfoListGroup>
-                            {
-                                asset.data?.assigned_user && (
-                                    <InfoListGroup title="Assigned User" columns={2}>
-                                        <InfoList direction="column">
-                                            <InfoListLabel>Name</InfoListLabel>
-                                            <InfoListContent>{asset.data.assigned_user?.name || '-'}</InfoListContent>
-                                        </InfoList>
-                                        <InfoList direction="column">
-                                            <InfoListLabel>Email</InfoListLabel>
-                                            <InfoListContent>{asset.data.assigned_user?.email || '-'}</InfoListContent>
-                                        </InfoList>
-                                    </InfoListGroup>
-                                )
-                            }
+                            {asset.data?.assigned_user && (
+                                <InfoListGroup title="Assigned User" columns={2}>
+                                    <InfoList direction="column">
+                                        <InfoListLabel>Name</InfoListLabel>
+                                        <InfoListContent>{asset.data.assigned_user?.name || '-'}</InfoListContent>
+                                    </InfoList>
+                                    <InfoList direction="column">
+                                        <InfoListLabel>Email</InfoListLabel>
+                                        <InfoListContent>{asset.data.assigned_user?.email || '-'}</InfoListContent>
+                                    </InfoList>
+                                </InfoListGroup>
+                            )}
                         </InfoListContainer>
                     </CardContent>
                 </Card>
@@ -107,15 +106,12 @@ const AssetsDetailPage = () => {
                         <CardTitle>Histories</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <DataGrid
-                            rows={[]}
-                            columns={[]}
-                        />
+                        <DataGrid rows={[]} columns={[]} />
                     </CardContent>
                 </Card>
             </AppContainer>
-        </AppLayout >
-    )
-}
+        </AppLayout>
+    );
+};
 
-export default AssetsDetailPage
+export default AssetsDetailPage;

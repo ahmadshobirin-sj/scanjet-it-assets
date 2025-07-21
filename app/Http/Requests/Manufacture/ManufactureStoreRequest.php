@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Manufacture;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class ManufactureStoreRequest extends FormRequest
 {
@@ -23,14 +22,14 @@ class ManufactureStoreRequest extends FormRequest
     public function rules(): array
     {
         return [
-            "name" => 'string|required|unique:manufactures,name',
-            "address" => 'string|nullable',
-            "phone" => 'string|nullable',
-            "email" => 'string|email|nullable',
-            "website" => 'string|nullable',
-            "contact_person_name" => 'string|nullable',
-            "contact_person_phone" => 'string|nullable',
-            "contact_person_email" => 'string|email|nullable'
+            'name' => 'string|required|unique:manufactures,name',
+            'address' => 'string|nullable',
+            'phone' => 'string|nullable',
+            'email' => 'string|email|nullable',
+            'website' => 'string|nullable',
+            'contact_person_name' => 'string|nullable',
+            'contact_person_phone' => 'string|nullable',
+            'contact_person_email' => 'string|email|nullable',
         ];
     }
 }

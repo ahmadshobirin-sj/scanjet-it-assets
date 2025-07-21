@@ -6,7 +6,6 @@ use App\Enums\AssetStatus;
 use App\Models\Asset;
 use App\Tables\AssetTable;
 use App\Tables\Traits\HasTable;
-use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -23,6 +22,7 @@ class AssetService extends Service
     public function getAll()
     {
         $query = $this->buildTable(Asset::class, $this->assetTable);
+
         return $this->executeTableQuery($query);
     }
 

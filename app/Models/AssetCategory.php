@@ -10,8 +10,8 @@ use Illuminate\Database\Eloquent\Model;
 class AssetCategory extends Model
 {
     use HasFactory;
-    use HasUuids;
     use HasFormattedTimestamp;
+    use HasUuids;
 
     protected $fillable = [
         'id',

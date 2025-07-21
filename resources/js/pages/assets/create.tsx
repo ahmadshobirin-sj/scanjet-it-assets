@@ -1,26 +1,25 @@
-import AppContainer from '@/components/app-container'
-import AppTitle from '@/components/app-title'
-import { CalendarDatePicker } from '@/components/ui/calendar-date-picker'
-import { Card, CardContent } from '@/components/ui/card'
-import { FormMessage } from '@/components/ui/form-message'
-import { GroupForm, GroupFormField, GroupFormGroup, GroupFormItem } from '@/components/ui/group-form'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import MultipleSelector, { Option } from '@/components/ui/multiple-selector'
-import AppLayout from '@/layouts/app-layout'
-import { AssetCategory, AssetStatus, Manufacture, ResponseCollection } from '@/types/model'
-import { router, useForm, usePage } from '@inertiajs/react'
-import { Globe } from 'lucide-react'
-import { FormField } from './type'
-import { Textarea } from '@/components/ui/textarea'
-import { Button } from '@/components/ui/button'
-import { useBreadcrumb } from '@/hooks/use-breadcrumb'
-import { toast } from 'sonner'
-
+import AppContainer from '@/components/app-container';
+import AppTitle from '@/components/app-title';
+import { Button } from '@/components/ui/button';
+import { CalendarDatePicker } from '@/components/ui/calendar-date-picker';
+import { Card, CardContent } from '@/components/ui/card';
+import { FormMessage } from '@/components/ui/form-message';
+import { GroupForm, GroupFormField, GroupFormGroup, GroupFormItem } from '@/components/ui/group-form';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import MultipleSelector, { Option } from '@/components/ui/multiple-selector';
+import { Textarea } from '@/components/ui/textarea';
+import { useBreadcrumb } from '@/hooks/use-breadcrumb';
+import AppLayout from '@/layouts/app-layout';
+import { AssetCategory, Manufacture, ResponseCollection } from '@/types/model';
+import { router, useForm, usePage } from '@inertiajs/react';
+import { Globe } from 'lucide-react';
+import { toast } from 'sonner';
+import { FormField } from './type';
 
 const AssetsCreatePage = () => {
-    const { component } = usePage()
-    const breadcrumbs = useBreadcrumb(component)
+    const { component } = usePage();
+    const breadcrumbs = useBreadcrumb(component);
 
     const { data, setData, processing, errors, reset, transform, post } = useForm<FormField>({
         name: '',
@@ -30,15 +29,15 @@ const AssetsCreatePage = () => {
         location: '',
         reference_link: '',
         note: '',
-    })
+    });
 
     const onSearchCategory = (value: string): Promise<Option[]> => {
         return new Promise((resolve) => {
             router.get(
                 route('asset.create', {
-                    'filter': {
-                        'search': value
-                    }
+                    filter: {
+                        search: value,
+                    },
                 }),
                 {},
                 {
@@ -48,25 +47,25 @@ const AssetsCreatePage = () => {
                     preserveState: true,
                     preserveScroll: true,
                     onSuccess: (data) => {
-                        const categories = data.props.categories as ResponseCollection<AssetCategory> || []
+                        const categories = (data.props.categories as ResponseCollection<AssetCategory>) || [];
                         const formatted = categories.data.map((category: any) => ({
                             label: category.name,
                             value: category.id,
-                        }))
-                        resolve(formatted)
+                        }));
+                        resolve(formatted);
                     },
-                }
-            )
-        })
-    }
+                },
+            );
+        });
+    };
 
     const onSearchManufacture = (value: string): Promise<Option[]> => {
         return new Promise((resolve) => {
             router.get(
                 route('asset.create', {
-                    'filter': {
-                        'search': value
-                    }
+                    filter: {
+                        search: value,
+                    },
                 }),
                 {},
                 {
@@ -76,46 +75,45 @@ const AssetsCreatePage = () => {
                     preserveState: true,
                     preserveScroll: true,
                     onSuccess: (data) => {
-                        const manufactures = data.props.manufactures as ResponseCollection<Manufacture> || []
+                        const manufactures = (data.props.manufactures as ResponseCollection<Manufacture>) || [];
                         const formatted = manufactures.data.map((manufacture: any) => ({
                             label: manufacture.name,
                             value: manufacture.id,
-                        }))
-                        resolve(formatted)
+                        }));
+                        resolve(formatted);
                     },
-                }
-            )
-        })
-    }
+                },
+            );
+        });
+    };
 
     const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault()
-        postAsset()
-    }
+        e.preventDefault();
+        postAsset();
+    };
 
     const postAsset = () => {
         transform((data) => ({
             ...data,
             category_id: data.category_id[0]?.value,
             manufacture_id: data.manufacture_id[0]?.value,
-        }))
+        }));
 
         post(route('asset.store'), {
             onSuccess: () => {
-                reset()
+                reset();
             },
             onError: (errors) => {
                 if (errors.message) {
                     toast.error(errors.message, {
                         ...(errors.error ? { description: errors.error } : {}),
-                    })
+                    });
                 }
             },
             preserveState: true,
             preserveScroll: true,
-        })
-    }
-
+        });
+    };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -139,11 +137,7 @@ const AssetsCreatePage = () => {
                                 <GroupFormItem>
                                     <GroupFormField>
                                         <Label htmlFor="name">Name</Label>
-                                        <Input
-                                            id="name"
-                                            value={data.name}
-                                            onChange={(e) => setData('name', e.target.value)}
-                                        />
+                                        <Input id="name" value={data.name} onChange={(e) => setData('name', e.target.value)} />
                                         {errors.name && <FormMessage error>{errors.name}</FormMessage>}
                                     </GroupFormField>
                                 </GroupFormItem>
@@ -176,11 +170,7 @@ const AssetsCreatePage = () => {
                                 <GroupFormItem>
                                     <GroupFormField>
                                         <Label htmlFor="location">Location</Label>
-                                        <Input
-                                            id="location"
-                                            value={data.location}
-                                            onChange={(e) => setData('location', e.target.value)}
-                                        />
+                                        <Input id="location" value={data.location} onChange={(e) => setData('location', e.target.value)} />
                                         {errors.location && <FormMessage error>{errors.location}</FormMessage>}
                                     </GroupFormField>
                                 </GroupFormItem>
@@ -243,11 +233,7 @@ const AssetsCreatePage = () => {
                                 <GroupFormItem>
                                     <GroupFormField>
                                         <Label htmlFor="reference-link">Note</Label>
-                                        <Textarea
-                                            id="reference-link"
-                                            value={data.note}
-                                            onChange={(e) => setData('note', e.target.value)}
-                                        />
+                                        <Textarea id="reference-link" value={data.note} onChange={(e) => setData('note', e.target.value)} />
                                         {errors.note && <FormMessage error>{errors.note}</FormMessage>}
                                     </GroupFormField>
                                 </GroupFormItem>
@@ -258,7 +244,7 @@ const AssetsCreatePage = () => {
                 </Card>
             </AppContainer>
         </AppLayout>
-    )
-}
+    );
+};
 
-export default AssetsCreatePage
+export default AssetsCreatePage;

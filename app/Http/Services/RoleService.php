@@ -21,7 +21,7 @@ class RoleService
             ->with(['permissions'])
             ->withCount('permissions')
             ->allowedFilters([
-                AllowedFilter::custom('search', new GlobalSearchFilter()),
+                AllowedFilter::custom('search', new GlobalSearchFilter),
             ])
             ->allowedSorts(['name', AllowedSort::custom('total_permissions', new TotalPermissionsSort), 'created_at'])
             ->defaultSort(['-created_at'])
@@ -35,6 +35,7 @@ class RoleService
             ->with(['permissions'])
             ->withCount('permissions')
             ->findOrFail($id);
+
         return $role;
     }
 
