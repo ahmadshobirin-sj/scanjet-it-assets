@@ -1,5 +1,5 @@
 import { NavGroup } from '@/types';
-import { Building2, LayoutGrid, ShieldUser, SquareUser } from 'lucide-react';
+import { Boxes, Building2, LayoutGrid, Logs, NotebookPen, ShieldUser, SquareUser, Tags } from 'lucide-react';
 
 export const mainNavItemsRaw: NavGroup[] = [
     {
@@ -10,29 +10,32 @@ export const mainNavItemsRaw: NavGroup[] = [
                 href: route('dashboard', undefined, false),
                 icon: LayoutGrid,
             },
-            {
-                title: 'Asset assignment',
-                icon: LayoutGrid,
-            },
         ],
     },
     {
         title: 'Manage assets',
         items: [
             {
+                title: 'Assignment',
+                icon: NotebookPen,
+                meta: {
+                    permission: ['asset.assignToUser'],
+                },
+            },
+            {
                 title: 'Assets',
-                icon: LayoutGrid,
+                icon: Boxes,
                 href: route('asset.index', undefined, false),
                 meta: {
-                    permission: 'asset_category.viewAny',
+                    permission: ['asset.viewAny'],
                 },
             },
             {
                 title: 'Categories',
                 href: route('asset_category.index', undefined, false),
-                icon: LayoutGrid,
+                icon: Tags,
                 meta: {
-                    permission: 'asset_category.viewAny',
+                    permission: ['asset_category.viewAny'],
                 },
             },
             {
@@ -40,14 +43,14 @@ export const mainNavItemsRaw: NavGroup[] = [
                 href: route('manufacture.index', undefined, false),
                 icon: Building2,
                 meta: {
-                    permission: 'manufacture.viewAny',
+                    permission: ['manufacture.viewAny'],
                 },
             },
             {
                 title: 'Logs',
-                icon: LayoutGrid,
+                icon: Logs,
                 meta: {
-                    permission: 'asset_category.viewAny',
+                    permission: ['asset_category.viewAny'],
                 },
             },
         ],
@@ -60,7 +63,7 @@ export const mainNavItemsRaw: NavGroup[] = [
                 href: route('user.index', undefined, false),
                 icon: SquareUser,
                 meta: {
-                    permission: 'user.viewAny',
+                    permission: ['user.viewAny'],
                 },
             },
             {
@@ -68,7 +71,7 @@ export const mainNavItemsRaw: NavGroup[] = [
                 href: route('role.index', undefined, false),
                 icon: ShieldUser,
                 meta: {
-                    permission: 'role.viewAny',
+                    permission: ['role.viewAny'],
                 },
             },
         ],
