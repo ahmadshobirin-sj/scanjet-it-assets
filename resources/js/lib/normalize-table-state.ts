@@ -3,7 +3,7 @@ import { DEFAULT_PAGINATION } from '@/constants/table';
 import { TableServerState } from '@/types/model';
 import { SortingState } from '@tanstack/react-table';
 
-export function spatieToTanstackState(state: TableServerState) {
+export function spatieToTanstackState(state: TableServerState): DataGridState {
     const pageIndex = Math.max(Number(state?.page || 1) - 1, DEFAULT_PAGINATION.pageIndex);
     const pageSize = Number(state?.per_page || DEFAULT_PAGINATION.pageSize);
 
