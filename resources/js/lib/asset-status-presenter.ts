@@ -13,6 +13,8 @@ export class AssetStatusPresenter {
                 return 'destructive';
             case 'scrapped':
                 return 'destructive';
+            case 'returned':
+                return 'info';
             default:
                 return 'secondary';
         }
@@ -30,6 +32,8 @@ export class AssetStatusPresenter {
                 return 'Lost';
             case 'scrapped':
                 return 'Scrapped';
+            case 'returned':
+                return 'Returned';
             default:
                 return 'Unknown';
         }
