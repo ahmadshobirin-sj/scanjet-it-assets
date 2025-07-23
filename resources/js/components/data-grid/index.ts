@@ -2,7 +2,14 @@
 export { default as DataGrid } from './data-grid';
 
 // Type exports
-export type { ActionsRow, DataGridProps, DataGridState } from './data-grid.types';
+export type {
+    ActionsRow,
+    DataGridProps,
+    DataGridState,
+    DataGridFilterField,
+    DataGridFilterOption,
+    DataGridSearchResult
+} from './data-grid.types';
 
 // Hook exports
 export { useTableColumns } from './hooks/use-table-columns';
@@ -14,3 +21,15 @@ export { DataGridActionsToolbar } from './components/data-grid-actions-toolbar';
 export { DataGridPagination } from './components/data-grid-pagination';
 export { DataGridTable } from './components/data-grid-table';
 export { DataGridToolbar } from './components/data-grid-toolbar';
+
+// Filter component exports
+export { DataGridFilterInput } from './components/data-grid-filter-input';
+export { DataGridFilterSelect } from './components/data-grid-filter-select';
+export { DataGridFilterCheckbox } from './components/data-grid-filter-checkbox';
+export { DataGridFilterSlider } from './components/data-grid-filter-slider';
+export { DataGridFilterTimerange } from './components/data-grid-filter-timerange';
+export { DataGridFilterRadio } from './components/data-grid-filter-radio';
+export { default as DataGridFilterToolbar } from './components/data-grid-filter-toolbar';
+
+// Provider export
+export { DataGridProvider, useDataGrid } from './data-grid-provider';

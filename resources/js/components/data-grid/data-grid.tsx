@@ -1,10 +1,12 @@
 import useDidUpdate from '@/hooks/use-did-update';
 import { getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { DataGridActionsToolbar } from './components/data-grid-actions-toolbar';
+import DataGridFilterToolbar from './components/data-grid-filter-toolbar';
 import { DataGridPagination } from './components/data-grid-pagination';
 import { DataGridTable } from './components/data-grid-table';
 import { DataGridToolbar } from './components/data-grid-toolbar';
+import { DataGridProvider } from './data-grid-provider';
 import type { DataGridProps } from './data-grid.types';
 import { useTableColumns } from './hooks/use-table-columns';
 import { useTableState } from './hooks/use-table-state';
@@ -30,6 +32,8 @@ const DataGrid = <TData extends Record<string, any>>({
     actionsRow,
     emptyText = 'No data available',
     debounceDelay = 300,
+    filterFields = [],
+    isLoading = false
 }: DataGridProps<TData>) => {
     const {
         sorting,
@@ -46,6 +50,9 @@ const DataGrid = <TData extends Record<string, any>>({
         setColumnVisibility,
         setPagination,
         handleGlobalFilterChange,
+        isFilterOpen,
+        setIsFilterOpen,
+        toggleFilterOpen,
     } = useTableState(
         initialTableState,
         tableState,
@@ -138,29 +145,33 @@ const DataGrid = <TData extends Record<string, any>>({
     }, [columnVisibility, onColumnVisibilityChange, tableState?.columnVisibility]);
 
     return (
-        <>
+        <DataGridProvider
+            table={table}
+            filterFields={filterFields}
+            isFilterOpen={isFilterOpen}
+            setFilterOpen={setIsFilterOpen}
+            toggleFilterOpen={toggleFilterOpen}
+            isLoading={isLoading}
+            isTableEmpty={isTableEmpty}
+            emptyText={emptyText}
+            serverSide={serverSide}
+            enableRowSelection={enableRowSelection}
+            pageSizeOptions={pageSizeOptions}
+            actionsToolbar={actionsToolbar}
+            inputValue={inputValue}
+            onGlobalFilterChange={handleGlobalFilterChange}
+            rowCount={rowCount}
+            rowSelection={rowSelection}
+        >
             <div className={`w-full ${className}`}>
-                <DataGridToolbar table={table} inputValue={inputValue} onGlobalFilterChange={handleGlobalFilterChange} />
-
-                <DataGridTable table={table} isTableEmpty={isTableEmpty} emptyText={emptyText} />
-
-                <DataGridPagination
-                    table={table}
-                    pageSizeOptions={pageSizeOptions}
-                    isTableEmpty={isTableEmpty}
-                    serverSide={serverSide}
-                    rowCount={rowCount}
-                />
+                <DataGridToolbar />
+                <DataGridFilterToolbar />
+                <div className="py-3">
+                    <DataGridTable />
+                </div>
+                <DataGridPagination />
             </div>
-
-            <DataGridActionsToolbar
-                table={table}
-                enableRowSelection={enableRowSelection}
-                serverSide={serverSide}
-                rowSelection={rowSelection}
-                actionsToolbar={actionsToolbar}
-            />
-        </>
+        </DataGridProvider>
     );
 };
 

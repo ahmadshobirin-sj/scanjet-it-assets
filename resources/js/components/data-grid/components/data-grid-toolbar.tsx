@@ -1,34 +1,62 @@
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { Table as TableType } from '@tanstack/react-table';
-import { ChevronsUpDown, Search } from 'lucide-react';
+import { ChevronsUpDown, FunnelIcon, Search, X } from 'lucide-react';
+import { useDataGrid } from '../data-grid-provider';
 
-interface DataGridToolbarProps<TData> {
-    table: TableType<TData>;
-    inputValue: string;
-    onGlobalFilterChange: (value: string) => void;
-}
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Spinner } from '@/components/ui/spinner';
 
-export const DataGridToolbar = <TData,>({ table, inputValue, onGlobalFilterChange }: DataGridToolbarProps<TData>) => {
+export const DataGridToolbar = () => {
+    const {
+        table,
+        inputValue,
+        onGlobalFilterChange,
+        toggleFilterOpen,
+        filterFields,
+        actionsToolbar,
+        rowSelection,
+        enableRowSelection,
+        isLoading,
+    } = useDataGrid();
+
+    const isMobile = useIsMobile();
+
     return (
-        <div className="mb-4 flex items-center space-x-2">
-            <Input
-                leading={<Search />}
-                type="text"
-                placeholder="Search all columns..."
-                value={inputValue}
-                className="w-[250px]"
-                onChange={(e) => onGlobalFilterChange(e.target.value)}
-            />
-            <div className="ml-auto">
+        <div className={`flex items-center space-x-2 py-3 ${isMobile ? 'flex-wrap gap-2' : ''}`}>
+
+            <div className={isMobile ? 'flex-grow flex items-center space-x-2' : 'flex items-center space-x-2'}>
+                <Input
+                    leading={<Search />}
+                    type="text"
+                    placeholder="Search all columns..."
+                    value={inputValue}
+                    className={isMobile ? 'w-full' : 'w-[250px]'}
+                    onChange={(e) => onGlobalFilterChange(e.target.value)}
+                />
+                {isLoading && <Spinner className="bg-primary dark:bg-white size-5" />}
+            </div>
+            <div className={`ml-auto flex items-center gap-2 ${isMobile ? 'w-full justify-between' : ''}`}>
+                {filterFields && filterFields.length > 0 && (
+                    <Button
+                        size="icon"
+                        variant="outline"
+                        intent="secondary"
+                        title="show/hide filters"
+                        onClick={toggleFilterOpen}
+                    >
+                        <FunnelIcon />
+                    </Button>
+                )}
+
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" intent="secondary" className="ml-auto">
                             Views <ChevronsUpDown />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
+                    <DropdownMenuContent align="end" className="max-h-60 overflow-auto">
                         {table
                             .getAllColumns()
                             .filter((column) => column.getCanHide())
@@ -46,6 +74,38 @@ export const DataGridToolbar = <TData,>({ table, inputValue, onGlobalFilterChang
                             })}
                     </DropdownMenuContent>
                 </DropdownMenu>
+
+                {enableRowSelection && rowSelection && Object.keys(rowSelection).length > 0 && actionsToolbar && actionsToolbar.length > 0 && (
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" intent="secondary" className="ml-auto">
+                                Actions
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                            <div className="flex items-center rounded-md border bg-background px-2 py-1 text-sm mb-2">
+                                <span>{Object.keys(rowSelection).length} selected</span>
+                                <Tooltip>
+                                    <TooltipTrigger asChild onClick={() => table.resetRowSelection()}>
+                                        <div className="cursor-pointer ml-auto">
+                                            <X className="size-4" />
+                                        </div>
+                                    </TooltipTrigger>
+                                    <TooltipContent>Clear selection</TooltipContent>
+                                </Tooltip>
+                            </div>
+                            {actionsToolbar.map((action, index) => (
+                                <DropdownMenuItem
+                                    key={index}
+                                    onClick={action.event}
+                                    variant={action.color as any || 'default'}
+                                >
+                                    {action.icon} {action.name}
+                                </DropdownMenuItem>
+                            ))}
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                )}
             </div>
         </div>
     );

@@ -1,14 +1,10 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { flexRender, Table as TableType } from '@tanstack/react-table';
+import { flexRender } from '@tanstack/react-table';
 import { ChevronDown, ChevronsUpDown, ChevronUp } from 'lucide-react';
+import { useDataGrid } from '../data-grid-provider';
 
-interface DataGridTableProps<TData> {
-    table: TableType<TData>;
-    isTableEmpty: boolean;
-    emptyText: string;
-}
-
-export const DataGridTable = <TData,>({ table, isTableEmpty, emptyText }: DataGridTableProps<TData>) => {
+export const DataGridTable = () => {
+    const { table, isTableEmpty, emptyText } = useDataGrid();
     return (
         <div className="overflow-x-auto rounded-lg border border-secondary">
             <Table>

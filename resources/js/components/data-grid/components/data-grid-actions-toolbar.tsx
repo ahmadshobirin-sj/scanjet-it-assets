@@ -1,30 +1,15 @@
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import { Table as TableType } from '@tanstack/react-table';
 import { X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useMemo } from 'react';
+import { useDataGrid } from '../data-grid-provider';
 
-interface DataGridActionsToolbarProps<TData> {
-    table: TableType<TData>;
-    enableRowSelection: boolean;
-    serverSide: boolean;
-    rowSelection: Record<string, boolean>;
-    actionsToolbar?: {
-        icon: React.ReactNode;
-        name: string;
-        event?: () => void;
-        color?: string;
-    }[];
-}
-
-export const DataGridActionsToolbar = <TData,>({
-    table,
-    enableRowSelection,
-    serverSide,
-    rowSelection,
-    actionsToolbar,
-}: DataGridActionsToolbarProps<TData>) => {
+export const DataGridActionsToolbar = () => {
+    const { table, enableRowSelection, serverSide, actionsToolbar } = useDataGrid();
+    
+    const rowSelection = table.getState().rowSelection;
+    
     const getLengthRowSelection = useMemo(
         () => (serverSide ? Object.keys(rowSelection).length : table.getFilteredSelectedRowModel().rows.length),
         [rowSelection, serverSide, table],
@@ -38,7 +23,7 @@ export const DataGridActionsToolbar = <TData,>({
                     initial={{ opacity: 0, translateY: 100 }}
                     animate={{ opacity: 1, translateY: 0 }}
                     exit={{ opacity: 0, translateY: 100 }}
-                    className="fixed bottom-10 left-1/2 flex -translate-x-1/2 gap-2 rounded-md border bg-secondary p-2"
+                    className="fixed bottom-10 left-1/2 flex -translate-x-1/2 gap-2 rounded-md border bg-background p-2"
                 >
                     <div className="flex items-center rounded-md border bg-background px-2 py-1 text-sm">
                         <span>{getLengthRowSelection} selected</span>

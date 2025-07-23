@@ -26,8 +26,20 @@ export const useTableState = (
         ...initialTableState.pagination,
     });
 
-    const [inputValue, setInputValue] = useState<string>(initialTableState.globalFilter || '');
+    // Use external state if provided, otherwise use internal state
+    const sorting = tableState?.sorting ?? internalSorting;
+    const columnFilters = tableState?.columnFilters ?? internalColumnFilters;
+    const globalFilter = tableState?.globalFilter ?? internalGlobalFilter;
+    const rowSelection = tableState?.rowSelection ?? internalRowSelection;
+    const columnVisibility = tableState?.columnVisibility ?? internalColumnVisibility;
+    const pagination = tableState?.pagination ?? internalPagination;
+
+    const [inputValue, setInputValue] = useState<string>(globalFilter || '');
     const debounceRef = useRef<NodeJS.Timeout | null>(null);
+
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+    const toggleFilterOpen = () => setIsFilterOpen((prev) => !prev);
 
     // Debounce function
     const debouncedCallback = useCallback((callback: () => void, delay: number) => {
@@ -51,14 +63,6 @@ export const useTableState = (
             }
         };
     }, []);
-
-    // Use external state if provided, otherwise use internal state
-    const sorting = tableState?.sorting ?? internalSorting;
-    const columnFilters = tableState?.columnFilters ?? internalColumnFilters;
-    const globalFilter = tableState?.globalFilter ?? internalGlobalFilter;
-    const rowSelection = tableState?.rowSelection ?? internalRowSelection;
-    const columnVisibility = tableState?.columnVisibility ?? internalColumnVisibility;
-    const pagination = tableState?.pagination ?? internalPagination;
 
     // State setters
     const setSorting = (updater: SortingState | ((prev: SortingState) => SortingState)) => {
@@ -157,5 +161,10 @@ export const useTableState = (
         onGlobalFilterChange,
         onColumnFiltersChange,
         onColumnVisibilityChange,
+
+        //
+        isFilterOpen,
+        setIsFilterOpen,
+        toggleFilterOpen,
     };
 };
