@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { DataGrid, DataGridFilterField, DataGridState } from '../index';
-import { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '@/components/ui/badge';
+import { ColumnDef } from '@tanstack/react-table';
 import { Trash2, UserPlus } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { DataGrid, DataGridFilterField, DataGridState } from '../index';
 
 // Example data type
 interface User {
@@ -59,9 +59,7 @@ const columns: ColumnDef<User>[] = [
     {
         accessorKey: 'name',
         header: 'Name',
-        cell: ({ row }) => (
-            <div className="font-medium">{row.getValue('name')}</div>
-        ),
+        cell: ({ row }) => <div className="font-medium">{row.getValue('name')}</div>,
     },
     {
         accessorKey: 'email',
@@ -72,11 +70,7 @@ const columns: ColumnDef<User>[] = [
         header: 'Role',
         cell: ({ row }) => {
             const role = row.getValue('role') as string;
-            return (
-                <Badge variant={role === 'admin' ? 'fill' : 'outline'}>
-                    {role}
-                </Badge>
-            );
+            return <Badge variant={role === 'admin' ? 'fill' : 'outline'}>{role}</Badge>;
         },
     },
     {
@@ -84,11 +78,7 @@ const columns: ColumnDef<User>[] = [
         header: 'Status',
         cell: ({ row }) => {
             const status = row.getValue('status') as string;
-            return (
-                <Badge variant={status === 'active' ? 'fill' : 'outline'}>
-                    {status}
-                </Badge>
-            );
+            return <Badge variant={status === 'active' ? 'fill' : 'outline'}>{status}</Badge>;
         },
     },
     {
@@ -213,24 +203,22 @@ export function ServerSideDataGridExample() {
         setLoading(true);
 
         // Simulate network delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
         // Apply filters, sorting, pagination
         let filteredData = [...sampleUsers];
 
         // Apply global filter
         if (state.globalFilter) {
-            filteredData = filteredData.filter(user =>
-                Object.values(user).some(value =>
-                    String(value).toLowerCase().includes(state.globalFilter!.toLowerCase())
-                )
+            filteredData = filteredData.filter((user) =>
+                Object.values(user).some((value) => String(value).toLowerCase().includes(state.globalFilter!.toLowerCase())),
             );
         }
 
         // Apply column filters
         if (state.columnFilters) {
             state.columnFilters.forEach((filter: any) => {
-                filteredData = filteredData.filter(user => {
+                filteredData = filteredData.filter((user) => {
                     const value = user[filter.id as keyof User];
                     if (Array.isArray(filter.value)) {
                         return filter.value.includes(String(value));
@@ -282,18 +270,10 @@ export function ServerSideDataGridExample() {
                 isLoading={loading}
                 enableRowSelection={true}
                 filterFields={filterFields}
-                onPaginationChange={(pagination) =>
-                    setTableState((prev: any) => ({ ...prev, pagination }))
-                }
-                onSortingChange={(sorting) =>
-                    setTableState((prev: any) => ({ ...prev, sorting }))
-                }
-                onColumnFiltersChange={(columnFilters) =>
-                    setTableState((prev: any) => ({ ...prev, columnFilters }))
-                }
-                onGlobalFilterChange={(globalFilter) =>
-                    setTableState((prev: any) => ({ ...prev, globalFilter }))
-                }
+                onPaginationChange={(pagination) => setTableState((prev: any) => ({ ...prev, pagination }))}
+                onSortingChange={(sorting) => setTableState((prev: any) => ({ ...prev, sorting }))}
+                onColumnFiltersChange={(columnFilters) => setTableState((prev: any) => ({ ...prev, columnFilters }))}
+                onGlobalFilterChange={(globalFilter) => setTableState((prev: any) => ({ ...prev, globalFilter }))}
             />
         </div>
     );
@@ -304,7 +284,7 @@ export function AsyncFilterDataGridExample() {
     // Simulate async department search
     const searchDepartments = async (searchValue: string) => {
         // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise((resolve) => setTimeout(resolve, 500));
 
         const departments = [
             { id: 1, name: 'Engineering', description: 'Software Development', manager: 'John Smith' },
@@ -315,11 +295,11 @@ export function AsyncFilterDataGridExample() {
         ];
 
         return departments
-            .filter(dept =>
-                dept.name.toLowerCase().includes(searchValue.toLowerCase()) ||
-                dept.description.toLowerCase().includes(searchValue.toLowerCase())
+            .filter(
+                (dept) =>
+                    dept.name.toLowerCase().includes(searchValue.toLowerCase()) || dept.description.toLowerCase().includes(searchValue.toLowerCase()),
             )
-            .map(dept => ({
+            .map((dept) => ({
                 label: dept.name,
                 value: dept.id,
                 // All additional properties are preserved for localStorage
@@ -346,12 +326,7 @@ export function AsyncFilterDataGridExample() {
     return (
         <div className="space-y-4">
             <h2 className="text-2xl font-bold">Async Filter DataGrid Example</h2>
-            <DataGrid
-                rows={sampleUsers}
-                columns={columns}
-                enableRowSelection={true}
-                filterFields={asyncFilterFields}
-            />
+            <DataGrid rows={sampleUsers} columns={columns} enableRowSelection={true} filterFields={asyncFilterFields} />
         </div>
     );
 }
