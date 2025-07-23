@@ -1,9 +1,9 @@
-import { useState, useEffect, useCallback } from 'react';
 import { DataGrid, DataGridFilterField, DataGridState } from '@/components/data-grid';
-import { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Trash2, UserPlus, Eye } from 'lucide-react';
+import { ColumnDef } from '@tanstack/react-table';
+import { Trash2, UserPlus } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
 
 // Test data type
 interface TestUser {
@@ -34,9 +34,9 @@ const generateTestData = (count: number): TestUser[] => {
         status: statuses[i % statuses.length],
         age: 20 + (i % 45),
         department: departments[i % departments.length],
-        createdAt: new Date(2023, (i % 12), (i % 28) + 1),
+        createdAt: new Date(2023, i % 12, (i % 28) + 1),
         permissions: permissions.slice(0, (i % 3) + 1),
-        salary: 50000 + (i * 1000),
+        salary: 50000 + i * 1000,
     }));
 };
 
@@ -47,9 +47,7 @@ const columns: ColumnDef<TestUser>[] = [
     {
         accessorKey: 'name',
         header: 'Name',
-        cell: ({ row }) => (
-            <div className="font-medium">{row.getValue('name')}</div>
-        ),
+        cell: ({ row }) => <div className="font-medium">{row.getValue('name')}</div>,
     },
     {
         accessorKey: 'email',
@@ -60,11 +58,7 @@ const columns: ColumnDef<TestUser>[] = [
         header: 'Role',
         cell: ({ row }) => {
             const role = row.getValue('role') as string;
-            return (
-                <Badge variant={role === 'admin' ? 'fill' : 'outline'}>
-                    {role}
-                </Badge>
-            );
+            return <Badge variant={role === 'admin' ? 'fill' : 'outline'}>{role}</Badge>;
         },
     },
     {
@@ -72,11 +66,7 @@ const columns: ColumnDef<TestUser>[] = [
         header: 'Status',
         cell: ({ row }) => {
             const status = row.getValue('status') as string;
-            return (
-                <Badge variant={status === 'active' ? 'fill' : 'outline'}>
-                    {status}
-                </Badge>
-            );
+            return <Badge variant={status === 'active' ? 'fill' : 'outline'}>{status}</Badge>;
         },
     },
     {
@@ -115,7 +105,7 @@ const columns: ColumnDef<TestUser>[] = [
 
 // Simulate async department search
 const searchDepartments = async (searchValue: string) => {
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     const departments = [
         { id: 1, name: 'Engineering', description: 'Software Development', manager: 'John Smith', location: 'Building A' },
@@ -126,11 +116,11 @@ const searchDepartments = async (searchValue: string) => {
     ];
 
     return departments
-        .filter(dept =>
-            dept.name.toLowerCase().includes(searchValue.toLowerCase()) ||
-            dept.description.toLowerCase().includes(searchValue.toLowerCase())
+        .filter(
+            (dept) =>
+                dept.name.toLowerCase().includes(searchValue.toLowerCase()) || dept.description.toLowerCase().includes(searchValue.toLowerCase()),
         )
-        .map(dept => ({
+        .map((dept) => ({
             label: dept.name,
             value: dept.name,
             description: dept.description,
@@ -213,118 +203,146 @@ export default function TestDataGrid() {
 
     // Stable callback functions
     const addTestResult = useCallback((result: string) => {
-        setTestResults(prev => [...prev, `${new Date().toLocaleTimeString()}: ${result}`]);
+        setTestResults((prev) => [...prev, `${new Date().toLocaleTimeString()}: ${result}`]);
     }, []);
 
     // Simulate server-side data fetching
-    const fetchServerSideData = useCallback(async (state: DataGridState) => {
-        setLoading(true);
+    const fetchServerSideData = useCallback(
+        async (state: DataGridState) => {
+            setLoading(true);
 
-        // Add test result
-        addTestResult(`Server-side fetch called`);
+            // Add test result
+            addTestResult(`Server-side fetch called`);
 
-        await new Promise(resolve => setTimeout(resolve, 1000));
+            await new Promise((resolve) => setTimeout(resolve, 1000));
 
-        let filteredData = [...testData];
+            let filteredData = [...testData];
 
-        // Apply global filter
-        if (state.globalFilter) {
-            filteredData = filteredData.filter(user =>
-                Object.values(user).some(value =>
-                    String(value).toLowerCase().includes(state.globalFilter!.toLowerCase())
-                )
-            );
-        }
+            // Apply global filter
+            if (state.globalFilter) {
+                filteredData = filteredData.filter((user) =>
+                    Object.values(user).some((value) => String(value).toLowerCase().includes(state.globalFilter!.toLowerCase())),
+                );
+            }
 
-        // Apply column filters
-        if (state.columnFilters) {
-            state.columnFilters.forEach((filter: any) => {
-                filteredData = filteredData.filter(user => {
-                    const value = user[filter.id as keyof TestUser];
-                    if (Array.isArray(filter.value)) {
-                        return filter.value.includes(String(value));
-                    }
-                    return String(value).toLowerCase().includes(String(filter.value).toLowerCase());
+            // Apply column filters
+            if (state.columnFilters) {
+                state.columnFilters.forEach((filter: any) => {
+                    filteredData = filteredData.filter((user) => {
+                        const value = user[filter.id as keyof TestUser];
+                        if (Array.isArray(filter.value)) {
+                            return filter.value.includes(String(value));
+                        }
+                        return String(value).toLowerCase().includes(String(filter.value).toLowerCase());
+                    });
                 });
-            });
-        }
+            }
 
-        // Apply sorting
-        if (state.sorting && state.sorting.length > 0) {
-            const sort = state.sorting[0];
-            filteredData.sort((a, b) => {
-                const aValue = a[sort.id as keyof TestUser];
-                const bValue = b[sort.id as keyof TestUser];
+            // Apply sorting
+            if (state.sorting && state.sorting.length > 0) {
+                const sort = state.sorting[0];
+                filteredData.sort((a, b) => {
+                    const aValue = a[sort.id as keyof TestUser];
+                    const bValue = b[sort.id as keyof TestUser];
 
-                if (aValue < bValue) return sort.desc ? 1 : -1;
-                if (aValue > bValue) return sort.desc ? -1 : 1;
-                return 0;
-            });
-        }
+                    if (aValue < bValue) return sort.desc ? 1 : -1;
+                    if (aValue > bValue) return sort.desc ? -1 : 1;
+                    return 0;
+                });
+            }
 
-        const total = filteredData.length;
+            const total = filteredData.length;
 
-        // Apply pagination
-        const pageSize = state.pagination?.pageSize || 10;
-        const pageIndex = state.pagination?.pageIndex || 0;
-        const start = pageIndex * pageSize;
-        const paginatedData = filteredData.slice(start, start + pageSize);
+            // Apply pagination
+            const pageSize = state.pagination?.pageSize || 10;
+            const pageIndex = state.pagination?.pageIndex || 0;
+            const start = pageIndex * pageSize;
+            const paginatedData = filteredData.slice(start, start + pageSize);
 
-        setServerSideData(paginatedData);
-        setRowCount(total);
-        setLoading(false);
+            setServerSideData(paginatedData);
+            setRowCount(total);
+            setLoading(false);
 
-        addTestResult(`Server-side data loaded: ${paginatedData.length} items of ${total} total`);
-    }, [addTestResult]);
+            addTestResult(`Server-side data loaded: ${paginatedData.length} items of ${total} total`);
+        },
+        [addTestResult],
+    );
 
     // Stable callback functions for DataGrid
-    const handleClientPaginationChange = useCallback((pagination: any) => {
-        addTestResult(`Client pagination changed: page ${pagination.pageIndex + 1}, size ${pagination.pageSize}`);
-    }, [addTestResult]);
+    const handleClientPaginationChange = useCallback(
+        (pagination: any) => {
+            addTestResult(`Client pagination changed: page ${pagination.pageIndex + 1}, size ${pagination.pageSize}`);
+        },
+        [addTestResult],
+    );
 
-    const handleClientSortingChange = useCallback((sorting: any) => {
-        addTestResult(`Client sorting changed: ${JSON.stringify(sorting)}`);
-    }, [addTestResult]);
+    const handleClientSortingChange = useCallback(
+        (sorting: any) => {
+            addTestResult(`Client sorting changed: ${JSON.stringify(sorting)}`);
+        },
+        [addTestResult],
+    );
 
-    const handleClientColumnFiltersChange = useCallback((filters: any) => {
-        addTestResult(`Client filters changed: ${filters.length} active`);
-    }, [addTestResult]);
+    const handleClientColumnFiltersChange = useCallback(
+        (filters: any) => {
+            addTestResult(`Client filters changed: ${filters.length} active`);
+        },
+        [addTestResult],
+    );
 
-    const handleClientGlobalFilterChange = useCallback((filter: string) => {
-        addTestResult(`Client global filter: "${filter}"`);
-    }, [addTestResult]);
+    const handleClientGlobalFilterChange = useCallback(
+        (filter: string) => {
+            addTestResult(`Client global filter: "${filter}"`);
+        },
+        [addTestResult],
+    );
 
-    const handleClientSelectionChange = useCallback((selection: any) => {
-        addTestResult(`Client selection changed: ${Object.keys(selection).length} selected`);
-    }, [addTestResult]);
+    const handleClientSelectionChange = useCallback(
+        (selection: any) => {
+            addTestResult(`Client selection changed: ${Object.keys(selection).length} selected`);
+        },
+        [addTestResult],
+    );
 
     // Server-side callbacks
-    const handleServerPaginationChange = useCallback((pagination: any) => {
-        addTestResult(`Server pagination changed: page ${pagination.pageIndex + 1}, size ${pagination.pageSize}`);
-        setTableState((prev: any) => ({ ...prev, pagination }));
-    }, [addTestResult]);
+    const handleServerPaginationChange = useCallback(
+        (pagination: any) => {
+            addTestResult(`Server pagination changed: page ${pagination.pageIndex + 1}, size ${pagination.pageSize}`);
+            setTableState((prev: any) => ({ ...prev, pagination }));
+        },
+        [addTestResult],
+    );
 
-    const handleServerSortingChange = useCallback((sorting: any) => {
-        addTestResult(`Server sorting changed: ${JSON.stringify(sorting)}`);
-        setTableState((prev: any) => ({ ...prev, sorting }));
-    }, [addTestResult]);
+    const handleServerSortingChange = useCallback(
+        (sorting: any) => {
+            addTestResult(`Server sorting changed: ${JSON.stringify(sorting)}`);
+            setTableState((prev: any) => ({ ...prev, sorting }));
+        },
+        [addTestResult],
+    );
 
-    const handleServerColumnFiltersChange = useCallback((columnFilters: any) => {
-        addTestResult(`Server filters changed: ${columnFilters.length} active`);
-        setTableState((prev: any) => ({ ...prev, columnFilters }));
-    }, [addTestResult]);
+    const handleServerColumnFiltersChange = useCallback(
+        (columnFilters: any) => {
+            addTestResult(`Server filters changed: ${columnFilters.length} active`);
+            setTableState((prev: any) => ({ ...prev, columnFilters }));
+        },
+        [addTestResult],
+    );
 
-    const handleServerGlobalFilterChange = useCallback((globalFilter: string) => {
-        addTestResult(`Server global filter: "${globalFilter}"`);
-        setTableState((prev: any) => ({ ...prev, globalFilter }));
-    }, [addTestResult]);
+    const handleServerGlobalFilterChange = useCallback(
+        (globalFilter: string) => {
+            addTestResult(`Server global filter: "${globalFilter}"`);
+            setTableState((prev: any) => ({ ...prev, globalFilter }));
+        },
+        [addTestResult],
+    );
 
     useEffect(() => {
         fetchServerSideData(tableState);
     }, [tableState, fetchServerSideData]);
 
     return (
-        <div className="container mx-auto p-6 space-y-8">
+        <div className="container mx-auto space-y-8 p-6">
             <div className="space-y-4">
                 <h1 className="text-3xl font-bold">DataGrid Comprehensive Testing</h1>
                 <p className="text-muted-foreground">
@@ -333,21 +351,16 @@ export default function TestDataGrid() {
             </div>
 
             {/* Test Results Panel */}
-            <div className="bg-muted p-4 rounded-lg">
-                <h3 className="font-semibold mb-2">Test Results Log</h3>
-                <div className="max-h-32 overflow-y-auto text-sm space-y-1">
+            <div className="rounded-lg bg-muted p-4">
+                <h3 className="mb-2 font-semibold">Test Results Log</h3>
+                <div className="max-h-32 space-y-1 overflow-y-auto text-sm">
                     {testResults.map((result, index) => (
-                        <div key={index} className="text-xs font-mono">
+                        <div key={index} className="font-mono text-xs">
                             {result}
                         </div>
                     ))}
                 </div>
-                <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setTestResults([])}
-                    className="mt-2"
-                >
+                <Button size="sm" variant="outline" onClick={() => setTestResults([])} className="mt-2">
                     Clear Log
                 </Button>
             </div>
@@ -355,9 +368,7 @@ export default function TestDataGrid() {
             {/* Client-side DataGrid */}
             <div className="space-y-4">
                 <h2 className="text-2xl font-semibold">Client-side DataGrid</h2>
-                <p className="text-sm text-muted-foreground">
-                    Tests all filter types, row selection, and client-side operations with 100 records.
-                </p>
+                <p className="text-sm text-muted-foreground">Tests all filter types, row selection, and client-side operations with 100 records.</p>
                 <DataGrid
                     rows={testData}
                     columns={columns}
@@ -406,9 +417,7 @@ export default function TestDataGrid() {
             {/* Server-side DataGrid */}
             <div className="space-y-4">
                 <h2 className="text-2xl font-semibold">Server-side DataGrid</h2>
-                <p className="text-sm text-muted-foreground">
-                    Tests server-side operations, loading states, and controlled state management.
-                </p>
+                <p className="text-sm text-muted-foreground">Tests server-side operations, loading states, and controlled state management.</p>
                 <DataGrid
                     rows={serverSideData}
                     columns={columns}
@@ -417,36 +426,37 @@ export default function TestDataGrid() {
                     rowCount={rowCount}
                     isLoading={loading}
                     enableRowSelection={true}
-                filterFields={filterFields.slice(0, 4)} // Limit filters for server-side
-                pageSizeOptions={[5, 10, 25]}
-                actionsToolbar={[
-                    {
-                        name: 'Add User',
-                        icon: <UserPlus className="h-4 w-4" />,
-                        color: 'primary',
-                        event: () => addTestResult('Add User action clicked (server-side)'),
-                    },
-                    {
-                        name: 'Delete Selected',
-                        icon: <Trash2 className="h-4 w-4" />,
-                        color: 'danger',
-                        event: () => addTestResult('Delete Selected action clicked (server-side)'),
-                    },
-                ]}
-                onPaginationChange={handleServerPaginationChange}
-                onSortingChange={handleServerSortingChange}
-                onColumnFiltersChange={handleServerColumnFiltersChange}
-                onGlobalFilterChange={handleServerGlobalFilterChange}
-            />
-
+                    filterFields={filterFields.slice(0, 4)} // Limit filters for server-side
+                    pageSizeOptions={[5, 10, 25]}
+                    actionsToolbar={[
+                        {
+                            name: 'Add User',
+                            icon: <UserPlus className="h-4 w-4" />,
+                            color: 'primary',
+                            event: () => addTestResult('Add User action clicked (server-side)'),
+                        },
+                        {
+                            name: 'Delete Selected',
+                            icon: <Trash2 className="h-4 w-4" />,
+                            color: 'danger',
+                            event: () => addTestResult('Delete Selected action clicked (server-side)'),
+                        },
+                    ]}
+                    onPaginationChange={handleServerPaginationChange}
+                    onSortingChange={handleServerSortingChange}
+                    onColumnFiltersChange={handleServerColumnFiltersChange}
+                    onGlobalFilterChange={handleServerGlobalFilterChange}
+                />
             </div>
 
             {/* Testing Instructions */}
-            <div className="bg-blue-50 p-4 rounded-lg">
-                <h3 className="font-semibold mb-2">Testing Instructions</h3>
-                <div className="text-sm space-y-2">
-                    <p><strong>1. Filter Testing:</strong></p>
-                    <ul className="list-disc list-inside ml-4 space-y-1">
+            <div className="rounded-lg bg-blue-50 p-4">
+                <h3 className="mb-2 font-semibold">Testing Instructions</h3>
+                <div className="space-y-2 text-sm">
+                    <p>
+                        <strong>1. Filter Testing:</strong>
+                    </p>
+                    <ul className="ml-4 list-inside list-disc space-y-1">
                         <li>Test input filter with name search</li>
                         <li>Test multi-select role filter</li>
                         <li>Test async department search (type to search)</li>
@@ -457,8 +467,10 @@ export default function TestDataGrid() {
                         <li>Test "Clear All" filters button</li>
                     </ul>
 
-                    <p><strong>2. Interaction Testing:</strong></p>
-                    <ul className="list-disc list-inside ml-4 space-y-1">
+                    <p>
+                        <strong>2. Interaction Testing:</strong>
+                    </p>
+                    <ul className="ml-4 list-inside list-disc space-y-1">
                         <li>Test column sorting (click headers)</li>
                         <li>Test pagination controls</li>
                         <li>Test page size changes</li>
@@ -469,8 +481,10 @@ export default function TestDataGrid() {
                         <li>Test column visibility (Views dropdown)</li>
                     </ul>
 
-                    <p><strong>3. Performance Testing:</strong></p>
-                    <ul className="list-disc list-inside ml-4 space-y-1">
+                    <p>
+                        <strong>3. Performance Testing:</strong>
+                    </p>
+                    <ul className="ml-4 list-inside list-disc space-y-1">
                         <li>Apply multiple filters simultaneously</li>
                         <li>Test with large page sizes (50 items)</li>
                         <li>Test rapid filter changes</li>
