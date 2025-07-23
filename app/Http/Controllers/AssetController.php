@@ -89,7 +89,7 @@ class AssetController extends Controller
         $asset->loadMissing([
             'category',
             'manufacture',
-            'assignedUser' => function ($query) {
+            'assigned_user' => function ($query) {
                 $query->select('id', 'name', 'email', 'office_location', 'job_title'); // hanya ambil kolom id dan name
             },
         ]);
