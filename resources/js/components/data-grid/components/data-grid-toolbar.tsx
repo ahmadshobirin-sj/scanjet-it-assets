@@ -1,32 +1,22 @@
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { ChevronsUpDown, FunnelIcon, Search, X } from 'lucide-react';
 import { useDataGrid } from '../data-grid-provider';
 
-import { useIsMobile } from '@/hooks/use-mobile';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Spinner } from '@/components/ui/spinner';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export const DataGridToolbar = () => {
-    const {
-        table,
-        inputValue,
-        onGlobalFilterChange,
-        toggleFilterOpen,
-        filterFields,
-        actionsToolbar,
-        rowSelection,
-        enableRowSelection,
-        isLoading,
-    } = useDataGrid();
+    const { table, inputValue, onGlobalFilterChange, toggleFilterOpen, filterFields, actionsToolbar, rowSelection, enableRowSelection, isLoading } =
+        useDataGrid();
 
     const isMobile = useIsMobile();
 
     return (
         <div className={`flex items-center space-x-2 py-3 ${isMobile ? 'flex-wrap gap-2' : ''}`}>
-
-            <div className={isMobile ? 'flex-grow flex items-center space-x-2' : 'flex items-center space-x-2'}>
+            <div className={isMobile ? 'flex flex-grow items-center space-x-2' : 'flex items-center space-x-2'}>
                 <Input
                     leading={<Search />}
                     type="text"
@@ -35,17 +25,11 @@ export const DataGridToolbar = () => {
                     className={isMobile ? 'w-full' : 'w-[250px]'}
                     onChange={(e) => onGlobalFilterChange(e.target.value)}
                 />
-                {isLoading && <Spinner className="bg-primary dark:bg-white size-5" />}
+                {isLoading && <Spinner className="size-5 bg-primary dark:bg-white" />}
             </div>
             <div className={`ml-auto flex items-center gap-2 ${isMobile ? 'w-full justify-between' : ''}`}>
                 {filterFields && filterFields.length > 0 && (
-                    <Button
-                        size="icon"
-                        variant="outline"
-                        intent="secondary"
-                        title="show/hide filters"
-                        onClick={toggleFilterOpen}
-                    >
+                    <Button size="icon" variant="outline" intent="secondary" title="show/hide filters" onClick={toggleFilterOpen}>
                         <FunnelIcon />
                     </Button>
                 )}
@@ -83,11 +67,11 @@ export const DataGridToolbar = () => {
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48">
-                            <div className="flex items-center rounded-md border bg-background px-2 py-1 text-sm mb-2">
+                            <div className="mb-2 flex items-center rounded-md border bg-background px-2 py-1 text-sm">
                                 <span>{Object.keys(rowSelection).length} selected</span>
                                 <Tooltip>
                                     <TooltipTrigger asChild onClick={() => table.resetRowSelection()}>
-                                        <div className="cursor-pointer ml-auto">
+                                        <div className="ml-auto cursor-pointer">
                                             <X className="size-4" />
                                         </div>
                                     </TooltipTrigger>
@@ -95,11 +79,7 @@ export const DataGridToolbar = () => {
                                 </Tooltip>
                             </div>
                             {actionsToolbar.map((action, index) => (
-                                <DropdownMenuItem
-                                    key={index}
-                                    onClick={action.event}
-                                    variant={action.color as any || 'default'}
-                                >
+                                <DropdownMenuItem key={index} onClick={action.event} variant={(action.color as any) || 'default'}>
                                     {action.icon} {action.name}
                                 </DropdownMenuItem>
                             ))}

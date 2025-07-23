@@ -2,8 +2,7 @@ import { useState, useEffect } from 'react';
 import { DataGrid, DataGridFilterField, DataGridState } from '../index';
 import { ColumnDef } from '@tanstack/react-table';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Edit, Trash2, UserPlus } from 'lucide-react';
+import { Trash2, UserPlus } from 'lucide-react';
 
 // Example data type
 interface User {
@@ -73,11 +72,11 @@ const columns: ColumnDef<User>[] = [
         header: 'Role',
         cell: ({ row }) => {
             const role = row.getValue('role') as string;
-      return (
-        <Badge variant={role === 'admin' ? 'fill' : 'outline'}>
-          {role}
-        </Badge>
-      );
+            return (
+                <Badge variant={role === 'admin' ? 'fill' : 'outline'}>
+                    {role}
+                </Badge>
+            );
         },
     },
     {
@@ -85,11 +84,11 @@ const columns: ColumnDef<User>[] = [
         header: 'Status',
         cell: ({ row }) => {
             const status = row.getValue('status') as string;
-      return (
-        <Badge variant={status === 'active' ? 'fill' : 'outline'}>
-          {status}
-        </Badge>
-      );
+            return (
+                <Badge variant={status === 'active' ? 'fill' : 'outline'}>
+                    {status}
+                </Badge>
+            );
         },
     },
     {
@@ -228,18 +227,18 @@ export function ServerSideDataGridExample() {
             );
         }
 
-    // Apply column filters
-    if (state.columnFilters) {
-      state.columnFilters.forEach((filter: any) => {
-        filteredData = filteredData.filter(user => {
-          const value = user[filter.id as keyof User];
-          if (Array.isArray(filter.value)) {
-            return filter.value.includes(String(value));
-          }
-          return String(value).toLowerCase().includes(String(filter.value).toLowerCase());
-        });
-      });
-    }
+        // Apply column filters
+        if (state.columnFilters) {
+            state.columnFilters.forEach((filter: any) => {
+                filteredData = filteredData.filter(user => {
+                    const value = user[filter.id as keyof User];
+                    if (Array.isArray(filter.value)) {
+                        return filter.value.includes(String(value));
+                    }
+                    return String(value).toLowerCase().includes(String(filter.value).toLowerCase());
+                });
+            });
+        }
 
         // Apply sorting
         if (state.sorting && state.sorting.length > 0) {
@@ -283,18 +282,18 @@ export function ServerSideDataGridExample() {
                 isLoading={loading}
                 enableRowSelection={true}
                 filterFields={filterFields}
-        onPaginationChange={(pagination) => 
-          setTableState((prev: any) => ({ ...prev, pagination }))
-        }
-        onSortingChange={(sorting) => 
-          setTableState((prev: any) => ({ ...prev, sorting }))
-        }
-        onColumnFiltersChange={(columnFilters) => 
-          setTableState((prev: any) => ({ ...prev, columnFilters }))
-        }
-        onGlobalFilterChange={(globalFilter) => 
-          setTableState((prev: any) => ({ ...prev, globalFilter }))
-        }
+                onPaginationChange={(pagination) =>
+                    setTableState((prev: any) => ({ ...prev, pagination }))
+                }
+                onSortingChange={(sorting) =>
+                    setTableState((prev: any) => ({ ...prev, sorting }))
+                }
+                onColumnFiltersChange={(columnFilters) =>
+                    setTableState((prev: any) => ({ ...prev, columnFilters }))
+                }
+                onGlobalFilterChange={(globalFilter) =>
+                    setTableState((prev: any) => ({ ...prev, globalFilter }))
+                }
             />
         </div>
     );

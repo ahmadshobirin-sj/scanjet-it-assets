@@ -7,9 +7,9 @@ import { useDataGrid } from '../data-grid-provider';
 
 export const DataGridActionsToolbar = () => {
     const { table, enableRowSelection, serverSide, actionsToolbar } = useDataGrid();
-    
+
     const rowSelection = table.getState().rowSelection;
-    
+
     const getLengthRowSelection = useMemo(
         () => (serverSide ? Object.keys(rowSelection).length : table.getFilteredSelectedRowModel().rows.length),
         [rowSelection, serverSide, table],

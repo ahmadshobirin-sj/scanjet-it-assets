@@ -1,8 +1,8 @@
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from 'lucide-react';
 import { useDataGrid } from '../data-grid-provider';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 export const DataGridPagination = () => {
     const { table, pageSizeOptions, isTableEmpty, serverSide } = useDataGrid();
@@ -34,13 +34,7 @@ export const DataGridPagination = () => {
                         <ChevronLeft className="h-4 w-4" />
                     </Button>
 
-                    <Button
-                        size="icon"
-                        variant="outline"
-                        intent="secondary"
-                        onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
-                    >
+                    <Button size="icon" variant="outline" intent="secondary" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
                         <ChevronRight className="h-4 w-4" />
                     </Button>
                 </div>
@@ -67,14 +61,14 @@ export const DataGridPagination = () => {
     }
 
     return (
-        <div className="mt-4 flex items-center justify-between flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center space-x-2">
                 <span className="text-sm">
                     Showing {start} to {end} of {total} results
                 </span>
             </div>
 
-            <div className="flex items-center space-x-2 flex-wrap">
+            <div className="flex flex-wrap items-center space-x-2">
                 <Select value={pageSize.toString()} onValueChange={(value) => table.setPageSize(Number(value))}>
                     <SelectTrigger className="w-[80px]" disabled={isTableEmpty}>
                         <SelectValue placeholder="Size" />
@@ -88,7 +82,7 @@ export const DataGridPagination = () => {
                     </SelectContent>
                 </Select>
 
-                <div className="flex items-center space-x-1 flex-wrap">
+                <div className="flex flex-wrap items-center space-x-1">
                     <Button
                         size="icon"
                         variant="outline"
@@ -120,13 +114,7 @@ export const DataGridPagination = () => {
                         </Button>
                     ))}
 
-                    <Button
-                        size="icon"
-                        variant="outline"
-                        intent="secondary"
-                        onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
-                    >
+                    <Button size="icon" variant="outline" intent="secondary" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
                         <ChevronRight className="h-4 w-4" />
                     </Button>
                     <Button

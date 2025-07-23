@@ -1,7 +1,6 @@
 import useDidUpdate from '@/hooks/use-did-update';
 import { getCoreRowModel, getFilteredRowModel, getPaginationRowModel, getSortedRowModel, useReactTable } from '@tanstack/react-table';
-import { useMemo, useState } from 'react';
-import { DataGridActionsToolbar } from './components/data-grid-actions-toolbar';
+import { useMemo } from 'react';
 import DataGridFilterToolbar from './components/data-grid-filter-toolbar';
 import { DataGridPagination } from './components/data-grid-pagination';
 import { DataGridTable } from './components/data-grid-table';
@@ -33,7 +32,7 @@ const DataGrid = <TData extends Record<string, any>>({
     emptyText = 'No data available',
     debounceDelay = 300,
     filterFields = [],
-    isLoading = false
+    isLoading = false,
 }: DataGridProps<TData>) => {
     const {
         sorting,

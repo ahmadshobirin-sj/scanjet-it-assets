@@ -1,7 +1,7 @@
 import { spatieToTanstackState, tanstackToSpatieParams } from '@/lib/normalize-table-state';
 import { TableServer } from '@/types/table';
 import { ColumnDef } from '@tanstack/react-table';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DataGridState } from '../data-grid.types';
 
 export type TransformColumnFn<TData> = (column: ColumnDef<TData>) => ColumnDef<TData>;
@@ -12,10 +12,7 @@ function getColumnId(column: ColumnDef<any>): string | undefined {
     return (column as any).id ?? (column as any).accessorKey;
 }
 
-export const useTableResolver = <TData extends Record<string, any>>(
-    tableKey: string,
-    transformers: TransformersTableResolver<TData> = {}
-) => {
+export const useTableResolver = <TData extends Record<string, any>>(tableKey: string, transformers: TransformersTableResolver<TData> = {}) => {
     const LOCAL_STORAGE_KEY = `tableState:${tableKey}`;
 
     const [table, setTable] = useState<TableServer<TData> | undefined>(undefined);
@@ -29,30 +26,29 @@ export const useTableResolver = <TData extends Record<string, any>>(
         }
     });
 
+    const setTableState = useCallback(
+        (newState: DataGridState | TableStateUpdater) => {
+            setTableStateRaw((prev) => {
+                const resolvedState = typeof newState === 'function' ? (newState as TableStateUpdater)(prev) : newState;
 
+                if (resolvedState) {
+                    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(resolvedState));
+                } else {
+                    localStorage.removeItem(LOCAL_STORAGE_KEY);
+                }
 
-    const setTableState = (newState: DataGridState | TableStateUpdater) => {
-        setTableStateRaw((prev) => {
-            const resolvedState = typeof newState === 'function'
-                ? (newState as TableStateUpdater)(prev)
-                : newState;
-
-            if (resolvedState) {
-                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(resolvedState));
-            } else {
-                localStorage.removeItem(LOCAL_STORAGE_KEY);
-            }
-
-            return resolvedState;
-        });
-    };
+                return resolvedState;
+            });
+        },
+        [LOCAL_STORAGE_KEY],
+    );
 
     useEffect(() => {
         if (table?.state) {
             const state = spatieToTanstackState(table.state);
             setTableState(state);
         }
-    }, [table]);
+    }, [table, setTableState]);
 
     const injectedColumns = useMemo<ColumnDef<TData>[]>(() => {
         if (!table?.columns) return [];

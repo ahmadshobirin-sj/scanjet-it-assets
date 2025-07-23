@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useMemo, useCallback } from 'react';
-import { DataGridFilterField, DataGridProps } from './data-grid.types';
 import { Table } from '@tanstack/react-table';
+import React, { createContext, useCallback, useContext, useMemo } from 'react';
+import { DataGridFilterField, DataGridProps } from './data-grid.types';
 
 interface DataGridContextProps<TData> {
     // Core table instance
@@ -55,7 +55,7 @@ type DataGridProviderProps<TData> = {
     onGlobalFilterChange: (value: string) => void;
     rowSelection: Record<string, boolean>;
     rowCount?: number;
-}
+};
 
 const DataGridContext = createContext<DataGridContextProps<any> | null>(null);
 
@@ -77,7 +77,6 @@ export const DataGridProvider = <TData,>({
     onGlobalFilterChange,
     rowSelection,
 }: DataGridProviderProps<TData>) => {
-
     // Memoized callbacks
     const clearAllFilters = useCallback(() => {
         table.resetColumnFilters();
@@ -88,64 +87,63 @@ export const DataGridProvider = <TData,>({
         table.resetSorting();
     }, [table]);
 
-    const contextValue = useMemo<DataGridContextProps<TData>>(() => ({
-        // Core table instance
-        table,
+    const contextValue = useMemo<DataGridContextProps<TData>>(
+        () => ({
+            // Core table instance
+            table,
 
-        // Filter related
-        isFilterOpen,
-        setFilterOpen,
-        toggleFilterOpen,
-        filterFields,
-        clearAllFilters,
+            // Filter related
+            isFilterOpen,
+            setFilterOpen,
+            toggleFilterOpen,
+            filterFields,
+            clearAllFilters,
 
-        // UI state
-        isLoading,
-        isTableEmpty,
-        emptyText,
+            // UI state
+            isLoading,
+            isTableEmpty,
+            emptyText,
 
-        // Configuration
-        serverSide,
-        enableRowSelection,
-        pageSizeOptions,
+            // Configuration
+            serverSide,
+            enableRowSelection,
+            pageSizeOptions,
 
-        // Actions
-        actionsToolbar,
+            // Actions
+            actionsToolbar,
 
-        // Global filter
-        inputValue,
-        onGlobalFilterChange,
+            // Global filter
+            inputValue,
+            onGlobalFilterChange,
 
-        // Row selection state
-        rowSelection,
+            // Row selection state
+            rowSelection,
 
-        // Clear all sorts
-        clearAllSorts,
-    }), [
-        table,
-        isFilterOpen,
-        setFilterOpen,
-        toggleFilterOpen,
-        filterFields,
-        clearAllFilters,
-        clearAllSorts,
-        isLoading,
-        isTableEmpty,
-        emptyText,
-        serverSide,
-        enableRowSelection,
-        pageSizeOptions,
-        actionsToolbar,
-        inputValue,
-        onGlobalFilterChange,
-        rowSelection,
-    ]);
-
-    return (
-        <DataGridContext.Provider value={contextValue}>
-            {children}
-        </DataGridContext.Provider>
+            // Clear all sorts
+            clearAllSorts,
+        }),
+        [
+            table,
+            isFilterOpen,
+            setFilterOpen,
+            toggleFilterOpen,
+            filterFields,
+            clearAllFilters,
+            clearAllSorts,
+            isLoading,
+            isTableEmpty,
+            emptyText,
+            serverSide,
+            enableRowSelection,
+            pageSizeOptions,
+            actionsToolbar,
+            inputValue,
+            onGlobalFilterChange,
+            rowSelection,
+        ],
     );
+
+    return <DataGridContext.Provider value={contextValue}>{children}</DataGridContext.Provider>;
 };
 
 export const useDataGrid = <TData = any,>(): DataGridContextProps<TData> => {
