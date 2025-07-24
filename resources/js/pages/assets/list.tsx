@@ -1,19 +1,21 @@
 import AppContainer from '@/components/app-container';
 import AppTitle from '@/components/app-title';
-import { DataGrid, useTableResolver } from '@/components/data-grid';
+import { DataGrid, DataGridState, useTableResolver } from '@/components/data-grid';
+import SkeletonDataGrid from '@/components/skeleton/skeleton-data-grid';
 import { Button } from '@/components/ui/button';
 import { useBreadcrumb } from '@/hooks/use-breadcrumb';
-import useDidUpdate from '@/hooks/use-did-update';
 import { usePermission } from '@/hooks/use-permissions';
 import AppLayout from '@/layouts/app-layout';
 import { confirmDialog } from '@/lib/confirmDialog';
+import { tanstackToSpatieParams } from '@/lib/normalize-table-state';
 import { SharedData } from '@/types';
 import { Asset, ResponseCollection } from '@/types/model';
 import { TableServer } from '@/types/table';
-import { router, usePage } from '@inertiajs/react';
+import { Page } from '@inertiajs/core';
+import { router, usePage, WhenVisible } from '@inertiajs/react';
 import { PaginationState, SortingState } from '@tanstack/react-table';
 import { Plus } from 'lucide-react';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { columns as TableColumns } from './column';
 
@@ -21,10 +23,12 @@ const AssetListPage = () => {
     const { can } = usePermission();
     const {
         component,
-        props: { assets, table, success, errors },
-    } = usePage<SharedData & { assets: ResponseCollection<Asset>; table: TableServer<Asset> }>();
+        props: { success, errors },
+    } = usePage<SharedData>();
     const breadcrumbs = useBreadcrumb(component);
-    const { tableState, setTableState, columns, tableStateServer } = useTableResolver(table, TableColumns);
+    const [assets, setAsssets] = useState<ResponseCollection<Asset> | undefined>(undefined);
+    const { setTable, columns, tableState, setTableState, tableStateServer } = useTableResolver('assets-table', TableColumns);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (success) {
@@ -65,45 +69,48 @@ const AssetListPage = () => {
         });
     };
 
-    const updateTableState = useCallback((tableState: Record<string, string>) => {
-        const query = tableState;
-        router.get(route('asset.index'), query, {
+    const updateDataTable = (query: DataGridState) => {
+        router.get(route('asset.index'), tanstackToSpatieParams(query), {
+            preserveUrl: true,
             preserveState: true,
             preserveScroll: true,
+            only: ['assets'],
+            async: true,
+            onStart: () => {
+                setIsLoading(true);
+            },
+            onSuccess: (data) => {
+                const typedData = data as Page<SharedData & { assets: ResponseCollection<Asset>; table: TableServer<Asset> }>;
+                setAsssets(typedData.props.assets);
+            },
+            onFinish: () => {
+                setIsLoading(false);
+            },
         });
+    };
+
+    const updateTableState = useCallback(
+        (partialState: Partial<DataGridState>) => {
+            setTableState((prevState) => {
+                const newState = { ...prevState, ...partialState };
+                updateDataTable(newState);
+                return newState;
+            });
+        },
+        [setTableState],
+    );
+
+    const handlePaginationChange = useCallback((pagination: PaginationState) => {
+        updateTableState({ pagination });
     }, []);
 
-    useDidUpdate(() => {
-        updateTableState(tableStateServer);
-    }, [tableStateServer]);
+    const handleSortingChange = useCallback((sorting: SortingState) => {
+        updateTableState({ sorting });
+    }, []);
 
-    const handlePaginationChange = useCallback(
-        (pagination: PaginationState) => {
-            setTableState((prev) => ({ ...prev, pagination }));
-        },
-        [setTableState],
-    );
-
-    const handleSortingChange = useCallback(
-        (sorting: SortingState) => {
-            setTableState((prev) => ({ ...prev, sorting }));
-        },
-        [setTableState],
-    );
-
-    const handleFilterChange = useCallback(
-        (globalFilter: string) => {
-            setTableState((prev) => ({
-                ...prev,
-                globalFilter,
-                pagination: {
-                    ...prev.pagination,
-                    pageIndex: 0,
-                },
-            }));
-        },
-        [setTableState],
-    );
+    const handleFilterChange = useCallback((globalFilter: string) => {
+        updateTableState({ globalFilter });
+    }, []);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -119,24 +126,46 @@ const AssetListPage = () => {
                         </>
                     }
                 />
-                <DataGrid
-                    rows={assets?.data || []}
-                    columns={columns}
-                    tableState={tableState}
-                    pageSizeOptions={[10, 25, 50]}
-                    rowCount={assets?.meta?.total || 0}
-                    rowId={(row) => (row.id ? row.id.toString() : '')}
-                    serverSide={true}
-                    emptyText="No data assets available"
-                    onSortingChange={handleSortingChange}
-                    onGlobalFilterChange={handleFilterChange}
-                    onPaginationChange={handlePaginationChange}
-                    actionsRow={() => [
-                        ...(can('asset.view') ? [{ name: 'View', event: handleView }] : []),
-                        ...(can('asset.update') ? [{ name: 'Edit', event: handleEdit }] : []),
-                        ...(can('asset.delete') ? [{ name: 'Delete', color: 'destructive', event: handleDelete }] : []),
-                    ]}
-                />
+                <WhenVisible
+                    params={{
+                        method: 'get',
+                        data: {
+                            ...(tableState ? tableStateServer : {}),
+                        },
+                        only: ['assets', 'table'],
+                        preserveUrl: true,
+                        async: true,
+                        onSuccess: (data) => {
+                            const typedData = data as Page<SharedData & { assets: ResponseCollection<Asset>; table: TableServer<Asset> }>;
+                            setAsssets(typedData.props.assets);
+                            setTable(typedData.props.table);
+                        },
+                    }}
+                    fallback={<SkeletonDataGrid />}
+                >
+                    <DataGrid
+                        rows={assets?.data || []}
+                        columns={columns}
+                        tableState={{
+                            ...tableState,
+                            sorting: tableState?.sorting || [{ id: 'created_at', desc: true }],
+                        }}
+                        pageSizeOptions={[10, 25, 50]}
+                        isLoading={isLoading}
+                        rowCount={assets?.meta?.total || 0}
+                        rowId={(row) => (row.id ? row.id.toString() : '')}
+                        serverSide={true}
+                        emptyText="No data assets available"
+                        onSortingChange={handleSortingChange}
+                        onGlobalFilterChange={handleFilterChange}
+                        onPaginationChange={handlePaginationChange}
+                        actionsRow={() => [
+                            ...(can('asset.view') ? [{ name: 'View', event: handleView }] : []),
+                            ...(can('asset.update') ? [{ name: 'Edit', event: handleEdit }] : []),
+                            ...(can('asset.delete') ? [{ name: 'Delete', color: 'destructive', event: handleDelete }] : []),
+                        ]}
+                    />
+                </WhenVisible>
             </AppContainer>
         </AppLayout>
     );
