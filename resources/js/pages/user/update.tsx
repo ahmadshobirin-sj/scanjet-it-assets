@@ -1,9 +1,9 @@
+import { MultipleSelector, Option } from '@/components/multiple-selector';
 import { Button } from '@/components/ui/button';
 import { FormMessage } from '@/components/ui/form-message';
 import { GroupForm, GroupFormItem } from '@/components/ui/group-form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import MultipleSelector, { Option } from '@/components/ui/multiple-selector';
 import { Sheet, SheetBody, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useBeforeUnloadPrompt } from '@/hooks/use-before-unload-prompt';
 import useControlledModal from '@/hooks/use-controlled-modal';
@@ -25,7 +25,7 @@ const UserUpdatePage = forwardRef<UserUpdatePageRef, { user: User | null; onClos
         props: { roles },
     } = usePage<SharedData & { roles: ResponseCollection<Role> }>();
     const sheetRef = useRef<HTMLDivElement>(null);
-    const { data, setData, put, processing, errors, reset, isDirty, setDefaults, transform } = useForm<{ email: string; roles: Option[] }>({
+    const { data, setData, put, processing, errors, reset, isDirty, setDefaults } = useForm<{ email: string; roles: string[] }>({
         email: '',
         roles: [],
     });
@@ -36,7 +36,7 @@ const UserUpdatePage = forwardRef<UserUpdatePageRef, { user: User | null; onClos
             value: role.id,
             badgeColor: UserRoleStyle.getIntent(role.name),
         }));
-    }, [roles.data]);
+    }, []);
 
     const { open, setOpen, handleChange } = useControlledModal({
         shouldConfirmClose: () => isDirty,
@@ -54,7 +54,7 @@ const UserUpdatePage = forwardRef<UserUpdatePageRef, { user: User | null; onClos
         if (open && user) {
             const values: typeof data = {
                 email: user.email,
-                roles: rolesOptions.filter((option) => user.roles.some((role) => role.id === option.value)),
+                roles: user.roles.map((role) => role.id),
             };
             setDefaults(values);
             setData(values);
@@ -75,10 +75,6 @@ const UserUpdatePage = forwardRef<UserUpdatePageRef, { user: User | null; onClos
     };
 
     const postData = () => {
-        transform((data) => ({
-            ...data,
-            roles: data.roles.map((role) => role.value),
-        }));
         put(route('user.update', user?.id), {
             onSuccess: (res) => {
                 reset();
@@ -106,7 +102,7 @@ const UserUpdatePage = forwardRef<UserUpdatePageRef, { user: User | null; onClos
     );
 
     const handleChangeRoles = (values: Option[]) => {
-        setData('roles', values);
+        setData('roles', values.map(option => option.value));
     };
 
     const handleChangeEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -129,7 +125,7 @@ const UserUpdatePage = forwardRef<UserUpdatePageRef, { user: User | null; onClos
                         </GroupFormItem>
                         <GroupFormItem>
                             <Label htmlFor="roles">Roles</Label>
-                            <MultipleSelector value={data.roles} options={rolesOptions} onChange={handleChangeRoles} />
+                            <MultipleSelector value={rolesOptions.filter(option => data.roles.includes(option.value))} defaultOptions={rolesOptions} onChange={handleChangeRoles} />
                             {errors.roles && <FormMessage error>{errors.roles}</FormMessage>}
                         </GroupFormItem>
                         <input type="submit" hidden />

@@ -1,9 +1,10 @@
+import React from 'react';
+import { MultipleSelector, Option } from '@/components/multiple-selector';
 import { Button } from '@/components/ui/button';
 import { FormMessage } from '@/components/ui/form-message';
 import { GroupForm, GroupFormItem } from '@/components/ui/group-form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import MultipleSelector, { Option } from '@/components/ui/multiple-selector';
 import {
     Sheet,
     SheetBody,
@@ -30,7 +31,7 @@ const UserCreatePage = () => {
         props: { roles },
     } = usePage<SharedData & { roles: ResponseCollection<Role> }>();
 
-    const { data, setData, post, processing, errors, reset, isDirty, transform } = useForm<{ email: string; roles: Option[] }>({
+    const { data, setData, post, processing, errors, reset, isDirty } = useForm<{ email: string; roles: string[] }>({
         email: '',
         roles: [],
     });
@@ -53,10 +54,6 @@ const UserCreatePage = () => {
     };
 
     const postData = () => {
-        transform((data) => ({
-            ...data,
-            roles: data.roles.map((role) => role.value),
-        }));
         post('/user/create', {
             onSuccess: (res) => {
                 reset();
@@ -73,21 +70,22 @@ const UserCreatePage = () => {
         });
     };
 
+    const handleChangeRoles = React.useCallback((values: Option[]) => {
+        setData('roles', values.map((v: Option) => v.value));
+    }, [setData]);
+
+
+    const handleChangeEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setData('email', e.target.value);
+    };
+
     const rolesOptions: Option[] = useMemo(() => {
         return roles.data.map((role) => ({
             label: role.name,
             value: role.id,
             badgeColor: UserRoleStyle.getIntent(role.name),
         }));
-    }, [roles.data]);
-
-    const handleChangeRoles = (values: Option[]) => {
-        setData('roles', values);
-    };
-
-    const handleChangeEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
-        setData('email', e.target.value);
-    };
+    }, []);
 
     return (
         <Sheet onOpenChange={handleChange} open={open}>
@@ -110,7 +108,7 @@ const UserCreatePage = () => {
                         </GroupFormItem>
                         <GroupFormItem>
                             <Label htmlFor="roles">Roles</Label>
-                            <MultipleSelector options={rolesOptions} onChange={handleChangeRoles} />
+                            <MultipleSelector value={rolesOptions.filter((option) => data.roles.includes(option.value))} defaultOptions={rolesOptions} onChange={handleChangeRoles} />
                             {errors.roles && <FormMessage error>{errors.roles}</FormMessage>}
                         </GroupFormItem>
                         <input type="submit" hidden />
