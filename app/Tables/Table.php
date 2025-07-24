@@ -3,7 +3,9 @@
 namespace App\Tables;
 
 use App\Tables\Columns\Column;
+use App\Tables\FilterColumns\FilterColumn;
 use App\Tables\Traits\HasFilter;
+use App\Tables\Traits\HasGlobalSearch;
 use App\Tables\Traits\HasSortable;
 use App\Tables\Traits\HasToggleable;
 use App\Tables\Traits\TableState;
@@ -12,6 +14,7 @@ use Spatie\QueryBuilder\QueryBuilder;
 abstract class Table
 {
     use HasFilter;
+    use HasGlobalSearch;
     use HasSortable;
     use HasToggleable;
     use TableState;
@@ -22,6 +25,16 @@ abstract class Table
      * @return Column[]
      */
     abstract public function columns(): array;
+
+    /**
+     * Return array of Column instances.
+     *
+     * @return FilterColumn[]
+     */
+    public function filters(): array
+    {
+        return [];
+    }
 
     public function with(): array
     {
@@ -43,15 +56,30 @@ abstract class Table
 
     public function mapColumnsToSchema(): array
     {
-        return array_map(function (Column $column) {
-            return $column->toSchema();
-        }, $this->columns());
+        return array_reduce($this->columns(), function ($carry, Column $column) {
+            if ($column->isHidden()) {
+                return $carry;
+            }
+            $carry[] = $column->toSchema();
+
+            return $carry;
+        }, []);
+    }
+
+    public function mapFiltersToSchema(): array
+    {
+        return array_reduce($this->filters(), function ($carry, FilterColumn $filter) {
+            $carry[] = $filter->toArray();
+
+            return $carry;
+        }, []);
     }
 
     public function toSchema(): array
     {
         return [
             'columns' => $this->mapColumnsToSchema(),
+            'filters' => $this->mapFiltersToSchema(),
             'state' => $this->getState(),
         ];
     }
