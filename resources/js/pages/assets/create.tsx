@@ -1,5 +1,6 @@
 import AppContainer from '@/components/app-container';
 import AppTitle from '@/components/app-title';
+import { MultipleSelector, Option } from '@/components/multiple-selector';
 import { Button } from '@/components/ui/button';
 import { CalendarDatePicker } from '@/components/ui/calendar-date-picker';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,7 +8,6 @@ import { FormMessage } from '@/components/ui/form-message';
 import { GroupForm, GroupFormField, GroupFormGroup, GroupFormItem } from '@/components/ui/group-form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import MultipleSelector, { Option } from '@/components/ui/multiple-selector';
 import { Textarea } from '@/components/ui/textarea';
 import { useBreadcrumb } from '@/hooks/use-breadcrumb';
 import AppLayout from '@/layouts/app-layout';
@@ -21,10 +21,10 @@ const AssetsCreatePage = () => {
     const { component } = usePage();
     const breadcrumbs = useBreadcrumb(component);
 
-    const { data, setData, processing, errors, reset, transform, post } = useForm<FormField>({
+    const { data, setData, processing, errors, reset, post } = useForm<FormField>({
         name: '',
-        category_id: [],
-        manufacture_id: [],
+        category_id: '',
+        manufacture_id: '',
         serial_number: '',
         location: '',
         reference_link: '',
@@ -93,12 +93,6 @@ const AssetsCreatePage = () => {
     };
 
     const postAsset = () => {
-        transform((data) => ({
-            ...data,
-            category_id: data.category_id[0]?.value,
-            manufacture_id: data.manufacture_id[0]?.value,
-        }));
-
         post(route('asset.store'), {
             onSuccess: () => {
                 reset();
@@ -147,9 +141,9 @@ const AssetsCreatePage = () => {
                                         <MultipleSelector
                                             single
                                             triggerSearchOnFocus
-                                            value={data.category_id}
+                                            value={data.category_id ? [{ label: '', value: data.category_id }] : []}
                                             onSearch={async (value) => await onSearchCategory(value)}
-                                            onChange={(value) => setData('category_id', value)}
+                                            onChange={(value) => setData('category_id', value[0]?.value || '')}
                                         />
                                         {errors.category_id && <FormMessage error>{errors.category_id}</FormMessage>}
                                     </GroupFormField>
@@ -160,9 +154,9 @@ const AssetsCreatePage = () => {
                                         <MultipleSelector
                                             single
                                             triggerSearchOnFocus
-                                            value={data.manufacture_id}
+                                            value={data.manufacture_id ? [{ label: '', value: data.manufacture_id }] : []}
                                             onSearch={async (value) => await onSearchManufacture(value)}
-                                            onChange={(value) => setData('manufacture_id', value)}
+                                            onChange={(value) => setData('manufacture_id', value[0]?.value || '')}
                                         />
                                         {errors.manufacture_id && <FormMessage error>{errors.manufacture_id}</FormMessage>}
                                     </GroupFormField>
