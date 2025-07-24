@@ -9,6 +9,7 @@ enum AssetStatus: string
     case MAINTENANCE = 'maintenance';
     case LOST = 'lost';
     case SCRAPPED = 'scrapped';
+    case RETURNED = 'returned';
 
     public function label(): string
     {
@@ -18,6 +19,7 @@ enum AssetStatus: string
             self::MAINTENANCE => 'Maintenance',
             self::LOST => 'Lost',
             self::SCRAPPED => 'Scrapped',
+            self::RETURNED => 'Returned',
         };
     }
 }
