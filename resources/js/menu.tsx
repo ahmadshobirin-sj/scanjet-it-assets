@@ -18,8 +18,9 @@ export const mainNavItemsRaw: NavGroup[] = [
             {
                 title: 'Assignment',
                 icon: NotebookPen,
+                href: route('asset-assignment.index', undefined, false),
                 meta: {
-                    permission: ['asset.assignToUser'],
+                    permission: ['asset_assignment.viewAny'],
                 },
             },
             {
