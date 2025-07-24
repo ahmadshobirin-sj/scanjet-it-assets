@@ -291,7 +291,18 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
         useEffect(() => {
             if (value) {
                 const transformedValue = selectedTransformer ? value.map(selectedTransformer) : value;
-                setSelected(transformedValue);
+                // Only update if different to avoid infinite loop
+                setSelected((prevSelected) => {
+                    const prevValues = prevSelected.map((v) => v.value);
+                    const newValues = transformedValue.map((v) => v.value);
+                    const isEqual =
+                        prevValues.length === newValues.length &&
+                        prevValues.every((val, idx) => val === newValues[idx]);
+                    if (isEqual) {
+                        return prevSelected;
+                    }
+                    return transformedValue;
+                });
             }
         }, [value, selectedTransformer]);
 
@@ -302,9 +313,36 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
             }
             const transformedOptions = optionTransformer ? arrayOptions.map(optionTransformer) : arrayOptions;
             const newOption = transToGroupOption(transformedOptions, groupBy);
-            // Don't use JSON.stringify for comparison as it removes functions
-            // Instead, do a simple length/key comparison or always update
-            setOptions(newOption);
+
+            // Compare options to prevent unnecessary updates
+            setOptions(prevOptions => {
+                const prevKeys = Object.keys(prevOptions).sort();
+                const newKeys = Object.keys(newOption).sort();
+
+                // Check if keys are different
+                if (prevKeys.length !== newKeys.length || !prevKeys.every((key, idx) => key === newKeys[idx])) {
+                    return newOption;
+                }
+
+                // Check if option values are different
+                for (const key of prevKeys) {
+                    const prevVals = prevOptions[key] || [];
+                    const newVals = newOption[key] || [];
+
+                    if (prevVals.length !== newVals.length) {
+                        return newOption;
+                    }
+
+                    for (let i = 0; i < prevVals.length; i++) {
+                        if (prevVals[i].value !== newVals[i].value || prevVals[i].label !== newVals[i].label) {
+                            return newOption;
+                        }
+                    }
+                }
+
+                // No changes detected, return previous options
+                return prevOptions;
+            });
         }, [arrayDefaultOptions, arrayOptions, groupBy, onSearch, optionTransformer]);
 
         useEffect(() => {
@@ -574,7 +612,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                         className={cn(
                             'size-5',
                             (hideClearAllButton || disabled || selected.length < 1 || selected.filter((s) => s.fixed).length === selected.length) &&
-                                'hidden',
+                            'hidden',
                         )}
                     >
                         <X className="size-5" />
@@ -583,7 +621,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                         className={cn(
                             'size-5 text-muted-foreground/50',
                             (hideClearAllButton || disabled || selected.length >= 1 || selected.filter((s) => s.fixed).length !== selected.length) &&
-                                'hidden',
+                            'hidden',
                         )}
                     />
                 </div>
