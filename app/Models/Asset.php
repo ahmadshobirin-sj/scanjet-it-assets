@@ -17,7 +17,6 @@ class Asset extends Model
         'name',
         'category_id',
         'manufacture_id',
-        'model',
         'location',
         'serial_number',
         'asset_tag',
@@ -25,15 +24,13 @@ class Asset extends Model
         'purchase_date',
         'note',
         'reference_link',
-        'assigned_user_id',
-        'assigned_at',
         'status',
     ];
 
     protected $casts = [
         'warranty_expired' => 'date',
         'purchase_date' => 'date',
-        'assigned_at' => 'datetime',
+        'last_maintenance' => 'date',
     ];
 
     public function category()
@@ -46,8 +43,27 @@ class Asset extends Model
         return $this->belongsTo(Manufacture::class, 'manufacture_id');
     }
 
+    public function assignments()
+    {
+        return $this->hasMany(AssetAssignment::class, 'asset_id');
+    }
+
+    public function currentAssignment()
+    {
+        return $this->hasOne(AssetAssignment::class, 'asset_id')
+            ->where('status', 'assigned')
+            ->latest('assigned_at');
+    }
+
     public function assignedUser()
     {
-        return $this->belongsTo(ExternalUser::class, 'assigned_user_id');
+        return $this->hasOneThrough(
+            ExternalUser::class,
+            AssetAssignment::class,
+            'asset_id',
+            'id',
+            'id',
+            'assigned_user_id'
+        )->where('asset_assignments.status', 'assigned');
     }
 }
