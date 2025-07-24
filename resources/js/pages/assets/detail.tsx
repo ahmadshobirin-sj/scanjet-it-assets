@@ -95,6 +95,14 @@ const AssetsDetailPage = () => {
                                         <InfoListLabel>Email</InfoListLabel>
                                         <InfoListContent>{asset.data.assigned_user?.email || '-'}</InfoListContent>
                                     </InfoList>
+                                    <InfoList direction="column">
+                                        <InfoListLabel>Job title</InfoListLabel>
+                                        <InfoListContent>{asset.data.assigned_user?.job_title || '-'}</InfoListContent>
+                                    </InfoList>
+                                    <InfoList direction="column">
+                                        <InfoListLabel>Office location</InfoListLabel>
+                                        <InfoListContent>{asset.data.assigned_user?.office_location || '-'}</InfoListContent>
+                                    </InfoList>
                                 </InfoListGroup>
                             )}
                         </InfoListContainer>
