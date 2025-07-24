@@ -5,7 +5,6 @@ namespace App\Tables\Columns;
 use App\Tables\Sorts\AllowedSort;
 use Closure;
 use Illuminate\Support\Str;
-use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\Filters\Filter;
 use Spatie\QueryBuilder\Sorts\Sort;
 
@@ -21,8 +20,6 @@ class Column
 
     private Closure|Sort|null $customSort = null;
 
-    private bool $filterable = false;
-
     private ?string $filterType = null;
 
     private Closure|Filter|null $customFilter = null;
@@ -30,6 +27,8 @@ class Column
     private bool $globalSearchable = false;
 
     private bool $toggleable = false;
+
+    private bool $hidden = false;
 
     public function __construct(string $name)
     {
@@ -72,11 +71,6 @@ class Column
         return $this->customSort;
     }
 
-    public function isFilterable(): bool
-    {
-        return $this->filterable;
-    }
-
     public function getFilterType(): ?string
     {
         return $this->filterType;
@@ -95,6 +89,11 @@ class Column
     public function isToggleable(): bool
     {
         return $this->toggleable;
+    }
+
+    public function isHidden(): bool
+    {
+        return $this->hidden;
     }
 
     // Setters (Fluent Interface)
@@ -133,13 +132,6 @@ class Column
         return $this;
     }
 
-    public function setFilterable(bool $filterable): self
-    {
-        $this->filterable = $filterable;
-
-        return $this;
-    }
-
     public function setFilterType(?string $filterType): self
     {
         $this->filterType = $filterType;
@@ -164,6 +156,13 @@ class Column
     public function setToggleable(bool $toggleable): self
     {
         $this->toggleable = $toggleable;
+
+        return $this;
+    }
+
+    public function setHidden(bool $hidden): self
+    {
+        $this->hidden = $hidden;
 
         return $this;
     }
@@ -193,30 +192,6 @@ class Column
         return $this;
     }
 
-    public function filterable(bool|string $filterable = true, Closure|Filter|null $custom = null): self
-    {
-        if (is_bool($filterable)) {
-            $this->setFilterable($filterable);
-            if ($filterable) {
-                $this->setFilterType('partial');
-            }
-        } else {
-            $this->setFilterable(true);
-            $this->setFilterType($filterable);
-        }
-
-        if ($custom !== null) {
-            $this->setCustomFilter($custom);
-        }
-
-        // $this->setFilterable(true);
-        // $this->setFilterType($type);
-        // if ($custom !== null) {
-        //     $this->setCustomFilter($custom);
-        // }
-        return $this;
-    }
-
     public function globallySearchable(bool $globalSearchable = true): self
     {
         return $this->setGlobalSearchable($globalSearchable);
@@ -225,6 +200,11 @@ class Column
     public function toggleable(bool $toggleable = true): self
     {
         return $this->setToggleable($toggleable);
+    }
+
+    public function hidden(bool $hidden = true): self
+    {
+        return $this->setHidden($hidden);
     }
 
     // Utility Methods
@@ -243,26 +223,6 @@ class Column
         };
     }
 
-    public function getAllowedFilter(): AllowedFilter
-    {
-        if (! $this->isFilterable()) {
-            throw new \InvalidArgumentException("Column {$this->name} is not filterable.");
-        }
-
-        return match ($this->filterType) {
-            'partial' => AllowedFilter::partial($this->name),
-            'exact' => AllowedFilter::exact($this->name),
-            'scope' => AllowedFilter::scope($this->name),
-            'callback' => $this->customFilter
-                ? AllowedFilter::callback($this->name, $this->customFilter)
-                : throw new \InvalidArgumentException('Callback filterType requires customFilter.'),
-            'custom' => $this->customFilter
-                ? AllowedFilter::callback($this->name, $this->customFilter)
-                : throw new \InvalidArgumentException('Custom filterType requires customFilter.'),
-            default => throw new \InvalidArgumentException("Unknown filterType: {$this->filterType}")
-        };
-    }
-
     public function toArray(): array
     {
         return [
@@ -270,7 +230,6 @@ class Column
             'label' => $this->label,
             'sortable' => $this->sortable,
             'sortType' => $this->sortType,
-            'filterable' => $this->filterable,
             'filterType' => $this->filterType,
             'globalSearchable' => $this->globalSearchable,
             'toggleable' => $this->toggleable,
@@ -284,7 +243,6 @@ class Column
             'accessorKey' => $this->name,
             'header' => $this->label ?? Str::headline(implode(' ', explode('.', $this->name))),
             'enableSorting' => $this->sortable,
-            'enableColumnFilter' => $this->filterable,
             'enableGlobalFilter' => $this->globalSearchable,
             'enableHiding' => $this->toggleable,
         ];
