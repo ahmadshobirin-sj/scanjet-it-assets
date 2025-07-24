@@ -1,6 +1,6 @@
+import { MultipleSelector, Option } from '@/components/multiple-selector';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import MultipleSelector, { Option } from '@/components/ui/multiple-selector';
 import { X } from 'lucide-react';
 import { useCallback, useRef } from 'react';
 import { useDataGrid } from '../data-grid-provider';
@@ -35,11 +35,14 @@ export const DataGridFilterSelect = <TData,>({ field }: DataGridFilterSelectProp
                   const result: ExtendedOption = {
                       value: stringValue,
                       label: cachedData.label,
+                      optionContent: cachedData.optionContent,
+                      badgeContent: cachedData.badgeContent,
+                      badgeElement: cachedData.badgeElement,
                   };
 
                   // Add other properties except label and value
                   Object.keys(cachedData).forEach((key) => {
-                      if (key !== 'label' && key !== 'value') {
+                      if (key !== 'label' && key !== 'value' && key !== 'optionContent' && key !== 'badgeContent' && key !== 'badgeElement') {
                           result[key] = cachedData[key];
                       }
                   });
@@ -52,11 +55,14 @@ export const DataGridFilterSelect = <TData,>({ field }: DataGridFilterSelectProp
                       const result: ExtendedOption = {
                           value: stringValue,
                           label: option.label || stringValue,
+                          optionContent: option.optionContent,
+                          badgeContent: option.badgeContent,
+                          badgeElement: option.badgeElement,
                       };
 
                       // Add other properties except label and value
                       Object.keys(option).forEach((key) => {
-                          if (key !== 'label' && key !== 'value') {
+                          if (key !== 'label' && key !== 'value' && key !== 'optionContent' && key !== 'badgeContent' && key !== 'badgeElement') {
                               result[key] = option[key];
                           }
                       });
@@ -89,11 +95,14 @@ export const DataGridFilterSelect = <TData,>({ field }: DataGridFilterSelectProp
                     const extendedOption: ExtendedOption = {
                         value: String(result.value),
                         label: result.label,
+                        optionContent: result.optionContent,
+                        badgeContent: result.badgeContent,
+                        badgeElement: result.badgeElement,
                     };
 
                     // Add other properties except label and value
                     Object.keys(result).forEach((key) => {
-                        if (key !== 'label' && key !== 'value') {
+                        if (key !== 'label' && key !== 'value' && key !== 'optionContent' && key !== 'badgeContent' && key !== 'badgeElement') {
                             extendedOption[key] = result[key];
                         }
                     });
@@ -121,11 +130,21 @@ export const DataGridFilterSelect = <TData,>({ field }: DataGridFilterSelectProp
                             value: String(option.value),
                             label: option.label,
                             disable: Boolean(option.disable),
+                            optionContent: option.optionContent,
+                            badgeContent: option.badgeContent,
+                            badgeElement: option.badgeElement,
                         };
 
                         // Add other properties except label, value, and disable
                         Object.keys(option).forEach((key) => {
-                            if (key !== 'label' && key !== 'value' && key !== 'disable') {
+                            if (
+                                key !== 'label' &&
+                                key !== 'value' &&
+                                key !== 'disable' &&
+                                key !== 'optionContent' &&
+                                key !== 'badgeContent' &&
+                                key !== 'badgeElement'
+                            ) {
                                 extendedOption[key] = option[key];
                             }
                         });
@@ -156,11 +175,21 @@ export const DataGridFilterSelect = <TData,>({ field }: DataGridFilterSelectProp
                         value: String(option.value),
                         label: option.label,
                         disable: Boolean(option.disable),
+                        optionContent: option.optionContent,
+                        badgeContent: option.badgeContent,
+                        badgeElement: option.badgeElement,
                     };
 
                     // Add other properties except label, value, and disable
                     Object.keys(option).forEach((key) => {
-                        if (key !== 'label' && key !== 'value' && key !== 'disable') {
+                        if (
+                            key !== 'label' &&
+                            key !== 'value' &&
+                            key !== 'disable' &&
+                            key !== 'optionContent' &&
+                            key !== 'badgeContent' &&
+                            key !== 'badgeElement'
+                        ) {
                             extendedOption[key] = option[key];
                         }
                     });
@@ -183,11 +212,14 @@ export const DataGridFilterSelect = <TData,>({ field }: DataGridFilterSelectProp
                 const cacheData: DataGridSearchResult = {
                     label: option.label,
                     value: option.value,
+                    optionContent: option.optionContent,
+                    badgeContent: option.badgeContent,
+                    badgeElement: option.badgeElement,
                 };
 
                 // Add other properties except label and value
                 Object.keys(option).forEach((key) => {
-                    if (key !== 'label' && key !== 'value') {
+                    if (key !== 'label' && key !== 'value' && key !== 'optionContent' && key !== 'badgeContent' && key !== 'badgeElement') {
                         cacheData[key] = option[key];
                     }
                 });
