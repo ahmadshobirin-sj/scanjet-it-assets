@@ -1,5 +1,5 @@
 import { Command as CommandPrimitive, useCommandState } from 'cmdk';
-import { X, ChevronDownIcon } from 'lucide-react';
+import { ChevronDownIcon, X } from 'lucide-react';
 import * as React from 'react';
 import { forwardRef, useEffect } from 'react';
 
@@ -14,8 +14,14 @@ export interface Option {
     badgeColor?: string;
     /** fixed option that can't be removed. */
     fixed?: boolean;
+    /** Custom content to render in the option dropdown - overrides default label */
+    optionContent?: (option: Option) => React.ReactNode;
+    /** Custom content to render in the selected badge - overrides default label */
+    badgeContent?: (option: Option) => React.ReactNode;
+    /** Custom element to completely replace the badge - receives option and handlers */
+    badgeElement?: (props: { option: Option; onRemove: () => void; disabled?: boolean; fixed?: boolean }) => React.ReactNode;
     /** Group the options by providing key. */
-    [key: string]: string | boolean | undefined;
+    [key: string]: string | boolean | undefined | React.ReactNode | ((props: any) => React.ReactNode);
 }
 interface GroupOption {
     [key: string]: Option[];
@@ -23,9 +29,9 @@ interface GroupOption {
 
 interface MultipleSelectorProps {
     value?: Option[];
-    defaultOptions?: Option[];
+    defaultOptions?: Option[] | any[];
     /** manually controlled options */
-    options?: Option[];
+    options?: Option[] | any[];
     placeholder?: string;
     /** Loading component. */
     loadingIndicator?: React.ReactNode;
@@ -38,14 +44,14 @@ interface MultipleSelectorProps {
      * For example, when user click on the input, it will trigger the search to get initial options.
      **/
     triggerSearchOnFocus?: boolean;
-    /** async search */
-    onSearch?: (value: string) => Promise<Option[]>;
+    /** async search - can return raw backend data when using optionTransformer */
+    onSearch?: (value: string) => Promise<Option[] | any[]>;
     /**
      * sync search. This search will not showing loadingIndicator.
      * The rest props are the same as async search.
      * i.e.: creatable, groupBy, delay.
      **/
-    onSearchSync?: (value: string) => Option[];
+    onSearchSync?: (value: string) => Option[] | any[];
     onChange?: (options: Option[]) => void;
     /** Limit the maximum number of selected options. */
     maxSelected?: number;
@@ -70,14 +76,15 @@ interface MultipleSelectorProps {
     /** Props of `Command` */
     commandProps?: React.ComponentPropsWithoutRef<typeof Command>;
     /** Props of `CommandInput` */
-    inputProps?: Omit<
-        React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>,
-        'value' | 'placeholder' | 'disabled'
-    >;
+    inputProps?: Omit<React.ComponentPropsWithoutRef<typeof CommandPrimitive.Input>, 'value' | 'placeholder' | 'disabled'>;
     /** hide the clear all button. */
     hideClearAllButton?: boolean;
     /** Enable single value mode - only one option can be selected */
     single?: boolean;
+    /** Transform backend data to add custom render functions */
+    optionTransformer?: (option: any) => Option;
+    /** Transform selected options for custom badge rendering */
+    selectedTransformer?: (option: any) => Option;
 }
 
 export interface MultipleSelectorRef {
@@ -123,10 +130,11 @@ function transToGroupOption(options: Option[], groupBy?: string) {
 }
 
 function removePickedOption(groupOption: GroupOption, picked: Option[]) {
-    const cloneOption = JSON.parse(JSON.stringify(groupOption)) as GroupOption;
+    // Don't use JSON.parse/stringify as it removes functions
+    const cloneOption: GroupOption = {};
 
-    for (const [key, value] of Object.entries(cloneOption)) {
-        cloneOption[key] = value.filter((val) => !picked.find((p) => p.value === val.value));
+    for (const [key, value] of Object.entries(groupOption)) {
+        cloneOption[key] = value.filter((val) => !picked.find((p) => p.value === val.value)).map((option) => ({ ...option })); // Shallow copy to preserve functions
     }
     return cloneOption;
 }
@@ -146,23 +154,12 @@ function isOptionsExist(groupOption: GroupOption, targetOption: Option[]) {
  *
  * @reference: https://github.com/hsuanyi-chou/shadcn-ui-expansions/issues/34#issuecomment-1949561607
  **/
-const CommandEmpty = forwardRef<
-    HTMLDivElement,
-    React.ComponentProps<typeof CommandPrimitive.Empty>
->(({ className, ...props }, forwardedRef) => {
+const CommandEmpty = forwardRef<HTMLDivElement, React.ComponentProps<typeof CommandPrimitive.Empty>>(({ className, ...props }, forwardedRef) => {
     const render = useCommandState((state) => state.filtered.count === 0);
 
     if (!render) return null;
 
-    return (
-        <div
-            ref={forwardedRef}
-            className={cn('py-6 text-center text-sm', className)}
-            cmdk-empty=""
-            role="presentation"
-            {...props}
-        />
-    );
+    return <div ref={forwardedRef} className={cn('py-6 text-center text-sm', className)} cmdk-empty="" role="presentation" {...props} />;
 });
 
 CommandEmpty.displayName = 'CommandEmpty';
@@ -194,6 +191,8 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
             inputProps,
             hideClearAllButton = false,
             single = false,
+            optionTransformer,
+            selectedTransformer,
         }: MultipleSelectorProps,
         ref: React.Ref<MultipleSelectorRef>,
     ) => {
@@ -203,10 +202,14 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
         const [isLoading, setIsLoading] = React.useState(false);
         const dropdownRef = React.useRef<HTMLDivElement>(null);
 
-        const [selected, setSelected] = React.useState<Option[]>(value || []);
-        const [options, setOptions] = React.useState<GroupOption>(
-            transToGroupOption(arrayDefaultOptions, groupBy),
-        );
+        const [selected, setSelected] = React.useState<Option[]>(() => {
+            const initialValue = value || [];
+            return selectedTransformer ? initialValue.map(selectedTransformer) : initialValue;
+        });
+        const [options, setOptions] = React.useState<GroupOption>(() => {
+            const transformedDefaults = optionTransformer ? arrayDefaultOptions.map(optionTransformer) : arrayDefaultOptions;
+            return transToGroupOption(transformedDefaults, groupBy);
+        });
         const [inputValue, setInputValue] = React.useState('');
         const debouncedSearchTerm = useDebounce(inputValue, delay || 500);
 
@@ -287,27 +290,31 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
 
         useEffect(() => {
             if (value) {
-                setSelected(value);
+                const transformedValue = selectedTransformer ? value.map(selectedTransformer) : value;
+                setSelected(transformedValue);
             }
-        }, [value]);
+        }, [value, selectedTransformer]);
 
         useEffect(() => {
             /** If `onSearch` is provided, do not trigger options updated. */
             if (!arrayOptions || onSearch) {
                 return;
             }
-            const newOption = transToGroupOption(arrayOptions || [], groupBy);
-            if (JSON.stringify(newOption) !== JSON.stringify(options)) {
-                setOptions(newOption);
-            }
-        }, [arrayDefaultOptions, arrayOptions, groupBy, onSearch, options]);
+            const transformedOptions = optionTransformer ? arrayOptions.map(optionTransformer) : arrayOptions;
+            const newOption = transToGroupOption(transformedOptions, groupBy);
+            // Don't use JSON.stringify for comparison as it removes functions
+            // Instead, do a simple length/key comparison or always update
+            setOptions(newOption);
+        }, [arrayDefaultOptions, arrayOptions, groupBy, onSearch, optionTransformer]);
 
         useEffect(() => {
             /** sync search */
 
             const doSearchSync = () => {
                 const res = onSearchSync?.(debouncedSearchTerm);
-                setOptions(transToGroupOption(res || [], groupBy));
+                const rawOptions = res || [];
+                const transformedOptions = optionTransformer ? rawOptions.map(optionTransformer) : rawOptions;
+                setOptions(transToGroupOption(transformedOptions, groupBy));
             };
 
             const exec = async () => {
@@ -324,27 +331,32 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
 
             void exec();
             // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, [debouncedSearchTerm, groupBy, open, triggerSearchOnFocus]);
+        }, [debouncedSearchTerm, groupBy, open, triggerSearchOnFocus, optionTransformer]);
 
         useEffect(() => {
             /** async search */
             const doSearch = async () => {
                 if (searchCache.current[debouncedSearchTerm]) {
-                    setOptions(transToGroupOption(searchCache.current[debouncedSearchTerm], groupBy))
-                    setIsLoading(false)
-                    return
+                    const cachedOptions = searchCache.current[debouncedSearchTerm];
+                    const transformedOptions = optionTransformer ? cachedOptions.map(optionTransformer) : cachedOptions;
+                    setOptions(transToGroupOption(transformedOptions, groupBy));
+                    setIsLoading(false);
+                    return;
                 }
 
-                setIsLoading(true)
+                setIsLoading(true);
 
                 try {
-                    const res = await onSearch?.(debouncedSearchTerm)
-                    searchCache.current[debouncedSearchTerm] = res || []
-                    setOptions(transToGroupOption(res || [], groupBy))
+                    const res = await onSearch?.(debouncedSearchTerm);
+                    const rawOptions = res || [];
+                    searchCache.current[debouncedSearchTerm] = rawOptions;
+
+                    const transformedOptions = optionTransformer ? rawOptions.map(optionTransformer) : rawOptions;
+                    setOptions(transToGroupOption(transformedOptions, groupBy));
                 } finally {
-                    setIsLoading(false)
+                    setIsLoading(false);
                 }
-            }
+            };
 
             const exec = async () => {
                 if (!onSearch || !open) return;
@@ -360,14 +372,11 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
 
             void exec();
             // eslint-disable-next-line react-hooks/exhaustive-deps
-        }, [debouncedSearchTerm, groupBy, open, triggerSearchOnFocus]);
+        }, [debouncedSearchTerm, groupBy, open, triggerSearchOnFocus, optionTransformer]);
 
         const CreatableItem = () => {
             if (!creatable) return undefined;
-            if (
-                isOptionsExist(options, [{ value: inputValue, label: inputValue }]) ||
-                selected.find((s) => s.value === inputValue)
-            ) {
+            if (isOptionsExist(options, [{ value: inputValue, label: inputValue }]) || selected.find((s) => s.value === inputValue)) {
                 return undefined;
             }
 
@@ -428,10 +437,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
             return <CommandEmpty>{emptyIndicator}</CommandEmpty>;
         }, [creatable, emptyIndicator, onSearch, options]);
 
-        const selectables = React.useMemo<GroupOption>(
-            () => removePickedOption(options, selected),
-            [options, selected],
-        );
+        const selectables = React.useMemo<GroupOption>(() => removePickedOption(options, selected), [options, selected]);
 
         /** Avoid Creatable Selector freezing or lagging when paste a long string. */
         const commandFilter = React.useCallback(() => {
@@ -457,16 +463,14 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                     commandProps?.onKeyDown?.(e);
                 }}
                 className={cn('h-auto overflow-visible bg-transparent', commandProps?.className)}
-                shouldFilter={
-                    commandProps?.shouldFilter !== undefined ? commandProps.shouldFilter : !onSearch
-                } // When onSearch is provided, we don't want to filter the options. You can still override it.
+                shouldFilter={commandProps?.shouldFilter !== undefined ? commandProps.shouldFilter : !onSearch} // When onSearch is provided, we don't want to filter the options. You can still override it.
                 filter={commandFilter()}
             >
                 <div
                     className={cn(
                         'flex items-start justify-between rounded-md border border-input px-3 py-2 text-base md:text-sm',
-                        'focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]',
-                        'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
+                        'focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50',
+                        'aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40',
                         'shadow-xs transition-[color,box-shadow] outline-none',
                         {
                             'cursor-text': !disabled && selected.length !== 0,
@@ -480,6 +484,21 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                 >
                     <div className="relative flex flex-wrap gap-1">
                         {selected.map((option) => {
+                            // If custom badge element is provided, use it
+                            if (option.badgeElement) {
+                                return (
+                                    <div key={option.value}>
+                                        {option.badgeElement({
+                                            option,
+                                            onRemove: () => handleUnselect(option),
+                                            disabled: disabled,
+                                            fixed: option.fixed,
+                                        })}
+                                    </div>
+                                );
+                            }
+
+                            // Default badge with optional custom content
                             return (
                                 <Badge
                                     key={option.value}
@@ -492,11 +511,11 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                                     data-fixed={option.fixed}
                                     data-disabled={disabled || undefined}
                                 >
-                                    {option.label}
+                                    {option.badgeContent ? option.badgeContent(option) : option.label || 'Unknown'}
                                     <button
                                         type="button"
                                         className={cn(
-                                            'ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2',
+                                            'ml-1 rounded-full ring-offset-background outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
                                             (disabled || option.fixed) && 'hidden',
                                         )}
                                         onKeyDown={(e) => {
@@ -554,11 +573,8 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                         }}
                         className={cn(
                             'size-5',
-                            (hideClearAllButton ||
-                                disabled ||
-                                selected.length < 1 ||
-                                selected.filter((s) => s.fixed).length === selected.length) &&
-                            'hidden',
+                            (hideClearAllButton || disabled || selected.length < 1 || selected.filter((s) => s.fixed).length === selected.length) &&
+                                'hidden',
                         )}
                     >
                         <X className="size-5" />
@@ -566,18 +582,15 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                     <ChevronDownIcon
                         className={cn(
                             'size-5 text-muted-foreground/50',
-                            (hideClearAllButton ||
-                                disabled ||
-                                selected.length >= 1 ||
-                                selected.filter((s) => s.fixed).length !== selected.length) &&
-                            'hidden',
+                            (hideClearAllButton || disabled || selected.length >= 1 || selected.filter((s) => s.fixed).length !== selected.length) &&
+                                'hidden',
                         )}
                     />
                 </div>
                 <div className="relative">
                     {open && (
                         <CommandList
-                            className="absolute top-1 z-10 w-full rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in"
+                            className="absolute top-1 z-10 w-full rounded-md border bg-popover text-popover-foreground shadow-md animate-in outline-none"
                             onMouseLeave={() => {
                                 setOnScrollbar(false);
                             }}
@@ -589,7 +602,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                             }}
                         >
                             {isLoading ? (
-                                <>{loadingIndicator || <p className="text-sm text-muted-foreground text-center">Loading...</p>}</>
+                                <>{loadingIndicator || <p className="text-center text-sm text-muted-foreground">Loading...</p>}</>
                             ) : (
                                 <>
                                     {EmptyItem()}
@@ -623,12 +636,9 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                                                                     inputRef.current?.blur();
                                                                 }
                                                             }}
-                                                            className={cn(
-                                                                'cursor-pointer',
-                                                                option.disable && 'cursor-default text-muted-foreground',
-                                                            )}
+                                                            className={cn('cursor-pointer', option.disable && 'cursor-default text-muted-foreground')}
                                                         >
-                                                            {option.label}
+                                                            {option.optionContent ? option.optionContent(option) : option.label || 'Unknown'}
                                                         </CommandItem>
                                                     );
                                                 })}
