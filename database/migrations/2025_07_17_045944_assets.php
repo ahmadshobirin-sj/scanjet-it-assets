@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('assets', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name');
+            $table->string('asset_tag')->nullable();
             $table->string('location')->nullable();
             $table->string('serial_number')->unique()->nullable();
             $table->date('warranty_expired')->nullable();
@@ -28,9 +29,6 @@ return new class extends Migration
             $table->foreign('manufacture_id')->references('id')->on('manufactures')->onDelete('restrict');
 
             $table->enum('status', ['available', 'assigned', 'maintenance', 'lost', 'scrapped'])->default('available');
-
-            $table->string('assigned_user_id')->nullable();
-            $table->timestamp('assigned_at')->nullable();
 
             $table->string('reference_link')->nullable();
 
