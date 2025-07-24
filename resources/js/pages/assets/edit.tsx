@@ -1,5 +1,6 @@
 import AppContainer from '@/components/app-container';
 import AppTitle from '@/components/app-title';
+import { MultipleSelector, Option } from '@/components/multiple-selector';
 import { Button } from '@/components/ui/button';
 import { CalendarDatePicker } from '@/components/ui/calendar-date-picker';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,7 +8,6 @@ import { FormMessage } from '@/components/ui/form-message';
 import { GroupForm, GroupFormField, GroupFormGroup, GroupFormItem } from '@/components/ui/group-form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import MultipleSelector, { Option } from '@/components/ui/multiple-selector';
 import { Textarea } from '@/components/ui/textarea';
 import { useBreadcrumb } from '@/hooks/use-breadcrumb';
 import AppLayout from '@/layouts/app-layout';
@@ -26,10 +26,10 @@ const AssetUpdatePage = () => {
     } = usePage<SharedData & { asset: ResponseResource<Asset> }>();
     const breadcrumbs = useBreadcrumb(component);
 
-    const { data, setData, processing, errors, reset, transform, put, setDefaults } = useForm<FormField>({
+    const { data, setData, processing, errors, reset, put, setDefaults } = useForm<FormField>({
         name: '',
-        category_id: [],
-        manufacture_id: [],
+        category_id: '',
+        manufacture_id: '',
         serial_number: '',
         location: '',
         reference_link: '',
@@ -39,8 +39,8 @@ const AssetUpdatePage = () => {
     useEffect(() => {
         const value: FormField = {
             name: asset.data.name,
-            category_id: asset.data.category ? [{ label: asset.data.category.name, value: asset.data.category.id }] : [],
-            manufacture_id: asset.data.manufacture ? [{ label: asset.data.manufacture.name, value: asset.data.manufacture.id }] : [],
+            category_id: asset.data.category ? asset.data.category.id : '',
+            manufacture_id: asset.data.manufacture ? asset.data.manufacture.id : '',
             serial_number: asset.data.serial_number || '',
             location: asset.data.location || '',
             reference_link: asset.data.reference_link || '',
@@ -119,12 +119,6 @@ const AssetUpdatePage = () => {
     };
 
     const putAsset = () => {
-        transform((data) => ({
-            ...data,
-            category_id: data.category_id[0]?.value,
-            manufacture_id: data.manufacture_id[0]?.value,
-        }));
-
         put(route('asset.update', { asset: asset.data.id }), {
             onSuccess: () => {
                 reset();
@@ -179,9 +173,9 @@ const AssetUpdatePage = () => {
                                         <MultipleSelector
                                             single
                                             triggerSearchOnFocus
-                                            value={data.category_id}
+                                            value={data.category_id ? [{ label: asset.data.category?.name || '', value: data.category_id }] : []}
                                             onSearch={async (value) => await onSearchCategory(value)}
-                                            onChange={(value) => setData('category_id', value)}
+                                            onChange={(value) => setData('category_id', value[0]?.value || '')}
                                         />
                                         {errors.category_id && <FormMessage error>{errors.category_id}</FormMessage>}
                                     </GroupFormField>
@@ -192,9 +186,9 @@ const AssetUpdatePage = () => {
                                         <MultipleSelector
                                             single
                                             triggerSearchOnFocus
-                                            value={data.manufacture_id}
+                                            value={data.manufacture_id ? [{ label: asset.data.manufacture?.name || '', value: data.manufacture_id }] : []}
                                             onSearch={async (value) => await onSearchManufacture(value)}
-                                            onChange={(value) => setData('manufacture_id', value)}
+                                            onChange={(value) => setData('manufacture_id', value[0]?.value || '')}
                                         />
                                         {errors.manufacture_id && <FormMessage error>{errors.manufacture_id}</FormMessage>}
                                     </GroupFormField>
