@@ -105,7 +105,7 @@ export interface AssetCategory {
     f_updated_at: string;
 }
 
-export type AssetStatus = 'available' | 'assigned' | 'maintenance' | 'lost' | 'scrapped';
+export type AssetStatus = 'available' | 'assigned' | 'maintenance' | 'lost' | 'scrapped' | 'returned';
 
 export interface Asset {
     id: string;
