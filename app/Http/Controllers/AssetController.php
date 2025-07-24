@@ -30,11 +30,11 @@ class AssetController extends Controller
     {
         $this->authorize('viewAny', Asset::class);
 
-        $assets = AssetResource::collection(
+        $assets = Inertia::optional(fn() => AssetResource::collection(
             $this->assetService->getAll()
-        );
+        ));
 
-        $tableSchema = $this->assetService->getTable()->toSchema();
+        $tableSchema = Inertia::optional(fn() => $this->assetService->getTable()->toSchema());
 
         return Inertia::render('assets/list', [
             'assets' => $assets,
@@ -49,9 +49,9 @@ class AssetController extends Controller
     {
         $this->authorize('create', Asset::class);
 
-        $manufactures = Inertia::optional(fn () => $this->manufactureService->getAll($request));
+        $manufactures = Inertia::optional(fn() => $this->manufactureService->getAll($request));
 
-        $categories = Inertia::optional(fn () => $this->assetCategoryService->getAll($request));
+        $categories = Inertia::optional(fn() => $this->assetCategoryService->getAll($request));
 
         return Inertia::render('assets/create', [
             'manufactures' => $manufactures,
@@ -88,10 +88,7 @@ class AssetController extends Controller
 
         $asset->loadMissing([
             'category',
-            'manufacture',
-            'assigned_user' => function ($query) {
-                $query->select('id', 'name', 'email', 'office_location', 'job_title'); // hanya ambil kolom id dan name
-            },
+            'manufacture'
         ]);
 
         return Inertia::render('assets/detail', [
@@ -111,9 +108,9 @@ class AssetController extends Controller
             'manufacture',
         ]);
 
-        $manufactures = Inertia::optional(fn () => $this->manufactureService->getAll());
+        $manufactures = Inertia::optional(fn() => $this->manufactureService->getAll());
 
-        $categories = Inertia::optional(fn () => $this->assetCategoryService->getAll());
+        $categories = Inertia::optional(fn() => $this->assetCategoryService->getAll());
 
         return Inertia::render('assets/edit', [
             'asset' => new AssetResource($asset),
