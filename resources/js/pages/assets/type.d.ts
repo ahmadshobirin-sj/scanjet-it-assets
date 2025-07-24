@@ -1,9 +1,7 @@
-import { Option } from '@/components/ui/multiple-selector';
-
 export type FormField = {
     name: string;
-    category_id: Option[];
-    manufacture_id: Option[];
+    category_id: string;
+    manufacture_id: string;
     serial_number?: string;
     location: string;
     warranty_expired?: Date;
