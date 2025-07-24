@@ -13,8 +13,13 @@ trait HasTable
     {
         $this->table = $table;
 
+        $filters = collect($table->globalSearchResolver())
+            ->merge($table->filterResolver())
+            ->filter(fn ($item) => filled($item))
+            ->toArray();
+
         $query = QueryBuilder::for($modelClass)
-            ->allowedFilters($table->filters())
+            ->allowedFilters($filters)
             ->allowedSorts($table->sorts())
             ->defaultSort($table->defaultSort());
 
