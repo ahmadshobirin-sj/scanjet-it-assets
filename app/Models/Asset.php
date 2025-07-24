@@ -54,16 +54,4 @@ class Asset extends Model
             ->where('status', 'assigned')
             ->latest('assigned_at');
     }
-
-    public function assignedUser()
-    {
-        return $this->hasOneThrough(
-            ExternalUser::class,
-            AssetAssignment::class,
-            'asset_id',
-            'id',
-            'id',
-            'assigned_user_id'
-        )->where('asset_assignments.status', 'assigned');
-    }
 }

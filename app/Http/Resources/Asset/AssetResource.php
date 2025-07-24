@@ -28,7 +28,6 @@ class AssetResource extends JsonResource
             'reference_link' => $this->reference_link,
             'category' => new AssetCategoryResource($this->whenLoaded('category')),
             'manufacture' => new ManufactureResource($this->whenLoaded('manufacture')),
-            'assigned_user' => new AssetAssignedUserResource($this->whenLoaded('assigned_user')),
             'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
