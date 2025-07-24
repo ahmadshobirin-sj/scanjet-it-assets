@@ -12,8 +12,26 @@ class ExternalUser extends Model
 
     protected $keyType = 'string';
 
+    public function assetAssignments()
+    {
+        return $this->hasMany(AssetAssignment::class, 'assigned_user_id');
+    }
+
+    public function currentAssetAssignments()
+    {
+        return $this->hasMany(AssetAssignment::class, 'assigned_user_id')
+            ->where('status', 'assigned');
+    }
+
     public function assets()
     {
-        return $this->hasMany(Asset::class, 'assigned_user_id');
+        return $this->hasManyThrough(
+            Asset::class,
+            AssetAssignment::class,
+            'assigned_user_id',
+            'id',
+            'id',
+            'asset_id'
+        )->where('asset_assignments.status', 'assigned');
     }
 }
