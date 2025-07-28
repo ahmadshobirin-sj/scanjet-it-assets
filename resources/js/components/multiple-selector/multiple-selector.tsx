@@ -21,7 +21,7 @@ export interface Option {
     /** Custom element to completely replace the badge - receives option and handlers */
     badgeElement?: (props: { option: Option; onRemove: () => void; disabled?: boolean; fixed?: boolean }) => React.ReactNode;
     /** Group the options by providing key. */
-    [key: string]: string | boolean | undefined | React.ReactNode | ((props: any) => React.ReactNode);
+    [key: string]: any;
 }
 interface GroupOption {
     [key: string]: Option[];
@@ -197,6 +197,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
         ref: React.Ref<MultipleSelectorRef>,
     ) => {
         const inputRef = React.useRef<HTMLInputElement>(null);
+        const inputContainerRef = React.useRef<HTMLInputElement>(null);
         const [open, setOpen] = React.useState(false);
         const [onScrollbar, setOnScrollbar] = React.useState(false);
         const [isLoading, setIsLoading] = React.useState(false);
@@ -295,9 +296,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                 setSelected((prevSelected) => {
                     const prevValues = prevSelected.map((v) => v.value);
                     const newValues = transformedValue.map((v) => v.value);
-                    const isEqual =
-                        prevValues.length === newValues.length &&
-                        prevValues.every((val, idx) => val === newValues[idx]);
+                    const isEqual = prevValues.length === newValues.length && prevValues.every((val, idx) => val === newValues[idx]);
                     if (isEqual) {
                         return prevSelected;
                     }
@@ -315,7 +314,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
             const newOption = transToGroupOption(transformedOptions, groupBy);
 
             // Compare options to prevent unnecessary updates
-            setOptions(prevOptions => {
+            setOptions((prevOptions) => {
                 const prevKeys = Object.keys(prevOptions).sort();
                 const newKeys = Object.keys(newOption).sort();
 
@@ -500,7 +499,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                     handleKeyDown(e);
                     commandProps?.onKeyDown?.(e);
                 }}
-                className={cn('h-auto overflow-visible bg-transparent', commandProps?.className)}
+                className={cn('h-auto overflow-visible', commandProps?.className)}
                 shouldFilter={commandProps?.shouldFilter !== undefined ? commandProps.shouldFilter : !onSearch} // When onSearch is provided, we don't want to filter the options. You can still override it.
                 filter={commandFilter()}
             >
@@ -519,6 +518,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                         if (disabled) return;
                         inputRef?.current?.focus();
                     }}
+                    ref={inputContainerRef}
                 >
                     <div className="relative flex flex-wrap gap-1">
                         {selected.map((option) => {
@@ -612,7 +612,7 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                         className={cn(
                             'size-5',
                             (hideClearAllButton || disabled || selected.length < 1 || selected.filter((s) => s.fixed).length === selected.length) &&
-                            'hidden',
+                                'hidden',
                         )}
                     >
                         <X className="size-5" />
@@ -621,11 +621,11 @@ const MultipleSelector = React.forwardRef<MultipleSelectorRef, MultipleSelectorP
                         className={cn(
                             'size-5 text-muted-foreground/50',
                             (hideClearAllButton || disabled || selected.length >= 1 || selected.filter((s) => s.fixed).length !== selected.length) &&
-                            'hidden',
+                                'hidden',
                         )}
                     />
                 </div>
-                <div className="relative">
+                <div className="relative" style={{ width: inputContainerRef?.current?.clientWidth || '100%' }}>
                     {open && (
                         <CommandList
                             className="absolute top-1 z-10 w-full rounded-md border bg-popover text-popover-foreground shadow-md animate-in outline-none"
