@@ -1,4 +1,3 @@
-import React from 'react';
 import { MultipleSelector, Option } from '@/components/multiple-selector';
 import { Button } from '@/components/ui/button';
 import { FormMessage } from '@/components/ui/form-message';
@@ -23,7 +22,7 @@ import { SharedData } from '@/types';
 import { ResponseCollection, Role } from '@/types/model';
 import { useForm, usePage } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
-import { FormEvent, useMemo } from 'react';
+import React, { FormEvent, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 
 const UserCreatePage = () => {
@@ -70,10 +69,15 @@ const UserCreatePage = () => {
         });
     };
 
-    const handleChangeRoles = React.useCallback((values: Option[]) => {
-        setData('roles', values.map((v: Option) => v.value));
-    }, [setData]);
-
+    const handleChangeRoles = useCallback(
+        (values: Option[]) => {
+            setData(
+                'roles',
+                values.map((v: Option) => v.value),
+            );
+        },
+        [setData],
+    );
 
     const handleChangeEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
         setData('email', e.target.value);
@@ -85,7 +89,7 @@ const UserCreatePage = () => {
             value: role.id,
             badgeColor: UserRoleStyle.getIntent(role.name),
         }));
-    }, []);
+    }, [roles.data]);
 
     return (
         <Sheet onOpenChange={handleChange} open={open}>
@@ -108,7 +112,11 @@ const UserCreatePage = () => {
                         </GroupFormItem>
                         <GroupFormItem>
                             <Label htmlFor="roles">Roles</Label>
-                            <MultipleSelector value={rolesOptions.filter((option) => data.roles.includes(option.value))} defaultOptions={rolesOptions} onChange={handleChangeRoles} />
+                            <MultipleSelector
+                                value={rolesOptions.filter((option) => data.roles.includes(option.value))}
+                                defaultOptions={rolesOptions}
+                                onChange={handleChangeRoles}
+                            />
                             {errors.roles && <FormMessage error>{errors.roles}</FormMessage>}
                         </GroupFormItem>
                         <input type="submit" hidden />
