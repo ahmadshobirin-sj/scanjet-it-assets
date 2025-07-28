@@ -13,7 +13,7 @@ import {
 } from "date-fns";
 import { toDate, formatInTimeZone } from "date-fns-tz";
 import { DateRange } from "react-day-picker";
-import { cva, VariantProps } from "class-variance-authority";
+import { VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -46,31 +46,30 @@ const months = [
     "December",
 ];
 
-const multiSelectVariants = cva(
-    "w-auto justify-start text-left flex items-center whitespace-nowrap rounded-md text-sm font-medium text-foreground ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none shadow-xs disabled:opacity-50",
-    {
-        variants: {
-            variant: {
-                default: "bg-primary text-primary-foreground hover:bg-primary/90",
-                destructive:
-                    "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-                outline:
-                    "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-                secondary:
-                    "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-                ghost: "hover:bg-accent hover:text-accent-foreground text-background",
-                link: "text-primary underline-offset-4 hover:underline text-background",
-            },
-        },
-        defaultVariants: {
-            variant: "default",
-        },
-    }
-);
+// const multiSelectVariants = cva(
+//     "w-auto justify-start text-left flex items-center whitespace-nowrap rounded-md text-sm font-medium text-foreground ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none shadow-xs disabled:opacity-50",
+//     {
+//         variants: {
+//             variant: {
+//                 default: "bg-primary text-primary-foreground hover:bg-primary/90",
+//                 destructive:
+//                     "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+//                 outline:
+//                     "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
+//                 secondary:
+//                     "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+//                 ghost: "hover:bg-accent hover:text-accent-foreground text-background",
+//                 link: "text-primary underline-offset-4 hover:underline text-background",
+//             },
+//         },
+//         defaultVariants: {
+//             variant: "default",
+//         },
+//     }
+// );
 
 interface CalendarDatePickerProps
-    extends React.HTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof multiSelectVariants> {
+    extends React.HTMLAttributes<HTMLButtonElement> {
     id?: string;
     className?: string;
     date: DateRange;
@@ -78,6 +77,9 @@ interface CalendarDatePickerProps
     numberOfMonths?: 1 | 2;
     yearsRange?: number;
     onDateSelect: (range: { from: Date; to: Date }) => void;
+    intent?: VariantProps<typeof Button>["intent"];
+    variant?: VariantProps<typeof Button>["variant"];
+    calendarClassName?: string;
 }
 
 export const CalendarDatePicker = React.forwardRef<
@@ -94,6 +96,7 @@ export const CalendarDatePicker = React.forwardRef<
             yearsRange = 10,
             onDateSelect,
             variant,
+            calendarClassName,
             ...props
         },
         ref
@@ -311,11 +314,10 @@ export const CalendarDatePicker = React.forwardRef<
                             id="date"
                             ref={ref}
                             {...props}
-                            className={cn(
-                                multiSelectVariants({ variant, className })
-                            )}
+                            variant={variant}
                             onClick={handleTogglePopover}
                             suppressHydrationWarning
+                            className={cn("w-auto justify-start text-left flex items-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none shadow-xs disabled:opacity-50", className)}
                         >
                             <CalendarIcon className="mr-2 h-4 w-4" />
                             <span>
@@ -549,7 +551,7 @@ export const CalendarDatePicker = React.forwardRef<
                                             onSelect={handleDateSelect}
                                             numberOfMonths={numberOfMonths}
                                             showOutsideDays={false}
-                                            className={className}
+                                            className={cn(calendarClassName)}
                                         />
                                     </div>
                                 </div>
