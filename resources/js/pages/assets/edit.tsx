@@ -186,7 +186,9 @@ const AssetUpdatePage = () => {
                                         <MultipleSelector
                                             single
                                             triggerSearchOnFocus
-                                            value={data.manufacture_id ? [{ label: asset.data.manufacture?.name || '', value: data.manufacture_id }] : []}
+                                            value={
+                                                data.manufacture_id ? [{ label: asset.data.manufacture?.name || '', value: data.manufacture_id }] : []
+                                            }
                                             onSearch={async (value) => await onSearchManufacture(value)}
                                             onChange={(value) => setData('manufacture_id', value[0]?.value || '')}
                                         />
