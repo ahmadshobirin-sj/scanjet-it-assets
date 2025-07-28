@@ -239,8 +239,9 @@ const searchUsers = async (searchValue: string) => {
                             {user.avatar}
                         </div>
                         <div
-                            className={`absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full border-2 border-white ${user.status === 'online' ? 'bg-green-500' : user.status === 'busy' ? 'bg-red-500' : 'bg-gray-400'
-                                }`}
+                            className={`absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full border-2 border-white ${
+                                user.status === 'online' ? 'bg-green-500' : user.status === 'busy' ? 'bg-red-500' : 'bg-gray-400'
+                            }`}
                         ></div>
                     </div>
                     <div className="flex-1">
@@ -258,8 +259,9 @@ const searchUsers = async (searchValue: string) => {
                             {user.avatar}
                         </div>
                         <div
-                            className={`absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full border border-white ${user.status === 'online' ? 'bg-green-500' : user.status === 'busy' ? 'bg-red-500' : 'bg-gray-400'
-                                }`}
+                            className={`absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full border border-white ${
+                                user.status === 'online' ? 'bg-green-500' : user.status === 'busy' ? 'bg-red-500' : 'bg-gray-400'
+                            }`}
                         ></div>
                     </div>
                     <span className="text-gray-700">{user.name}</span>
