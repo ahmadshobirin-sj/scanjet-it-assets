@@ -36,7 +36,7 @@ const UserUpdatePage = forwardRef<UserUpdatePageRef, { user: User | null; onClos
             value: role.id,
             badgeColor: UserRoleStyle.getIntent(role.name),
         }));
-    }, []);
+    }, [roles.data]);
 
     const { open, setOpen, handleChange } = useControlledModal({
         shouldConfirmClose: () => isDirty,
@@ -102,7 +102,10 @@ const UserUpdatePage = forwardRef<UserUpdatePageRef, { user: User | null; onClos
     );
 
     const handleChangeRoles = (values: Option[]) => {
-        setData('roles', values.map(option => option.value));
+        setData(
+            'roles',
+            values.map((option) => option.value),
+        );
     };
 
     const handleChangeEmail = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -125,7 +128,11 @@ const UserUpdatePage = forwardRef<UserUpdatePageRef, { user: User | null; onClos
                         </GroupFormItem>
                         <GroupFormItem>
                             <Label htmlFor="roles">Roles</Label>
-                            <MultipleSelector value={rolesOptions.filter(option => data.roles.includes(option.value))} defaultOptions={rolesOptions} onChange={handleChangeRoles} />
+                            <MultipleSelector
+                                value={rolesOptions.filter((option) => data.roles.includes(option.value))}
+                                defaultOptions={rolesOptions}
+                                onChange={handleChangeRoles}
+                            />
                             {errors.roles && <FormMessage error>{errors.roles}</FormMessage>}
                         </GroupFormItem>
                         <input type="submit" hidden />
