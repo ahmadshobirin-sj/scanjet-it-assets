@@ -272,12 +272,13 @@ const userTransformer = (user: BackendUser): Option => ({
                     </AvatarFallback>
                 </Avatar>
                 <div
-                    className={`absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full border-2 border-white ${(user?.status || 'offline') === 'online'
-                        ? 'bg-green-500'
-                        : (user?.status || 'offline') === 'busy'
-                            ? 'bg-yellow-500'
-                            : 'bg-gray-400'
-                        }`}
+                    className={`absolute -right-0.5 -bottom-0.5 h-3 w-3 rounded-full border-2 border-white ${
+                        (user?.status || 'offline') === 'online'
+                            ? 'bg-green-500'
+                            : (user?.status || 'offline') === 'busy'
+                              ? 'bg-yellow-500'
+                              : 'bg-gray-400'
+                    }`}
                 />
             </div>
             <div className="min-w-0 flex-1">
@@ -327,12 +328,13 @@ const userTransformer = (user: BackendUser): Option => ({
                     </AvatarFallback>
                 </Avatar>
                 <div
-                    className={`absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full border border-white ${(user?.status || 'offline') === 'online'
-                        ? 'bg-green-500'
-                        : (user?.status || 'offline') === 'busy'
-                            ? 'bg-yellow-500'
-                            : 'bg-gray-400'
-                        }`}
+                    className={`absolute -right-0.5 -bottom-0.5 h-2 w-2 rounded-full border border-white ${
+                        (user?.status || 'offline') === 'online'
+                            ? 'bg-green-500'
+                            : (user?.status || 'offline') === 'busy'
+                              ? 'bg-yellow-500'
+                              : 'bg-gray-400'
+                    }`}
                 />
             </div>
             <div className="min-w-0 flex-1">
@@ -415,12 +417,13 @@ const projectTransformer = (project: BackendProject): Option => ({
     optionContent: () => (
         <div className="flex items-center gap-3 py-2">
             <div
-                className={`flex h-10 w-10 items-center justify-center rounded-lg text-white ${(project?.priority || 'medium') === 'high'
-                    ? 'bg-red-500'
-                    : (project?.priority || 'medium') === 'medium'
-                        ? 'bg-yellow-500'
-                        : 'bg-green-500'
-                    }`}
+                className={`flex h-10 w-10 items-center justify-center rounded-lg text-white ${
+                    (project?.priority || 'medium') === 'high'
+                        ? 'bg-red-500'
+                        : (project?.priority || 'medium') === 'medium'
+                          ? 'bg-yellow-500'
+                          : 'bg-green-500'
+                }`}
             >
                 <Star className="h-5 w-5" />
             </div>
@@ -435,8 +438,8 @@ const projectTransformer = (project: BackendProject): Option => ({
                             (project?.status || 'active') === 'active'
                                 ? 'success'
                                 : (project?.status || 'active') === 'completed'
-                                    ? 'info'
-                                    : 'warning'
+                                  ? 'info'
+                                  : 'warning'
                         }
                     >
                         {project?.status || 'active'}
@@ -465,12 +468,13 @@ const projectTransformer = (project: BackendProject): Option => ({
     badgeContent: () => (
         <div className="flex items-center gap-2">
             <div
-                className={`flex h-4 w-4 items-center justify-center rounded text-xs text-white ${(project?.priority || 'medium') === 'high'
-                    ? 'bg-red-500'
-                    : (project?.priority || 'medium') === 'medium'
-                        ? 'bg-yellow-500'
-                        : 'bg-green-500'
-                    }`}
+                className={`flex h-4 w-4 items-center justify-center rounded text-xs text-white ${
+                    (project?.priority || 'medium') === 'high'
+                        ? 'bg-red-500'
+                        : (project?.priority || 'medium') === 'medium'
+                          ? 'bg-yellow-500'
+                          : 'bg-green-500'
+                }`}
             >
                 <Star className="h-2.5 w-2.5" />
             </div>
