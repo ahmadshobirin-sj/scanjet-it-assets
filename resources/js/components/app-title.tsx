@@ -11,11 +11,20 @@ export type AppTitleProps = {
         title?: string;
         description?: string;
     };
+    containerClassName?: string;
 } & React.HTMLAttributes<HTMLDivElement>;
 
-const AppTitle: FC<AppTitleProps> = ({ title = 'AppTitle', subtitle = 'Subtitle goes here', actions, className, head, ...props }) => {
+const AppTitle: FC<AppTitleProps> = ({
+    title = 'AppTitle',
+    subtitle = 'Subtitle goes here',
+    actions,
+    className,
+    containerClassName,
+    head,
+    ...props
+}) => {
     return (
-        <Card>
+        <Card className={cn(containerClassName)}>
             <CardContent>
                 <div className={cn('flex items-center justify-between gap-4', className)} {...props}>
                     <Head>
