@@ -102,15 +102,15 @@ const AssetListPage = () => {
 
     const handlePaginationChange = useCallback((pagination: PaginationState) => {
         updateTableState({ pagination });
-    }, []);
+    }, [updateTableState]);
 
     const handleSortingChange = useCallback((sorting: SortingState) => {
         updateTableState({ sorting });
-    }, []);
+    }, [updateTableState]);
 
     const handleFilterChange = useCallback((globalFilter: string) => {
         updateTableState({ globalFilter });
-    }, []);
+    }, [updateTableState]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -146,10 +146,7 @@ const AssetListPage = () => {
                     <DataGrid
                         rows={assets?.data || []}
                         columns={columns}
-                        tableState={{
-                            ...tableState,
-                            sorting: tableState?.sorting || [{ id: 'created_at', desc: true }],
-                        }}
+                        tableState={tableState}
                         pageSizeOptions={[10, 25, 50]}
                         isLoading={isLoading}
                         rowCount={assets?.meta?.total || 0}
