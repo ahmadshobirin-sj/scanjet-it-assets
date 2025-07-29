@@ -53,8 +53,6 @@ export interface User {
     roles: Role[];
     created_at: string;
     updated_at: string;
-    f_created_at: string;
-    f_updated_at: string;
 }
 
 export interface Role {
@@ -137,4 +135,19 @@ export interface AssetAssignedUser {
     email: string;
     job_title: string;
     office_location: string;
+}
+
+export interface AssetAssignment {
+    id: string;
+    asset_id: string;
+    assigned_user_id: string;
+    user_id: string;
+    note: string | null;
+    status: string;
+    condition: string;
+    assigned_at: string | null;
+    returned_at: string | null;
+    asset: Asset;
+    assignedUser: AssetAssignedUser | null;
+    assignedBy: User | null;
 }
