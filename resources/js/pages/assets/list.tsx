@@ -100,17 +100,26 @@ const AssetListPage = () => {
         [setTableState],
     );
 
-    const handlePaginationChange = useCallback((pagination: PaginationState) => {
-        updateTableState({ pagination });
-    }, [updateTableState]);
+    const handlePaginationChange = useCallback(
+        (pagination: PaginationState) => {
+            updateTableState({ pagination });
+        },
+        [updateTableState],
+    );
 
-    const handleSortingChange = useCallback((sorting: SortingState) => {
-        updateTableState({ sorting });
-    }, [updateTableState]);
+    const handleSortingChange = useCallback(
+        (sorting: SortingState) => {
+            updateTableState({ sorting });
+        },
+        [updateTableState],
+    );
 
-    const handleFilterChange = useCallback((globalFilter: string) => {
-        updateTableState({ globalFilter });
-    }, [updateTableState]);
+    const handleFilterChange = useCallback(
+        (globalFilter: string) => {
+            updateTableState({ globalFilter });
+        },
+        [updateTableState],
+    );
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
