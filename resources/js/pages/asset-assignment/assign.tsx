@@ -199,7 +199,11 @@ const AssetAssignmentAssignPage = () => {
                                                     placeholder="Search for assets..."
                                                     emptyIndicator="No assets found"
                                                     className="md:w-[500px]"
-                                                    onSearch={async (value) => fetchAssets(value)}
+                                                    value={assetsSelected.filter((asset) => value.includes(asset.value)).map((asset) => ({
+                                                        label: asset.label,
+                                                        value: asset.value
+                                                    }))}
+                                                    onSearch={async (item) => fetchAssets(item)}
                                                     onChange={(value) => {
                                                         onChange(value.map((item) => item.value));
                                                         setAssetsSelected(value);
