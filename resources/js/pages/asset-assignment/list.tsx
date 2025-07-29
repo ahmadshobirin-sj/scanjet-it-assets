@@ -4,7 +4,6 @@ import { DataGrid, useTableResolver } from '@/components/data-grid';
 import SkeletonDataGrid from '@/components/skeleton/skeleton-data-grid';
 import { Button } from '@/components/ui/button';
 import { useBreadcrumb } from '@/hooks/use-breadcrumb';
-import { usePermission } from '@/hooks/use-permissions';
 import AppLayout from '@/layouts/app-layout';
 import { SharedData } from '@/types';
 import { AssetAssignment, ResponseCollection } from '@/types/model';
@@ -15,18 +14,15 @@ import { PackageMinus, PackagePlus } from 'lucide-react';
 import { useState } from 'react';
 
 const AssetAssignmentListPage = () => {
-    const { can } = usePermission();
     const {
         component,
-        props: { success, errors },
     } = usePage<SharedData>();
     const breadcrumbs = useBreadcrumb(component);
     const [assets, setAsssets] = useState<ResponseCollection<AssetAssignment> | undefined>(undefined);
-    const { setTable, columns, tableState, setTableState, tableStateServer } = useTableResolver('assets-assignment-table');
-    const [isLoading, setIsLoading] = useState(false);
+    const { setTable, columns, tableState, tableStateServer } = useTableResolver('assets-assignment-table');
 
     return (
-        <AppLayout>
+        <AppLayout breadcrumbs={breadcrumbs}>
             <AppContainer className="space-y-6">
                 <AppTitle
                     title="Asset Assignments"
