@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreign('asset_id')->references('id')->on('assets')->onDelete('cascade');
 
             $table->uuid('assigned_user_id');
-            $table->foreign('assigned_user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('assigned_user_id')->references('id')->on('scanjet-crm-dev.users')->onDelete('cascade');
 
             $table->uuid('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
@@ -30,6 +30,7 @@ return new class extends Migration
 
             $table->timestamp('assigned_at')->useCurrent();
             $table->timestamp('returned_at')->nullable();
+            $table->timestamp('confirmed_at')->nullable();
 
             $table->timestamps();
         });
