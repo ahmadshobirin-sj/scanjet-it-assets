@@ -10,10 +10,6 @@ class DateHelper
      * Format a date to a specific format.
      *
      * @param  string|\DateTimeInterface|null  $date
-     * @param  string  $format
-     * @param  bool  $withTime
-     * @param  string  $timezone
-     * @return string|null
      */
     public static function format($date, string $format = 'd M Y', bool $withTime = true, string $timezone = 'UTC'): ?string
     {
