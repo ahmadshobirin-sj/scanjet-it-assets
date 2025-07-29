@@ -26,9 +26,9 @@ type GridColumnsProps = VariantProps<typeof gridColumns>;
 export type GroupFormProps = {
     columns?: GridColumnsProps["columns"];
     hasGroups?: boolean;
-} & React.HTMLAttributes<HTMLFormElement>
+} & React.HTMLAttributes<HTMLDivElement>
 
-const GroupForm = React.forwardRef<HTMLFormElement, GroupFormProps>(({
+const GroupForm = React.forwardRef<HTMLDivElement, GroupFormProps>(({
     className,
     columns = 1,
     hasGroups = false,
@@ -38,7 +38,7 @@ const GroupForm = React.forwardRef<HTMLFormElement, GroupFormProps>(({
     const spacing = hasGroups ? "gap-6" : "gap-5";
 
     return (
-        <form
+        <div
             ref={ref}
             className={cn(
                 `grid flex-1 auto-rows-min ${spacing}`,
