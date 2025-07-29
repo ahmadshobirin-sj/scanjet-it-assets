@@ -120,23 +120,25 @@ const UserUpdatePage = forwardRef<UserUpdatePageRef, { user: User | null; onClos
                     <SheetDescription>Update user information and roles.</SheetDescription>
                 </SheetHeader>
                 <SheetBody className="px-4">
-                    <GroupForm onSubmit={onSubmit}>
-                        <GroupFormItem>
-                            <Label htmlFor="email">Email</Label>
-                            <Input id="email" autoComplete="off" value={data.email} onChange={handleChangeEmail} />
-                            {errors.email && <FormMessage error>{errors.email}</FormMessage>}
-                        </GroupFormItem>
-                        <GroupFormItem>
-                            <Label htmlFor="roles">Roles</Label>
-                            <MultipleSelector
-                                value={rolesOptions.filter((option) => data.roles.includes(option.value))}
-                                defaultOptions={rolesOptions}
-                                onChange={handleChangeRoles}
-                            />
-                            {errors.roles && <FormMessage error>{errors.roles}</FormMessage>}
-                        </GroupFormItem>
-                        <input type="submit" hidden />
-                    </GroupForm>
+                    <form onSubmit={onSubmit}>
+                        <GroupForm>
+                            <GroupFormItem>
+                                <Label htmlFor="email">Email</Label>
+                                <Input id="email" autoComplete="off" value={data.email} onChange={handleChangeEmail} />
+                                {errors.email && <FormMessage error>{errors.email}</FormMessage>}
+                            </GroupFormItem>
+                            <GroupFormItem>
+                                <Label htmlFor="roles">Roles</Label>
+                                <MultipleSelector
+                                    value={rolesOptions.filter((option) => data.roles.includes(option.value))}
+                                    defaultOptions={rolesOptions}
+                                    onChange={handleChangeRoles}
+                                />
+                                {errors.roles && <FormMessage error>{errors.roles}</FormMessage>}
+                            </GroupFormItem>
+                            <input type="submit" hidden />
+                        </GroupForm>
+                    </form>
                 </SheetBody>
                 <SheetFooter>
                     <Button loading={processing} onClick={onButtonSubmit}>
