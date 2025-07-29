@@ -59,9 +59,6 @@ function UserListPage() {
         {
             accessorKey: 'created_at',
             header: 'Created At',
-            cell: ({ row }) => {
-                return row.original.f_created_at;
-            },
         },
     ];
 
