@@ -28,8 +28,6 @@ class UserResource extends JsonResource
             'roles' => RoleResource::collection($this->whenLoaded('roles')),
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
-            'f_created_at' => $this->f_created_at,
-            'f_updated_at' => $this->f_updated_at,
         ];
     }
 }
