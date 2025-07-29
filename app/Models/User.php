@@ -4,7 +4,6 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 
-use App\HasFormattedTimestamp;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -14,9 +13,7 @@ use Spatie\Permission\Traits\HasRoles;
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, HasFormattedTimestamp, HasRoles, HasUuids, Notifiable;
-
-    protected $formatTimestamp = 'd M Y, H:i';
+    use HasFactory, HasRoles, HasUuids, Notifiable;
 
     /**
      * The attributes that are mass assignable.
