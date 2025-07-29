@@ -106,19 +106,21 @@ const AssetCategoryUpdatePage = forwardRef<AssetCategoryUpdatePageRef, { assetCa
                         <SheetDescription>Update asset category details.</SheetDescription>
                     </SheetHeader>
                     <SheetBody className="px-4">
-                        <GroupForm onSubmit={onSubmit}>
-                            <GroupFormItem>
-                                <Label htmlFor="name">Name</Label>
-                                <Input id="name" autoComplete="off" value={data.name} onChange={handleChangeName} />
-                                {errors.name && <FormMessage error>{errors.name}</FormMessage>}
-                            </GroupFormItem>
-                            <GroupFormItem>
-                                <Label htmlFor="description">Description</Label>
-                                <Textarea id="description" autoComplete="off" value={data.description} onChange={handleChangeDescription} />
-                                {errors.description && <FormMessage error>{errors.description}</FormMessage>}
-                            </GroupFormItem>
-                            <input type="submit" hidden />
-                        </GroupForm>
+                        <form onSubmit={onSubmit}>
+                            <GroupForm>
+                                <GroupFormItem>
+                                    <Label htmlFor="name">Name</Label>
+                                    <Input id="name" autoComplete="off" value={data.name} onChange={handleChangeName} />
+                                    {errors.name && <FormMessage error>{errors.name}</FormMessage>}
+                                </GroupFormItem>
+                                <GroupFormItem>
+                                    <Label htmlFor="description">Description</Label>
+                                    <Textarea id="description" autoComplete="off" value={data.description} onChange={handleChangeDescription} />
+                                    {errors.description && <FormMessage error>{errors.description}</FormMessage>}
+                                </GroupFormItem>
+                                <input type="submit" hidden />
+                            </GroupForm>
+                        </form>
                     </SheetBody>
                     <SheetFooter>
                         <Button loading={processing} onClick={onButtonSubmit}>
