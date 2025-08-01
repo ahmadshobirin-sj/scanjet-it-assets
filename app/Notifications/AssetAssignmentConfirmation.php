@@ -4,9 +4,9 @@ namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\URL;
 
 class AssetAssignmentConfirmation extends Notification implements ShouldQueue
 {
@@ -29,12 +29,7 @@ class AssetAssignmentConfirmation extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
-        if ($notifiable instanceof AnonymousNotifiable) {
-            return ['mail'];
-        }
-
-        // Jika Eloquent model (misalnya User), gunakan database
-        return ['database'];
+        return ['mail'];
     }
 
     /**
@@ -46,6 +41,11 @@ class AssetAssignmentConfirmation extends Notification implements ShouldQueue
             ->subject('Asset assignment confirmation')
             ->view('emails.asset-assignment-confirmation', [
                 'data' => $this->assetAssignment,
+                'confirmation_url' => URL::temporarySignedRoute(
+                    'asset-assignment.confirmation',
+                    now()->addDay(), // Set cache expiration time
+                    ['reference_code' => $this->assetAssignment['reference_code']]
+                ),
             ]);
     }
 
