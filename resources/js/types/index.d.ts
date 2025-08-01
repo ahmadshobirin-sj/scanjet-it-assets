@@ -35,7 +35,7 @@ export interface NavGroup {
 }
 export interface SharedData {
     name: string;
-    quote: { message: string; author: string };
+    unreadNotificationsCount: number;
     auth: Auth;
     ziggy: Config & { location: string };
     sidebarOpen: boolean;
