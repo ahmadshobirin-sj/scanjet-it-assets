@@ -12,7 +12,7 @@ class AssetFactory extends Factory
     public function definition()
     {
         return [
-            'name' => $this->faker->word(),
+            'name' => $this->faker->word().' '.$this->faker->bothify('Model-###-###'),
             'category_id' => \App\Models\AssetCategory::inRandomOrder()->first()->id,
             'manufacture_id' => \App\Models\Manufacture::inRandomOrder()->first()->id,
             'location' => $this->faker->city(),
