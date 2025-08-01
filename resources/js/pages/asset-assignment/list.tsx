@@ -14,9 +14,7 @@ import { PackageMinus, PackagePlus } from 'lucide-react';
 import { useState } from 'react';
 
 const AssetAssignmentListPage = () => {
-    const {
-        component,
-    } = usePage<SharedData>();
+    const { component } = usePage<SharedData>();
     const breadcrumbs = useBreadcrumb(component);
     const [assets, setAsssets] = useState<ResponseCollection<AssetAssignment> | undefined>(undefined);
     const { setTable, columns, tableState, tableStateServer } = useTableResolver('assets-assignment-table');
