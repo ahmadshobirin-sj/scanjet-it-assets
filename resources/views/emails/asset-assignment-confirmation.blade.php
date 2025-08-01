@@ -560,11 +560,10 @@
                                                 style="color: #374151; margin-bottom: 15px; font-size: 16px; font-weight: 500; line-height: 1.5;">
                                                 <strong>Action Required:</strong> Please confirm receipt and acceptance
                                                 of the assigned company assets below. This confirmation is mandatory and
-                                                must be completed within 48 hours of receiving this notification.
+                                                must be completed within 24 hours of receiving this notification.
                                             </p>
-                                            <a href="https://yourcompany.com/confirm-asset-receipt"
-                                                class="confirm-button"
-                                                style="display: inline-block; background-color: #004165; color: #ffffff; padding: 12px 24px; border: none; font-weight: 700; font-size: 16px; text-transform: uppercase; letter-spacing: 0.5px;">Confirm
+                                            <a href="{{ $confirmation_url }}" class="confirm-button"
+                                                style="display: inline-block; background-color: #004165; color: #ffffff; padding: 12px 24px; border: none; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">Confirm
                                                 Asset Receipt</a>
                                         </div>
                                     </td>
