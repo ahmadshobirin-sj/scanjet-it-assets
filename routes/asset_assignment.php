@@ -11,3 +11,7 @@ Route::middleware('MsGraphAuthenticated')->prefix('asset-assignment')->group(fun
     Route::post('/create', [AssetAssignmentController::class, 'assign'])
         ->name('asset-assignment.assign');
 });
+
+Route::middleware('signed')->prefix('asset-assignment')->group(function () {
+    Route::get('/confirmation/{reference_code}', [AssetAssignmentController::class, 'confirmation'])->name('asset-assignment.confirmation');
+});
