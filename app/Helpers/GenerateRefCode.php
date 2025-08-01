@@ -8,8 +8,6 @@ class GenerateRefCode
 {
     /**
      * Generate a unique reference code.
-     *
-     * @return string
      */
     public static function generate(): string
     {
@@ -19,7 +17,7 @@ class GenerateRefCode
         $uuid = Str::uuid7();
         $codeUuid = Str::substr($uuid, Str::length($uuid) - 5, 5);
 
-        $final = Str::upper($prefix . '-' . $randomString . $code . $codeUuid);
+        $final = Str::upper($prefix.'-'.$randomString.$code.$codeUuid);
 
         return $final;
     }
