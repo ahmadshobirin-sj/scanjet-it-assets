@@ -13,9 +13,7 @@ return new class extends Migration
     {
         Schema::create('asset_assignments', function (Blueprint $table) {
             $table->uuid('id')->primary();
-
-            $table->uuid('asset_id');
-            $table->foreign('asset_id')->references('id')->on('assets')->onDelete('cascade');
+            $table->string('reference_code')->unique();
 
             $table->uuid('assigned_user_id');
             $table->foreign('assigned_user_id')->references('id')->on('scanjet-crm-dev.users')->onDelete('cascade');
@@ -23,12 +21,12 @@ return new class extends Migration
             $table->uuid('user_id');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 
-            $table->text('note')->nullable();
+            $table->text('notes')->nullable();
             $table->enum('status', ['assigned', 'returned'])->default('assigned');
 
             $table->enum('condition', ['ok', 'loss', 'damaged', 'malfunction', 'theft'])->default('ok');
 
-            $table->timestamp('assigned_at')->useCurrent();
+            $table->timestamp('assigned_at')->nullable();
             $table->timestamp('returned_at')->nullable();
             $table->timestamp('confirmed_at')->nullable();
 
