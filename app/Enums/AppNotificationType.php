@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum AppMessageNotificationType: string
+enum AppNotificationType: string
 {
     case DEFAULT = 'default';
     case EMAIL = 'email';
