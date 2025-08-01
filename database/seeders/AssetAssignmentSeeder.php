@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Asset;
 use App\Models\AssetAssignment;
 use Illuminate\Database\Seeder;
 
@@ -12,6 +13,9 @@ class AssetAssignmentSeeder extends Seeder
      */
     public function run(): void
     {
-        AssetAssignment::factory()->count(50)->create();
+        $assignments = AssetAssignment::factory()->count(5)->create();
+        foreach ($assignments as $assignment) {
+            $assignment->assets()->attach(Asset::inRandomOrder()->take(4)->pluck('id'));
+        }
     }
 }
