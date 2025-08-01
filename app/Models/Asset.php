@@ -45,13 +45,14 @@ class Asset extends Model
 
     public function assignments()
     {
-        return $this->hasMany(AssetAssignment::class, 'asset_id');
+        return $this->belongsToMany(AssetAssignment::class, 'asset_assignment_has_assets', 'asset_id', 'asset_assignment_id');
     }
 
     public function currentAssignment()
     {
-        return $this->hasOne(AssetAssignment::class, 'asset_id')
+        return $this->assignments()
             ->where('status', 'assigned')
-            ->latest('assigned_at');
+            ->orderBy('assigned_at', 'desc')
+            ->first();
     }
 }
