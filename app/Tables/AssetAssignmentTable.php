@@ -9,7 +9,8 @@ class AssetAssignmentTable extends Table
     public function columns(): array
     {
         return [
-            Column::make('asset.name')
+            Column::make('reference_code')
+                ->label('Reference Code')
                 ->sortable()
                 ->globallySearchable()
                 ->toggleable(),
@@ -35,6 +36,10 @@ class AssetAssignmentTable extends Table
                 ->sortable()
                 ->globallySearchable()
                 ->toggleable(),
+            Column::make('confirmed_at')
+                ->sortable()
+                ->globallySearchable()
+                ->toggleable(),
             Column::make('returned_at')
                 ->sortable()
                 ->globallySearchable()
@@ -44,7 +49,7 @@ class AssetAssignmentTable extends Table
 
     public function with(): array
     {
-        return ['asset', 'assignedUser', 'assignedBy'];
+        return ['assignedUser', 'assignedBy'];
     }
 
     public function defaultSort(): array
