@@ -142,7 +142,7 @@ export interface AssetAssignment {
     asset_id: string;
     assigned_user_id: string;
     user_id: string;
-    note: string | null;
+    notes: string | null;
     status: string;
     condition: string;
     assigned_at: string | null;
@@ -150,4 +150,14 @@ export interface AssetAssignment {
     asset: Asset;
     assignedUser: AssetAssignedUser | null;
     assignedBy: User | null;
+}
+
+export interface AppNotification {
+    id: string;
+    message: string;
+    description: string;
+    status: any;
+    url: string | null;
+    type: string;
+    created_at: string;
 }
