@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum AppMessageNotificationStatus: string
+enum AppNotificationStatus: string
 {
     case SUCCESS = 'success';
     case ERROR = 'error';
