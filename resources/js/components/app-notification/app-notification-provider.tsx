@@ -40,7 +40,7 @@ const AppNotificationProvider: FC<AppNotificationProviderProps> = ({ props }) =>
         return () => {
             leaveChannel();
         };
-    }, [unreadNotificationsCount]);
+    }, [unreadNotificationsCount, leaveChannel]);
     return <></>;
 };
 

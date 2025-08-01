@@ -164,7 +164,7 @@ export const AppNotificationItem: React.FC<AppNotificationItemProps> = ({
         }, duration);
 
         return () => clearTimeout(timer);
-    }, [duration, loadingStates, toast, keyToast]);
+    }, [duration, loadingStates, toast, keyToast, isFloating]);
 
     const handleButtonClick = async (event: AppNotificationEvent, index: number) => {
         if (!event.onClick) return;
