@@ -13,24 +13,25 @@ class AssetAssignment extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'asset_id',
         'assigned_user_id',
         'user_id',
-        'note',
+        'notes',
         'status',
         'condition',
         'assigned_at',
         'returned_at',
+        'reference_code',
     ];
 
     protected $casts = [
         'assigned_at' => 'datetime',
         'returned_at' => 'datetime',
+        'confirmed_at' => 'datetime',
     ];
 
-    public function asset()
+    public function assets()
     {
-        return $this->belongsTo(Asset::class, 'asset_id');
+        return $this->belongsToMany(Asset::class, 'asset_assignment_has_assets', 'asset_assignment_id', 'asset_id');
     }
 
     public function assignedUser()
