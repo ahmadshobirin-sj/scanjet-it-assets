@@ -101,17 +101,7 @@ const AssetAssignmentAssignPage = () => {
     };
 
     const onConfirm = () => {
-        post(route('asset-assignment.assign'), {
-            onSuccess: () => {
-                console.log('Assets assigned successfully');
-            },
-            onError: (errors) => {
-                console.error('Assignment errors:', errors);
-                // form.setError('assigned_user_id', { message: errors.assigned_user_id });
-                // form.setError('asset_ids', { message: errors.asset_ids });
-                // form.setError('assign_at', { message: errors.assign_at });
-            },
-        });
+        post(route('asset-assignment.assign'));
     };
 
     return (
@@ -199,10 +189,12 @@ const AssetAssignmentAssignPage = () => {
                                                     placeholder="Search for assets..."
                                                     emptyIndicator="No assets found"
                                                     className="md:w-[500px]"
-                                                    value={assetsSelected.filter((asset) => value.includes(asset.value)).map((asset) => ({
-                                                        label: asset.label,
-                                                        value: asset.value
-                                                    }))}
+                                                    value={assetsSelected
+                                                        .filter((asset) => value.includes(asset.value))
+                                                        .map((asset) => ({
+                                                            label: asset.label,
+                                                            value: asset.value,
+                                                        }))}
                                                     onSearch={async (item) => fetchAssets(item)}
                                                     onChange={(value) => {
                                                         onChange(value.map((item) => item.value));
