@@ -12,6 +12,6 @@ class AssetCategorySeeder extends Seeder
      */
     public function run(): void
     {
-        AssetCategory::factory()->count(20)->create();
+        AssetCategory::factory()->count(10)->create();
     }
 }
