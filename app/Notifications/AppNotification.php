@@ -25,14 +25,24 @@ class AppNotification extends Notification implements ShouldQueue
 
     protected Closure|string|null $url = null;
 
+    protected string $message;
+
+    protected ?string $description = null;
+
+    protected ?array $data = [];
+
     /**
      * Create a new notification instance.
      */
     public function __construct(
-        private string $message,
-        private ?string $description = null,
-        private ?array $data = [],
-    ) {}
+        string $message,
+        ?string $description = null,
+        ?array $data = [],
+    ) {
+        $this->message = $message;
+        $this->description = $description;
+        $this->data = $data;
+    }
 
     /**
      * Get the notification's delivery channels.
@@ -60,7 +70,7 @@ class AppNotification extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            'type' => $this->getType()->value,
+            'ui_type' => $this->getType()->value,
             'status' => $this->getStatus()->value,
             'message' => $this->message,
             'description' => $this->description,
@@ -72,7 +82,7 @@ class AppNotification extends Notification implements ShouldQueue
     public function toBroadcast(object $notifiable): BroadcastMessage
     {
         return new BroadcastMessage([
-            'type' => $this->getType()->value,
+            'ui_type' => $this->getType()->value,
             'status' => $this->getStatus()->value,
             'message' => $this->message,
             'description' => $this->description,
