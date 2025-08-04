@@ -9,15 +9,30 @@ import { notificationColorResolver } from './lib';
 
 type AppNotificationProviderProps = Page<SharedData>;
 
-const AppNotificationProvider: FC<AppNotificationProviderProps> = ({ props }) => {
+const AppNotificationProvider: FC<AppNotificationProviderProps> = (props) => {
+    if (!props.props.auth || !props.props.auth.user) {
+        return null;
+    }
+
+    return <EchoNotificationHandler {...props} />;
+};
+
+const EchoNotificationHandler: FC<AppNotificationProviderProps> = ({ props }) => {
     const { unreadNotificationsCount, auth } = props;
-    const { setUnreadNotificationsCount, incrementUnreadNotificationsCount, setNotifications } = useNotificationStore();
+    const {
+        setUnreadNotificationsCount,
+        incrementUnreadNotificationsCount,
+        setNotifications,
+    } = useNotificationStore();
 
     const { leaveChannel } = useEchoNotification(
         `App.Models.User.${auth.user.id}`,
         (notification: any) => {
-            incrementUnreadNotificationsCount();
-            setNotifications(notification);
+            console.log('New notification received:', notification);
+            if (notification.type === 'App\\Notifications\\AppNotification') {
+                incrementUnreadNotificationsCount();
+                setNotifications(notification);
+            }
 
             toast.custom((t) => (
                 <AppNotificationItem
@@ -31,7 +46,7 @@ const AppNotificationProvider: FC<AppNotificationProviderProps> = ({ props }) =>
                 />
             ));
         },
-        'App.Notifications.AppNotification',
+        ['App.Notifications.AppNotification', 'App.Notifications.AppErrorNotification']
     );
 
     useEffect(() => {
@@ -40,8 +55,9 @@ const AppNotificationProvider: FC<AppNotificationProviderProps> = ({ props }) =>
         return () => {
             leaveChannel();
         };
-    }, [unreadNotificationsCount, leaveChannel]);
-    return <></>;
+    }, [unreadNotificationsCount, setUnreadNotificationsCount, leaveChannel]);
+
+    return null;
 };
 
 export default AppNotificationProvider;
