@@ -158,6 +158,6 @@ export interface AppNotification {
     description: string;
     status: any;
     url: string | null;
-    type: string;
+    ui_type: string;
     created_at: string;
 }
