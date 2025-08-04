@@ -12,3 +12,36 @@
 .animate-spinner-leaf-fade {
     animation: spinner-leaf-fade 1.2s linear infinite;
 }
+
+@keyframes move-forever {
+    0% {
+        transform: translate3d(-90px, 0, 0);
+    }
+    100% {
+        transform: translate3d(85px, 0, 0);
+    }
+}
+
+.animate-wave {
+    animation: move-forever 25s cubic-bezier(0.55, 0.5, 0.45, 0.5) infinite;
+}
+
+.wave-1 {
+    animation-delay: -2s;
+    animation-duration: 7s;
+}
+
+.wave-2 {
+    animation-delay: -3s;
+    animation-duration: 10s;
+}
+
+.wave-3 {
+    animation-delay: -4s;
+    animation-duration: 13s;
+}
+
+.wave-4 {
+    animation-delay: -5s;
+    animation-duration: 20s;
+}
