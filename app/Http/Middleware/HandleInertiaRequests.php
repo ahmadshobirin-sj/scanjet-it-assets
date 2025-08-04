@@ -42,7 +42,7 @@ class HandleInertiaRequests extends Middleware
             'name' => config('app.name'),
             'unreadNotificationsCount' => $request->user()?->unreadNotifications->count() ?? 0,
             'auth' => [
-                'user' => new AuthResource($request->user()),
+                'user' => $request->user() ? new AuthResource($request->user()) : null,
             ],
             'ziggy' => fn (): array => [
                 ...(new Ziggy)->toArray(),
