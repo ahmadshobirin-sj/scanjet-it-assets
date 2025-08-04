@@ -1,11 +1,15 @@
 <?php
 
+use App\Helpers\ExceptionReport;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Symfony\Component\HttpFoundation\Response;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -24,5 +28,24 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        if (app()->isProduction()) {
+            $exceptions->reportable(function (Throwable $e) {
+                ExceptionReport::report($e);
+            });
+
+            // Override the default exception handler to return a 200 response
+            $exceptions->respond(function (Response $response, Throwable $exception, Request $request) {
+                if (ExceptionReport::isServerError($exception)) {
+                    return response(null, 200);
+                } else {
+                    return Inertia::render('error', [
+                        'status' => $response->getStatusCode(),
+                    ])
+                        ->toResponse($request)
+                        ->setStatusCode($response->getStatusCode());
+                }
+
+                return $response;
+            });
+        }
     })->create();
