@@ -3,11 +3,13 @@
 namespace App\Http\Services;
 
 use App\Enums\AssetStatus;
+use App\Exceptions\ClientException;
 use App\Helpers\GenerateRefCode;
 use App\Models\Asset;
 use App\Models\AssetAssignment;
 use App\Tables\AssetAssignmentTable;
 use App\Tables\Traits\HasTable;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -58,7 +60,10 @@ class AssetAsignmentService extends Service
                 ->exists();
 
             if ($assetsAlreadyAssigned) {
-                throw new \Exception('Some assets are already assigned to this user.');
+                throw new ClientException(
+                    message: 'Failed to assign assets',
+                    description: 'Some assets are already assigned. Please check the asset status.',
+                );
             }
 
             $assignments = [
