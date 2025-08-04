@@ -2,9 +2,16 @@
 
 use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
 
 Route::middleware(['MsGraphAuthenticated'])->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+});
+
+Route::fallback(function () {
+    return Inertia::render('error', [
+        'status' => 404,
+    ], 404);
 });
 
 require __DIR__.'/asset_assignment.php';
