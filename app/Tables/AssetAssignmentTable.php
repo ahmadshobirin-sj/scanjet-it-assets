@@ -3,6 +3,7 @@
 namespace App\Tables;
 
 use App\Tables\Columns\Column;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class AssetAssignmentTable extends Table
 {
@@ -14,21 +15,13 @@ class AssetAssignmentTable extends Table
                 ->sortable()
                 ->globallySearchable()
                 ->toggleable(),
-            Column::make('assigned_user.name')
+            Column::make('assigned_user.email')
                 ->label('Assigned To')
                 ->sortable()
                 ->globallySearchable()
                 ->toggleable(),
-            Column::make('assigned_by.name')
+            Column::make('assigned_by.email')
                 ->label('Assigned By')
-                ->sortable()
-                ->globallySearchable()
-                ->toggleable(),
-            Column::make('status')
-                ->sortable()
-                ->globallySearchable()
-                ->toggleable(),
-            Column::make('condition')
                 ->sortable()
                 ->globallySearchable()
                 ->toggleable(),
@@ -49,11 +42,16 @@ class AssetAssignmentTable extends Table
 
     public function with(): array
     {
-        return ['assignedUser', 'assignedBy'];
+        return ['assignedUser:id,name,email', 'assignedBy:id,name,email'];
     }
 
     public function defaultSort(): array
     {
         return ['-assigned_at'];
+    }
+
+    public function customizeQuery(QueryBuilder $query): QueryBuilder
+    {
+        return $query;
     }
 }
