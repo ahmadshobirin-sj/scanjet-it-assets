@@ -19,11 +19,7 @@ const AppNotificationProvider: FC<AppNotificationProviderProps> = (props) => {
 
 const EchoNotificationHandler: FC<AppNotificationProviderProps> = ({ props }) => {
     const { unreadNotificationsCount, auth } = props;
-    const {
-        setUnreadNotificationsCount,
-        incrementUnreadNotificationsCount,
-        setNotifications,
-    } = useNotificationStore();
+    const { setUnreadNotificationsCount, incrementUnreadNotificationsCount, setNotifications } = useNotificationStore();
 
     const { leaveChannel } = useEchoNotification(
         `App.Models.User.${auth.user.id}`,
@@ -46,7 +42,7 @@ const EchoNotificationHandler: FC<AppNotificationProviderProps> = ({ props }) =>
                 />
             ));
         },
-        ['App.Notifications.AppNotification', 'App.Notifications.AppErrorNotification']
+        ['App.Notifications.AppNotification', 'App.Notifications.AppErrorNotification'],
     );
 
     useEffect(() => {
