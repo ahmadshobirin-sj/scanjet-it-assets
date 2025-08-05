@@ -85,6 +85,13 @@
             font-weight: 400;
         }
 
+        .header-ref {
+            margin: 0;
+            font-size: 16px;
+            color: #ffffff;
+            font-weight: 400;
+        }
+
         .content-wrapper {
             padding: 25px;
         }
@@ -298,6 +305,10 @@
                 font-size: 14px;
             }
 
+            .header-ref {
+                font-size: 14px;
+            }
+
             .content-wrapper {
                 padding: 15px;
             }
@@ -410,6 +421,7 @@
                                     <td class="header-content">
                                         <h1 class="header-title">Asset Assignment Notification</h1>
                                         <p class="header-subtitle">Official confirmation of company asset allocation</p>
+                                        <p class="header-ref">{{ $data['reference_code'] }}</p>
                                     </td>
                                 </tr>
                             </table>
