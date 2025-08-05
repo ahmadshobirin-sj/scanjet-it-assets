@@ -12,7 +12,7 @@ class AssetAssignmentPolicy
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->can('asset_assignment.viewAny');
     }
 
     /**
@@ -20,7 +20,7 @@ class AssetAssignmentPolicy
      */
     public function view(User $user, AssetAssignment $assetAssignment): bool
     {
-        return false;
+        return $user->can('asset_assignment.view');
     }
 
     /**
@@ -28,7 +28,7 @@ class AssetAssignmentPolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return $user->can('asset_assignment.create');
     }
 
     /**
