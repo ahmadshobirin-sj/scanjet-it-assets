@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Enums\AppNotificationStatus;
 use App\Enums\AppNotificationType;
 use App\Enums\AssetStatus;
-use App\Exceptions\ClientException;
 use App\Http\Filters\GlobalSearchNew;
 use App\Http\Requests\AssetAssignment\AssetAssigmentRequest;
 use App\Http\Resources\AssetAssignment\AssetAssignmentResource;
@@ -18,7 +17,6 @@ use App\Notifications\AssetAssignmentConfirmation;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Inertia\Inertia;
 use Spatie\QueryBuilder\AllowedFilter;
@@ -38,14 +36,16 @@ class AssetAssignmentController extends Controller
     public function index()
     {
         $this->authorize('viewAny', AssetAssignment::class);
+
         $assetAssignments = [];
         $tableSchema = [];
+
         try {
-            $assetAssignments = Inertia::optional(fn () => AssetAssignmentResource::collection(
+            $assetAssignments = Inertia::optional(fn() => AssetAssignmentResource::collection(
                 $this->assetAssignmentService->getAll()
             ));
 
-            $tableSchema = Inertia::optional(fn () => $this->assetAssignmentService->getTable()->toSchema());
+            $tableSchema = Inertia::optional(fn() => $this->assetAssignmentService->getTable()->toSchema());
         } catch (\Throwable $th) {
             report($th);
         }
@@ -61,8 +61,10 @@ class AssetAssignmentController extends Controller
      */
     public function create(Request $request)
     {
-        $employees = Inertia::optional(fn () => $this->assetAssignmentService->getEmployees($this->employeesQueryBuilder($request)));
-        $assets = Inertia::optional(fn () => $this->assetAssignmentService->getAssets($this->assetsQueryBuilder($request)));
+        $this->authorize('create', AssetAssignment::class);
+
+        $employees = Inertia::optional(fn() => $this->assetAssignmentService->getEmployees($this->employeesQueryBuilder($request)));
+        $assets = Inertia::optional(fn() => $this->assetAssignmentService->getAssets($this->assetsQueryBuilder($request)));
 
         return Inertia::render('asset-assignment/assign', [
             'employees' => $employees,
@@ -75,6 +77,8 @@ class AssetAssignmentController extends Controller
      */
     public function assign(AssetAssigmentRequest $request)
     {
+        $this->authorize('create', AssetAssignment::class);
+
         try {
             $data = $request->validated();
 
@@ -86,13 +90,13 @@ class AssetAssignmentController extends Controller
                 (
                     new AppNotification(
                         message: 'Asset Assignment Confirmation',
-                        description: 'Assets assigned successfully to '.$assignments['assigned_user']['email'].'.',
+                        description: 'Assets assigned successfully to ' . $assignments['assigned_user']['email'] . '.',
                         data: [
                             'reference_code' => $assetAssignment->reference_code,
                         ],
                     )
                 )
-                    ->type(AppNotificationType::DEFAULT)
+                    ->type(AppNotificationType::EMAIL)
                     ->status(AppNotificationStatus::SUCCESS)
                     ->afterCommit()
             );
@@ -104,10 +108,6 @@ class AssetAssignmentController extends Controller
                 ->route('asset-assignment.index');
         } catch (\Throwable $th) {
             report($th);
-            // throw new ClientException(
-            //     message: 'Failed to assign assets',
-            //     description: $th->getMessage(),
-            // );
 
             return back();
         }
@@ -115,42 +115,43 @@ class AssetAssignmentController extends Controller
 
     public function confirmation(Request $request, string $reference_code)
     {
+        $assetAssignment = null;
         try {
             $assetAssignment = $this->assetAssignmentService->confirmation($reference_code);
+
             if ($assetAssignment === false) {
-                return 'Asset assignment already confirmed.';
+                return response('Asset assignment already confirmed.', 200);
             }
 
             Notification::send(
-                Auth::user(),
-                (
-                    new AppNotification(
-                        message: 'Asset Assignment Confirmation',
-                        description: 'Asset assignment to '.$assetAssignment->assignedUser->email.' confirmed successfully.',
-                    )
-                )
-                    ->status(AppNotificationStatus::SUCCESS)
+                $assetAssignment->assignedBy,
+                (new AppNotification(
+                    message: 'Asset Assignment Confirmation',
+                    description: 'Asset assignment to ' . $assetAssignment->assignedUser->email . ' confirmed successfully.',
+                    data: [
+                        'reference_code' => $assetAssignment->reference_code,
+                    ],
+                ))->type(AppNotificationType::EMAIL)->status(AppNotificationStatus::SUCCESS)
             );
 
-            return 'Asset assignment confirmed successfully.';
+            return response('Asset assignment confirmed successfully.', 200);
         } catch (\Throwable $th) {
-            Notification::send(
-                Auth::user(),
-                (
-                    new AppNotification(
-                        message: 'Asset Assignment Confirmation Error',
-                        description: $th->getMessage(),
-                    )
-                )
-                    ->status(AppNotificationStatus::ERROR)
-            );
+            report($th);
 
-            Log::error('Asset Assignment Confirmation Error', [
-                'message' => $th->getMessage(),
-                'trace' => $th->getTraceAsString(),
-            ]);
+            if (isset($assetAssignment) && $assetAssignment) {
+                Notification::send(
+                    $assetAssignment->assignedBy,
+                    (new AppNotification(
+                        message: 'Asset Assignment Confirmation Failed',
+                        description: 'There was an error while confirming the assignment to ' . $assetAssignment->assignedUser->email,
+                        data: [
+                            'reference_code' => $assetAssignment->reference_code,
+                        ],
+                    ))->type(AppNotificationType::EMAIL)->status(AppNotificationStatus::ERROR)
+                );
+            }
 
-            return 'Asset assignment confirmation failed';
+            return response('Asset assignment confirmation failed.', 500);
         }
     }
 
