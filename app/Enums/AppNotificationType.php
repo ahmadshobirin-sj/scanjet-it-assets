@@ -14,4 +14,12 @@ enum AppNotificationType: string
             self::EMAIL => 'Email',
         };
     }
+
+    public static function options(): array
+    {
+        return array_map(
+            fn ($case) => ['value' => $case->value, 'label' => $case->label()],
+            self::cases()
+        );
+    }
 }
