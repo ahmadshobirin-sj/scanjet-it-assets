@@ -22,12 +22,9 @@ return new class extends Migration
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 
             $table->text('notes')->nullable();
-            $table->enum('status', ['assigned', 'returned'])->default('assigned');
-
-            $table->enum('condition', ['ok', 'loss', 'damaged', 'malfunction', 'theft'])->default('ok');
 
             $table->timestamp('assigned_at')->nullable();
-            $table->timestamp('returned_at')->nullable();
+            $table->timestamp('returned_at')->nullable(); // This is the time when all assets in this assignment are returned
             $table->timestamp('confirmed_at')->nullable();
 
             $table->timestamps();

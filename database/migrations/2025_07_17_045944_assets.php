@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\AssetStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -28,7 +29,7 @@ return new class extends Migration
             $table->uuid('manufacture_id');
             $table->foreign('manufacture_id')->references('id')->on('manufactures')->onDelete('restrict');
 
-            $table->enum('status', ['available', 'assigned', 'maintenance', 'lost', 'scrapped'])->default('available');
+            $table->enum('status', array_column(AssetStatus::cases(), 'value'))->default('available');
 
             $table->string('reference_link')->nullable();
 
