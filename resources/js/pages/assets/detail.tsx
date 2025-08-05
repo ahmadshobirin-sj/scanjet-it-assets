@@ -5,9 +5,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { InfoList, InfoListContainer, InfoListContent, InfoListGroup, InfoListLabel } from '@/components/ui/info-list';
+import { AssetStatusHelper } from '@/constants/asset-status';
 import { useBreadcrumb } from '@/hooks/use-breadcrumb';
 import AppLayout from '@/layouts/app-layout';
-import { AssetStatusPresenter } from '@/lib/asset-status-presenter';
 import { formatWithBrowserTimezone } from '@/lib/date';
 import { SharedData } from '@/types';
 import type { Asset, ResponseResource } from '@/types/model';
@@ -79,8 +79,8 @@ const AssetsDetailPage = () => {
                                 <InfoList direction="column">
                                     <InfoListLabel>Status</InfoListLabel>
                                     <InfoListContent>
-                                        <Badge intent={AssetStatusPresenter.getIntent(asset.data.status) as any} size="md">
-                                            {AssetStatusPresenter.getLabel(asset.data.status)}
+                                        <Badge intent={AssetStatusHelper.getIntent(asset.data.status) as any} size="md">
+                                            {AssetStatusHelper.getLabel(asset.data.status)}
                                         </Badge>
                                     </InfoListContent>
                                 </InfoList>
