@@ -30,7 +30,7 @@ class Asset extends Model
     protected $casts = [
         'warranty_expired' => 'date',
         'purchase_date' => 'date',
-        'last_maintenance' => 'date',
+        'last_maintenance' => 'datetime',
     ];
 
     public function category()
@@ -45,7 +45,9 @@ class Asset extends Model
 
     public function assignments()
     {
-        return $this->belongsToMany(AssetAssignment::class, 'asset_assignment_has_assets', 'asset_id', 'asset_assignment_id');
+        return $this->belongsToMany(AssetAssignment::class, 'asset_assignment_has_assets', 'asset_id', 'asset_assignment_id')
+            ->withPivot(['status', 'condition', 'returned_at', 'created_at', 'updated_at'])
+            ->withTimestamps();
     }
 
     public function currentAssignment()
