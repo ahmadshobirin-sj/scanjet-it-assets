@@ -2,6 +2,8 @@
 
 namespace App\Http\Services;
 
+use App\Enums\AssetAssignmentAssetCondition;
+use App\Enums\AssetAssignmentAssetStatus;
 use App\Enums\AssetStatus;
 use App\Exceptions\ClientException;
 use App\Helpers\GenerateRefCode;
@@ -9,7 +11,6 @@ use App\Models\Asset;
 use App\Models\AssetAssignment;
 use App\Tables\AssetAssignmentTable;
 use App\Tables\Traits\HasTable;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -33,7 +34,6 @@ class AssetAsignmentService extends Service
     public function getAll()
     {
         $query = $this->buildTable(AssetAssignment::class, $this->assetAssignmentTable);
-
         return $this->executeTableQuery($query);
     }
 
@@ -54,7 +54,6 @@ class AssetAsignmentService extends Service
             $reference_code = GenerateRefCode::generate();
             $user_id = Auth::id();
 
-            // Cek duplikasi
             $assetsAlreadyAssigned = Asset::whereIn('id', $asset_ids)
                 ->where('status', AssetStatus::ASSIGNED)
                 ->exists();
@@ -76,7 +75,17 @@ class AssetAsignmentService extends Service
 
             $assignment = AssetAssignment::create(Arr::only($assignments, $this->attributes()));
 
-            $assignment->assets()->attach($asset_ids);
+            $assets = [];
+            foreach ($asset_ids as $assetId) {
+                $assets[$assetId] = [
+                    'status' => AssetAssignmentAssetStatus::ASSIGNED,
+                    'condition' => AssetAssignmentAssetCondition::OK,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                    'returned_at' => null,
+                ];
+            }
+            $assignment->assets()->attach($assets);
 
             Asset::whereIn('id', $asset_ids)->update([
                 'status' => AssetStatus::ASSIGNED,
