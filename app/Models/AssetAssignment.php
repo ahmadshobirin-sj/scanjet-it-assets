@@ -31,7 +31,9 @@ class AssetAssignment extends Model
 
     public function assets()
     {
-        return $this->belongsToMany(Asset::class, 'asset_assignment_has_assets', 'asset_assignment_id', 'asset_id');
+        return $this->belongsToMany(Asset::class, 'asset_assignment_has_assets', 'asset_assignment_id', 'asset_id')
+            ->withPivot(['status', 'condition', 'returned_at', 'created_at', 'updated_at'])
+            ->withTimestamps();
     }
 
     public function assignedUser()
@@ -42,5 +44,10 @@ class AssetAssignment extends Model
     public function assignedBy()
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function isFullyReturned(): bool
+    {
+        return ! $this->assets()->wherePivot('status', 'assigned')->exists();
     }
 }
