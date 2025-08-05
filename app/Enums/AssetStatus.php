@@ -8,8 +8,10 @@ enum AssetStatus: string
     case ASSIGNED = 'assigned';
     case MAINTENANCE = 'maintenance';
     case LOST = 'lost';
-    case SCRAPPED = 'scrapped';
-    case RETURNED = 'returned';
+    case STOLEN = 'stolen';
+    case DAMAGED = 'damaged';
+    case MALFUNCTIONING = 'malfunctioning';
+    case DISPOSED = 'disposed';
 
     public function label(): string
     {
@@ -18,8 +20,18 @@ enum AssetStatus: string
             self::ASSIGNED => 'Assigned',
             self::MAINTENANCE => 'Maintenance',
             self::LOST => 'Lost',
-            self::SCRAPPED => 'Scrapped',
-            self::RETURNED => 'Returned',
+            self::STOLEN => 'Stolen',
+            self::DAMAGED => 'Damaged',
+            self::MALFUNCTIONING => 'Malfunctioning',
+            self::DISPOSED => 'Disposed',
         };
+    }
+
+    public static function options(): array
+    {
+        return array_map(
+            fn ($case) => ['value' => $case->value, 'label' => $case->label()],
+            self::cases()
+        );
     }
 }
