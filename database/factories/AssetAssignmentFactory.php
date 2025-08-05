@@ -4,6 +4,8 @@ namespace Database\Factories;
 
 use App\Helpers\GenerateRefCode;
 use App\Models\AssetAssignment;
+use App\Models\ExternalUser;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class AssetAssignmentFactory extends Factory
@@ -14,13 +16,11 @@ class AssetAssignmentFactory extends Factory
     {
         return [
             'reference_code' => GenerateRefCode::generate(),
-            'assigned_user_id' => \App\Models\ExternalUser::inRandomOrder()->first()->id,
-            'user_id' => \App\Models\User::inRandomOrder()->first()->id,
+            'assigned_user_id' => ExternalUser::inRandomOrder()->first()?->id ?? ExternalUser::factory(),
+            'user_id' => User::inRandomOrder()->first()?->id ?? User::factory(),
             'notes' => $this->faker->sentence(),
-            'status' => $this->faker->randomElement(['assigned', 'returned']),
-            'condition' => $this->faker->randomElement(['ok', 'loss', 'damaged', 'malfunction', 'theft']),
             'assigned_at' => $this->faker->dateTimeBetween('-1 years', 'now'),
-            'returned_at' => $this->faker->optional()->dateTimeBetween('assigned_at', 'now'),
+            'confirmed_at' => $this->faker->optional()->dateTimeBetween('-1 years', 'now'),
         ];
     }
 }
