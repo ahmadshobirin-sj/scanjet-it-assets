@@ -1,3 +1,5 @@
+import { AssetStatus } from "@/constants/asset-status";
+
 export interface TableServerState {
     sort: string[];
     filters: Record<string, any>;
@@ -102,9 +104,6 @@ export interface AssetCategory {
     f_created_at: string;
     f_updated_at: string;
 }
-
-export type AssetStatus = 'available' | 'assigned' | 'maintenance' | 'lost' | 'scrapped' | 'returned';
-
 export interface Asset {
     id: string;
     name: string;
