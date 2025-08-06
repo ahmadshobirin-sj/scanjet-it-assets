@@ -1,32 +1,28 @@
-import { NavGroup } from '@/types';
-import { Boxes, Building2, LayoutGrid, Logs, NotebookPen, ShieldUser, SquareUser, Tags } from 'lucide-react';
+import { NavGroup, NavItem } from '@/types';
+import { Boxes, Building2, ClipboardList, LayoutGrid, Logs, NotebookPen, Server, ShieldUser, SquareUser, Tags } from 'lucide-react';
 
-export const mainNavItemsRaw: NavGroup[] = [
+export const mainNavItemsRaw: NavItem[] = [
     {
-        title: 'General',
-        items: [
-            {
-                title: 'Dashboard',
-                href: route('dashboard', undefined, false),
-                icon: LayoutGrid,
-            },
-        ],
+        title: 'Dashboard',
+        href: route('dashboard', undefined, false),
+        icon: LayoutGrid,
     },
     {
-        title: 'Manage assets',
+        title: 'Assignment',
+        icon: NotebookPen,
+        href: route('asset-assignment.index', undefined, false),
+        meta: {
+            permission: ['asset_assignment.viewAny'],
+        },
+    },
+    {
+        title: 'Manage Assets',
+        icon: ClipboardList,
         items: [
             {
-                title: 'Assignment',
-                icon: NotebookPen,
-                href: route('asset-assignment.index', undefined, false),
-                meta: {
-                    permission: ['asset_assignment.viewAny'],
-                },
-            },
-            {
                 title: 'Assets',
-                icon: Boxes,
                 href: route('asset.index', undefined, false),
+                icon: Boxes,
                 meta: {
                     permission: ['asset.viewAny'],
                 },
@@ -45,13 +41,6 @@ export const mainNavItemsRaw: NavGroup[] = [
                 icon: Building2,
                 meta: {
                     permission: ['manufacture.viewAny'],
-                },
-            },
-            {
-                title: 'Logs',
-                icon: Logs,
-                meta: {
-                    permission: ['asset_category.viewAny'],
                 },
             },
         ],
@@ -74,6 +63,17 @@ export const mainNavItemsRaw: NavGroup[] = [
                 meta: {
                     permission: ['role.viewAny'],
                 },
+            },
+        ],
+    },
+    {
+        title: 'Systems',
+        icon: Server,
+        items: [
+            {
+                title: 'Logs',
+                href: '#',
+                icon: Logs,
             },
         ],
     },
