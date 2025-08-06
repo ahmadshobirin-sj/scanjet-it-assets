@@ -36,7 +36,7 @@ createInertiaApp<SharedData>({
         );
     },
     progress: {
-        color: '#ffffff',
+        color: '#004165',
     },
 });
 
