@@ -1,6 +1,14 @@
-export const Wave = ({ backgroundColor = 'bg-blue-600', waveColor = 'white', waveOpacity = [0.7, 0.5, 0.3, 1], waveHeight = 'h-[100px]' }) => {
+import { cn } from '@/lib/utils';
+
+export const Wave = ({
+    backgroundColor = 'bg-blue-600',
+    waveColor = 'white',
+    waveOpacity = [0.7, 0.5, 0.3, 1],
+    waveHeight = 'h-[100px]',
+    className = '',
+}) => {
     return (
-        <div className={`relative w-full ${backgroundColor}`}>
+        <div className={cn(`relative w-full ${backgroundColor}`, className)}>
             <svg
                 className={`relative w-full ${waveHeight} -mt-px`}
                 xmlns="http://www.w3.org/2000/svg"
