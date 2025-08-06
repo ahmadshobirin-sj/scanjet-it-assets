@@ -32,6 +32,7 @@ export interface MetaNav {
 export interface NavGroup {
     title: string;
     items: NavItem[];
+    icon?: LucideIcon;
 }
 export interface SharedData {
     name: string;
