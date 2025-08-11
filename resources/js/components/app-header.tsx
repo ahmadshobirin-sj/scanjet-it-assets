@@ -21,6 +21,7 @@ import { Link, usePage } from '@inertiajs/react';
 import { Menu } from 'lucide-react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
+import AppNotifications from './app-notification/app-notifications';
 
 interface AppHeaderProps {
     breadcrumbs?: BreadcrumbItem[];
@@ -34,7 +35,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
 
     return (
         <>
-            <div className={cn('sticky top-0 z-50 border-b border-sidebar-border/80 bg-background/70')}>
+            <div className={cn('sticky top-0 z-50 border-b border-sidebar-border bg-background')}>
                 <div className="mx-auto flex h-12 items-center px-4">
                     {/* Mobile Menu */}
                     <div className="lg:hidden">
@@ -78,7 +79,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                                                     {item.icon && <item.icon className="mr-2 size-4" />}
                                                     {item.title}
                                                 </NavigationMenuTrigger>
-                                                <NavigationMenuContent className="z-50">
+                                                <NavigationMenuContent className="z-50 md:w-56">
                                                     {item.items.map((subItem, subIndex) => (
                                                         <NavigationMenuLink key={subIndex} asChild>
                                                             <Link href={subItem.href || '#'} className="flex-row items-center gap-2">
@@ -104,6 +105,7 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
                     </div>
 
                     <div className="ml-auto flex items-center space-x-2">
+                        <AppNotifications />
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" className="size-10 rounded-full p-1">
