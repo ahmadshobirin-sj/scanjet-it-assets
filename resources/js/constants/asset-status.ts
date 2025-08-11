@@ -1,4 +1,4 @@
-export const AssetStatusList = ['available', 'assigned', 'maintenance', 'lost', 'stolen', 'damaged', 'malfunctioning', 'disposed'] as const;
+export const AssetStatusList = ['available', 'assigned', 'maintenance', 'lost', 'stolen', 'damaged', 'malfunctioning'] as const;
 
 export type AssetStatus = (typeof AssetStatusList)[number];
 
@@ -10,7 +10,6 @@ const AssetStatusMeta: Record<AssetStatus, { label: string; intent: string }> = 
     stolen: { label: 'Stolen', intent: 'destructive' },
     damaged: { label: 'Damaged', intent: 'destructive' },
     malfunctioning: { label: 'Malfunctioning', intent: 'destructive' },
-    disposed: { label: 'Disposed', intent: 'destructive' },
 };
 
 export class AssetStatusHelper {
