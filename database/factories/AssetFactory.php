@@ -13,7 +13,7 @@ class AssetFactory extends Factory
     public function definition()
     {
         return [
-            'name' => $this->faker->word() . ' ' . $this->faker->bothify('Model-###-###'),
+            'name' => $this->faker->word().' '.$this->faker->bothify('Model-###-###'),
             'category_id' => \App\Models\AssetCategory::inRandomOrder()->first()?->id ?? \App\Models\AssetCategory::factory(),
             'manufacture_id' => \App\Models\Manufacture::inRandomOrder()->first()?->id ?? \App\Models\Manufacture::factory(),
             'location' => $this->faker->city(),
@@ -23,7 +23,7 @@ class AssetFactory extends Factory
             'purchase_date' => $this->faker->dateTimeBetween('-5 years', 'now'),
             'note' => $this->faker->sentence(),
             'reference_link' => $this->faker->url(),
-            'status' => $this->faker->randomElement(array_column(AssetStatus::cases(), 'value')),
+            'status' => AssetStatus::AVAILABLE,
             'created_at' => now(),
             'updated_at' => now(),
         ];
