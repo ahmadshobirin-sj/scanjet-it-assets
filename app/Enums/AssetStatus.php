@@ -11,7 +11,6 @@ enum AssetStatus: string
     case STOLEN = 'stolen';
     case DAMAGED = 'damaged';
     case MALFUNCTIONING = 'malfunctioning';
-    case DISPOSED = 'disposed';
 
     public function label(): string
     {
@@ -23,7 +22,6 @@ enum AssetStatus: string
             self::STOLEN => 'Stolen',
             self::DAMAGED => 'Damaged',
             self::MALFUNCTIONING => 'Malfunctioning',
-            self::DISPOSED => 'Disposed',
         };
     }
 
