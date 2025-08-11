@@ -8,8 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Asset extends Model
 {
-    use HasFactory;
-    use HasUuids;
+    use HasFactory, HasUuids;
 
     protected $keyType = 'string';
 
@@ -46,15 +45,25 @@ class Asset extends Model
     public function assignments()
     {
         return $this->belongsToMany(AssetAssignment::class, 'asset_assignment_has_assets', 'asset_id', 'asset_assignment_id')
-            ->withPivot(['status', 'condition', 'returned_at', 'created_at', 'updated_at'])
+            ->using(AssetAssignmentItem::class)
+            ->withPivot(['asset_return_id', 'condition', 'returned_at', 'created_at', 'updated_at'])
             ->withTimestamps();
     }
 
+    // assignment aktif untuk aset ini (belum dikembalikan)
     public function currentAssignment()
     {
         return $this->assignments()
-            ->where('status', 'assigned')
-            ->orderBy('assigned_at', 'desc')
+            ->wherePivotNull('returned_at')
+            ->orderBy('asset_assignments.assigned_at', 'desc')
             ->first();
+    }
+
+    // semua return form yang pernah mengembalikan aset ini
+    public function returns()
+    {
+        return $this->belongsToMany(AssetReturn::class, 'asset_assignment_has_assets', 'asset_id', 'asset_return_id')
+            ->withPivot(['asset_assignment_id', 'condition', 'returned_at', 'created_at', 'updated_at'])
+            ->withTimestamps();
     }
 }
