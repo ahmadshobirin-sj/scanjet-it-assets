@@ -46,28 +46,6 @@ const months = [
     "December",
 ];
 
-// const multiSelectVariants = cva(
-//     "w-auto justify-start text-left flex items-center whitespace-nowrap rounded-md text-sm font-medium text-foreground ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none shadow-xs disabled:opacity-50",
-//     {
-//         variants: {
-//             variant: {
-//                 default: "bg-primary text-primary-foreground hover:bg-primary/90",
-//                 destructive:
-//                     "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-//                 outline:
-//                     "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
-//                 secondary:
-//                     "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-//                 ghost: "hover:bg-accent hover:text-accent-foreground text-background",
-//                 link: "text-primary underline-offset-4 hover:underline text-background",
-//             },
-//         },
-//         defaultVariants: {
-//             variant: "default",
-//         },
-//     }
-// );
-
 interface CalendarDatePickerProps
     extends React.HTMLAttributes<HTMLButtonElement> {
     id?: string;
@@ -80,6 +58,7 @@ interface CalendarDatePickerProps
     intent?: VariantProps<typeof Button>["intent"];
     variant?: VariantProps<typeof Button>["variant"];
     calendarClassName?: string;
+    withTime?: boolean;
 }
 
 export const CalendarDatePicker = React.forwardRef<
@@ -93,7 +72,7 @@ export const CalendarDatePicker = React.forwardRef<
             date,
             closeOnSelect = false,
             numberOfMonths = 2,
-            yearsRange = 10,
+            yearsRange = 100,
             onDateSelect,
             variant,
             calendarClassName,
@@ -118,7 +97,14 @@ export const CalendarDatePicker = React.forwardRef<
             numberOfMonths === 2 ? date?.to?.getFullYear() : date?.from?.getFullYear()
         );
 
+        // Time state
+        const [timeFrom, setTimeFrom] = React.useState<string>('00:00');
+        const [timeTo, setTimeTo] = React.useState<string>('23:59');
+
         const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const {
+            withTime = false,
+        } = props;
 
         const handleClose = () => setIsPopoverOpen(false);
 
@@ -299,12 +285,97 @@ export const CalendarDatePicker = React.forwardRef<
         const formatWithTz = (date: Date, fmt: string) =>
             formatInTimeZone(date, timeZone, fmt);
 
+        // Time formatting utilities
+        const formatTime = (time: string) => {
+            if (!time) return '';
+
+            return time;
+        };
+
+        const parseTimeToDate = (date: Date, time: string): Date => {
+            const [hours, minutes] = time.split(':').map(Number);
+            const newDate = new Date(date);
+            newDate.setHours(hours, minutes, 0, 0);
+            return newDate;
+        };
+
+        const handleTimeChange = (time: string, type: 'from' | 'to') => {
+            if (type === 'from') {
+                setTimeFrom(time);
+                if (date?.from) {
+                    const newFrom = parseTimeToDate(date.from, time);
+                    onDateSelect({ from: newFrom, to: date.to || newFrom });
+                }
+            } else {
+                setTimeTo(time);
+                if (date?.to) {
+                    const newTo = parseTimeToDate(date.to, time);
+                    onDateSelect({ from: date.from || new Date(), to: newTo });
+                }
+            }
+        };
+
+        const renderTimePicker = (type: 'from' | 'to') => {
+            const currentTime = type === 'from' ? timeFrom : timeTo;
+
+            return (
+                <div className="flex items-center gap-2 w-full">
+                    <span className="text-sm font-medium">{numberOfMonths > 1 ? type === 'from' ? 'From:' : 'To:' : 'Time:'}</span>
+                    <input
+                        type="time"
+                        value={currentTime}
+                        onChange={(e) => handleTimeChange(e.target.value, type)}
+                        className="px-2 py-1 border rounded text-sm w-full"
+                    />
+                </div>
+            );
+        };
+
+        const renderDateWithTime = () => {
+            if (!date?.from) return <span>Pick a date</span>;
+
+            const fromDate = withTime ? parseTimeToDate(date.from, timeFrom) : date.from;
+            const toDate = withTime && date.to ? parseTimeToDate(date.to, timeTo) : date.to;
+
+            const fromFormatted = formatWithTz(fromDate, "dd LLL, y");
+            const fromTimeFormatted = withTime ? ` ${formatTime(timeFrom)}` : '';
+
+            if (toDate && numberOfMonths === 2) {
+                const toFormatted = formatWithTz(toDate, "dd LLL, y");
+                const toTimeFormatted = withTime ? ` ${formatTime(timeTo)}` : '';
+
+                return (
+                    <>
+                        <span>{fromFormatted}{fromTimeFormatted}</span>
+                        {" - "}
+                        <span>{toFormatted}{toTimeFormatted}</span>
+                    </>
+                );
+            }
+
+            return <span>{fromFormatted}{fromTimeFormatted}</span>;
+        };
+
         return (
             <>
                 <style>
                     {`
             .date-part {
               touch-action: none;
+            }
+            .time-picker {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              margin-top: 0.5rem;
+              padding: 0.5rem;
+              border-top: 1px solid #e5e7eb;
+            }
+            .time-input {
+              padding: 0.25rem 0.5rem;
+              border: 1px solid #d1d5db;
+              border-radius: 0.25rem;
+              font-size: 0.875rem;
             }
           `}
                 </style>
@@ -321,105 +392,13 @@ export const CalendarDatePicker = React.forwardRef<
                         >
                             <CalendarIcon className="mr-2 h-4 w-4" />
                             <span>
-                                {date?.from ? (
-                                    date.to ? (
-                                        <>
-                                            <span
-                                                id={`firstDay-${id}`}
-                                                className={cn(
-                                                    "date-part",
-
-                                                )}
-                                            >
-                                                {formatWithTz(date.from, "dd")}
-                                            </span>{" "}
-                                            <span
-                                                id={`firstMonth-${id}`}
-                                                className={cn(
-                                                    "date-part",
-
-                                                )}
-                                            >
-                                                {formatWithTz(date.from, "LLL")}
-                                            </span>
-                                            ,{" "}
-                                            <span
-                                                id={`firstYear-${id}`}
-                                                className={cn(
-                                                    "date-part",
-
-                                                )}
-                                            >
-                                                {formatWithTz(date.from, "y")}
-                                            </span>
-                                            {numberOfMonths === 2 && (
-                                                <>
-                                                    {" - "}
-                                                    <span
-                                                        id={`secondDay-${id}`}
-                                                        className={cn(
-                                                            "date-part",
-                                                        )}
-                                                    >
-                                                        {formatWithTz(date.to, "dd")}
-                                                    </span>{" "}
-                                                    <span
-                                                        id={`secondMonth-${id}`}
-                                                        className={cn(
-                                                            "date-part",
-                                                        )}
-                                                    >
-                                                        {formatWithTz(date.to, "LLL")}
-                                                    </span>
-                                                    ,{" "}
-                                                    <span
-                                                        id={`secondYear-${id}`}
-                                                        className={cn(
-                                                            "date-part",
-                                                        )}
-                                                    >
-                                                        {formatWithTz(date.to, "y")}
-                                                    </span>
-                                                </>
-                                            )}
-                                        </>
-                                    ) : (
-                                        <>
-                                            <span
-                                                id="day"
-                                                className={cn(
-                                                    "date-part",
-                                                )}
-                                            >
-                                                {formatWithTz(date.from, "dd")}
-                                            </span>{" "}
-                                            <span
-                                                id="month"
-                                                className={cn(
-                                                    "date-part",
-                                                )}
-                                            >
-                                                {formatWithTz(date.from, "LLL")}
-                                            </span>
-                                            ,{" "}
-                                            <span
-                                                id="year"
-                                                className={cn(
-                                                    "date-part",
-                                                )}
-                                            >
-                                                {formatWithTz(date.from, "y")}
-                                            </span>
-                                        </>
-                                    )
-                                ) : (
-                                    <span>Pick a date</span>
-                                )}
+                                {renderDateWithTime()}
                             </span>
                         </Button>
                     </PopoverTrigger>
                     {isPopoverOpen && (
                         <PopoverContent
+                            id={id}
                             className="w-auto"
                             align="center"
                             avoidCollisions={true}
@@ -554,6 +533,14 @@ export const CalendarDatePicker = React.forwardRef<
                                             className={cn(calendarClassName)}
                                         />
                                     </div>
+                                    {withTime && (
+                                        <div className="time-picker">
+                                            <div className="flex flex-col gap-2 md:flex-row md:gap-4 w-full">
+                                                {renderTimePicker('from')}
+                                                {numberOfMonths === 2 && renderTimePicker('to')}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </PopoverContent>
