@@ -14,6 +14,7 @@ use App\Models\AssetAssignment;
 use App\Models\ExternalUser;
 use App\Notifications\AppNotification;
 use App\Notifications\AssetAssignmentConfirmation;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -41,11 +42,11 @@ class AssetAssignmentController extends Controller
         $tableSchema = [];
 
         try {
-            $assetAssignments = Inertia::optional(fn() => AssetAssignmentResource::collection(
+            $assetAssignments = Inertia::optional(fn () => AssetAssignmentResource::collection(
                 $this->assetAssignmentService->getAll()
             ));
 
-            $tableSchema = Inertia::optional(fn() => $this->assetAssignmentService->getTable()->toSchema());
+            $tableSchema = Inertia::optional(fn () => $this->assetAssignmentService->getTable()->toSchema());
         } catch (\Throwable $th) {
             report($th);
         }
@@ -63,8 +64,8 @@ class AssetAssignmentController extends Controller
     {
         $this->authorize('create', AssetAssignment::class);
 
-        $employees = Inertia::optional(fn() => $this->assetAssignmentService->getEmployees($this->employeesQueryBuilder($request)));
-        $assets = Inertia::optional(fn() => $this->assetAssignmentService->getAssets($this->assetsQueryBuilder($request)));
+        $employees = Inertia::optional(fn () => $this->assetAssignmentService->getEmployees($this->employeesQueryBuilder($request)));
+        $assets = Inertia::optional(fn () => $this->assetAssignmentService->getAssets($this->assetsQueryBuilder($request, Asset::select())));
 
         return Inertia::render('asset-assignment/assign', [
             'employees' => $employees,
@@ -90,7 +91,7 @@ class AssetAssignmentController extends Controller
                 (
                     new AppNotification(
                         message: 'Asset Assignment Confirmation',
-                        description: 'Assets assigned successfully to ' . $assignments['assigned_user']['email'] . '.',
+                        description: 'Assets assigned successfully to '.$assignments['assigned_user']['email'].'.',
                         data: [
                             'reference_code' => $assetAssignment->reference_code,
                         ],
@@ -127,7 +128,7 @@ class AssetAssignmentController extends Controller
                 $assetAssignment->assignedBy,
                 (new AppNotification(
                     message: 'Asset Assignment Confirmation',
-                    description: 'Asset assignment to ' . $assetAssignment->assignedUser->email . ' confirmed successfully.',
+                    description: 'Asset assignment to '.$assetAssignment->assignedUser->email.' confirmed successfully.',
                     data: [
                         'reference_code' => $assetAssignment->reference_code,
                     ],
@@ -143,7 +144,7 @@ class AssetAssignmentController extends Controller
                     $assetAssignment->assignedBy,
                     (new AppNotification(
                         message: 'Asset Assignment Confirmation Failed',
-                        description: 'There was an error while confirming the assignment to ' . $assetAssignment->assignedUser->email,
+                        description: 'There was an error while confirming the assignment to '.$assetAssignment->assignedUser->email,
                         data: [
                             'reference_code' => $assetAssignment->reference_code,
                         ],
@@ -202,13 +203,15 @@ class AssetAssignmentController extends Controller
             ->getEloquentBuilder();
     }
 
-    private function assetsQueryBuilder(Request $request)
+    private function assetsQueryBuilder(Request $request, $asset)
     {
         $dp_request = $request->duplicate($request->input('asset', []));
 
-        return QueryBuilder::for(Asset::select(), $dp_request)
+        $query = QueryBuilder::for($asset, $dp_request)
             ->select(['id', 'name', 'serial_number', 'asset_tag', 'category_id', 'manufacture_id'])
-            ->where('status', AssetStatus::AVAILABLE)
+            ->when($asset instanceof Builder, function ($query) {
+                $query->where('status', AssetStatus::AVAILABLE);
+            })
             ->allowedFilters([
                 AllowedFilter::custom('search', new GlobalSearchNew(['name', 'serial_number', 'asset_tag', 'category.name', 'manufacture.name'])),
             ])
@@ -220,5 +223,7 @@ class AssetAssignmentController extends Controller
             ->defaultSort('name')
             ->limit(10)
             ->getEloquentBuilder();
+
+        return $query;
     }
 }
