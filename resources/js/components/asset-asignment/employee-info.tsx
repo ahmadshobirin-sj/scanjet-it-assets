@@ -7,9 +7,10 @@ interface EmployeeInfoProps extends React.HTMLAttributes<HTMLDivElement> {
     name?: string;
     job_title?: string;
     email?: string;
+    office_location?: string;
 }
 
-const EmployeeInfo: FC<EmployeeInfoProps> = ({ name, job_title, email, className, ...props }) => {
+const EmployeeInfo: FC<EmployeeInfoProps> = ({ name, job_title, email, office_location, className, ...props }) => {
     return (
         <div className={cn('rounded-md border p-4', className)} {...props}>
             <InfoListContainer hasGroups>
@@ -17,6 +18,10 @@ const EmployeeInfo: FC<EmployeeInfoProps> = ({ name, job_title, email, className
                     <InfoList direction="column">
                         <InfoListLabel>Name</InfoListLabel>
                         <InfoListContent>{name || '-'}</InfoListContent>
+                    </InfoList>
+                    <InfoList direction="column">
+                        <InfoListLabel>Email</InfoListLabel>
+                        <InfoListContent>{email}</InfoListContent>
                     </InfoList>
                     <InfoList direction="column">
                         <InfoListLabel>Job title</InfoListLabel>
@@ -27,8 +32,8 @@ const EmployeeInfo: FC<EmployeeInfoProps> = ({ name, job_title, email, className
                         </InfoListContent>
                     </InfoList>
                     <InfoList direction="column">
-                        <InfoListLabel>Email</InfoListLabel>
-                        <InfoListContent>{email}</InfoListContent>
+                        <InfoListLabel>Office Location</InfoListLabel>
+                        <InfoListContent>{office_location || 'N/A'}</InfoListContent>
                     </InfoList>
                 </InfoListGroup>
             </InfoListContainer>
