@@ -1,4 +1,4 @@
-import { AssetStatus } from "@/constants/asset-status";
+import { AssetStatus } from '@/constants/asset-status';
 
 export interface TableServerState {
     sort: string[];
@@ -138,6 +138,7 @@ export interface AssetAssignedUser {
 
 export interface AssetAssignment {
     id: string;
+    reference_code: string;
     asset_id: string;
     assigned_user_id: string;
     user_id: string;
@@ -146,9 +147,10 @@ export interface AssetAssignment {
     condition: string;
     assigned_at: string | null;
     returned_at: string | null;
-    asset: Asset;
-    assignedUser: AssetAssignedUser | null;
-    assignedBy: User | null;
+    confirmed_at: string | null;
+    assets: Asset[] | null;
+    assigned_user: AssetAssignedUser | null;
+    assigned_by: AssetAssignedUser | null;
 }
 
 export interface AppNotification {
