@@ -1,5 +1,18 @@
 import { NavGroup, NavItem } from '@/types';
-import { Boxes, Building2, ClipboardList, LayoutGrid, Logs, NotebookPen, Server, ShieldUser, SquareUser, Tags } from 'lucide-react';
+import {
+    Boxes,
+    Building2,
+    ClipboardList,
+    LayoutGrid,
+    Logs,
+    NotebookPen,
+    PackagePlus,
+    Server,
+    ShieldUser,
+    SquareUser,
+    Table,
+    Tags,
+} from 'lucide-react';
 
 export const mainNavItemsRaw: NavItem[] = [
     {
@@ -10,10 +23,27 @@ export const mainNavItemsRaw: NavItem[] = [
     {
         title: 'Assignment',
         icon: NotebookPen,
-        href: route('asset-assignment.index', undefined, false),
         meta: {
-            permission: ['asset_assignment.viewAny'],
+            permission: ['asset_assignment.viewAny', 'asset_assignment.create'],
         },
+        items: [
+            {
+                title: 'View Assignments',
+                icon: Table,
+                href: route('asset-assignment.index', undefined, false),
+                meta: {
+                    permission: ['asset_assignment.create'],
+                },
+            },
+            {
+                title: 'Assign assets',
+                icon: PackagePlus,
+                href: route('asset-assignment.assign', undefined, false),
+                meta: {
+                    permission: ['asset_assignment.create'],
+                },
+            },
+        ],
     },
     {
         title: 'Manage Assets',
