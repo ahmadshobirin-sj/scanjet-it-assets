@@ -7,7 +7,7 @@ enum AssetAssignmentAssetCondition: string
     case OK = 'ok';
     case LOST = 'lost';
     case STOLEN = 'stolen';
-    case DEMAGED = 'damaged';
+    case DAMAGED = 'damaged';
     case MALFUNCTIONING = 'malfunctioning';
 
     public function label(): string
@@ -16,7 +16,7 @@ enum AssetAssignmentAssetCondition: string
             self::OK => 'OK',
             self::LOST => 'Lost',
             self::STOLEN => 'Stolen',
-            self::DEMAGED => 'Damaged',
+            self::DAMAGED => 'Damaged',
             self::MALFUNCTIONING => 'Malfunctioning',
         };
     }
@@ -27,5 +27,17 @@ enum AssetAssignmentAssetCondition: string
             fn ($case) => ['value' => $case->value, 'label' => $case->label()],
             self::cases()
         );
+    }
+
+    public static function syncWithAssetStatus(AssetAssignmentAssetCondition $condition): AssetStatus
+    {
+        return match ($condition) {
+            self::OK => AssetStatus::AVAILABLE,
+            self::LOST => AssetStatus::LOST,
+            self::STOLEN => AssetStatus::STOLEN,
+            self::DAMAGED => AssetStatus::DAMAGED,
+            self::MALFUNCTIONING => AssetStatus::MALFUNCTIONING,
+            default => AssetStatus::AVAILABLE
+        };
     }
 }
