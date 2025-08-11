@@ -14,7 +14,7 @@ const AppNotifications = () => {
             <PopoverTrigger asChild>
                 <Button variant="ghost" size="icon" className="relative">
                     <Bell className="size-6" />
-                    <span className="rounded-ful absolute top-0 right-1.5 inline-flex h-4 w-auto min-w-4 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-4xl bg-destructive px-1 text-xs text-white">
+                    <span className="rounded-ful absolute top-1.5 right-2 inline-flex h-4 w-auto min-w-4 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-4xl bg-destructive px-1 text-xs text-white">
                         <span className="sr-only">Notifications</span>
                         <span>{unreadNotificationsCount}</span>
                     </span>
