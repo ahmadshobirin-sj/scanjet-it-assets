@@ -19,7 +19,7 @@ import AppLayout from '@/layouts/app-layout';
 import { SharedData } from '@/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router, useForm as useFormInertia, usePage } from '@inertiajs/react';
-import { Boxes, Check, User, X } from 'lucide-react';
+import { Boxes, Check, Notebook, User, X } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { AssignFormFields, assignFormSchema } from './form.schema';
@@ -48,7 +48,7 @@ const AssetAssignmentAssignPage = () => {
     const fetchEmployees = (search: string): Promise<any[]> => {
         return new Promise((resolve) => {
             router.get(
-                route('asset-assignment.create', {
+                route('asset-assignment.assign', {
                     employee: {
                         filter: {
                             search: search,
@@ -73,7 +73,7 @@ const AssetAssignmentAssignPage = () => {
     const fetchAssets = (search: string): Promise<any[]> => {
         return new Promise((resolve) => {
             router.get(
-                route('asset-assignment.create', {
+                route('asset-assignment.assign', {
                     asset: {
                         filter: {
                             search: search,
@@ -101,7 +101,7 @@ const AssetAssignmentAssignPage = () => {
     };
 
     const onConfirm = () => {
-        post(route('asset-assignment.assign'));
+        post(route('asset-assignment.storeAssign'));
     };
 
     return (
@@ -251,9 +251,9 @@ const AssetAssignmentAssignPage = () => {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <Badge size="md" className="p-1.5" intent="success" variant="light">
-                                        <User className="!size-5" />
+                                        <Notebook className="!size-5" />
                                     </Badge>
-                                    Assignment Details
+                                    Assignment Information
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -324,8 +324,15 @@ const AssetAssignmentAssignPage = () => {
                 </Form>
                 {employeeSelected && assetsSelected.length > 0 && (
                     <AssignmentConfirmation
+                        type="assign"
                         data={form.getValues()}
-                        employeeSelected={employeeSelected}
+                        employeeSelected={{
+                            id: employeeSelected.value,
+                            name: employeeSelected.label,
+                            job_title: employeeSelected.job_title,
+                            email: employeeSelected.email,
+                            office_location: employeeSelected.office_location,
+                        }}
                         assetsSelected={assetsSelected}
                         open={confirmationOpen}
                         onOpenChange={(open) => {
