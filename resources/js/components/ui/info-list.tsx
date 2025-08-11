@@ -29,12 +29,35 @@ type GridColumnsProps = VariantProps<typeof gridColumns>;
 interface InfoListContainerProps extends React.ComponentProps<"div"> {
     columns?: GridColumnsProps["columns"];
     hasGroups?: boolean;
+    enableDivide?: boolean;
 }
 
 const InfoListContainer = React.forwardRef<HTMLDivElement, InfoListContainerProps>(
-    ({ className, columns = 1, hasGroups = false, ...props }, ref) => {
+    ({ className, columns = 1, hasGroups = false, enableDivide = false, children, ...props }, ref) => {
         const clamped = Math.min(Math.max(columns || 1, 1), 8) as NonNullable<GridColumnsProps["columns"]>;
         const spacing = hasGroups ? "gap-6" : "gap-4";
+
+        // If enableDivide is true and hasGroups, we need to handle children differently
+        if (enableDivide && hasGroups) {
+            const childrenArray = React.Children.toArray(children);
+
+            return (
+                <div
+                    ref={ref}
+                    className={cn("space-y-6", className)}
+                    {...props}
+                >
+                    {childrenArray.map((child, index) => (
+                        <React.Fragment key={index}>
+                            {index > 0 && (
+                                <hr className="border-border/50" />
+                            )}
+                            {child}
+                        </React.Fragment>
+                    ))}
+                </div>
+            );
+        }
 
         return (
             <div
@@ -52,7 +75,9 @@ const InfoListContainer = React.forwardRef<HTMLDivElement, InfoListContainerProp
                     className
                 )}
                 {...props}
-            />
+            >
+                {children}
+            </div>
         );
     }
 );
@@ -69,6 +94,7 @@ interface InfoListGroupProps extends React.ComponentProps<"div"> {
 const InfoListGroup = React.forwardRef<HTMLDivElement, InfoListGroupProps>(
     ({ className, title, children, columns = 1, ...props }, ref) => {
         const clamped = Math.min(Math.max(columns, 1), 8) as NonNullable<GridColumnsProps["columns"]>;
+
         return (
             <div
                 ref={ref}
@@ -102,7 +128,7 @@ const InfoList = React.forwardRef<HTMLDivElement, InfoListProps>(
             <div
                 ref={ref}
                 className={cn(
-                    "gap-1",
+                    "gap-2",
                     direction === "row" ? "flex items-center" : "flex flex-col",
                     className
                 )}
@@ -137,7 +163,7 @@ const InfoListContent = React.forwardRef<HTMLDivElement, React.ComponentProps<"d
         return (
             <div
                 ref={ref}
-                className={cn("text-sm font-normal", className)}
+                className={cn("text-sm font-normal break-words", className)}
                 {...props}
             />
         );
