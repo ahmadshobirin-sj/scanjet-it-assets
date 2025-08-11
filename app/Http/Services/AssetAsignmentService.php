@@ -12,6 +12,7 @@ use App\Models\AssetAssignment;
 use App\Tables\AssetAssignmentTable;
 use App\Tables\Traits\HasTable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -34,6 +35,7 @@ class AssetAsignmentService extends Service
     public function getAll()
     {
         $query = $this->buildTable(AssetAssignment::class, $this->assetAssignmentTable);
+
         return $this->executeTableQuery($query);
     }
 
@@ -44,7 +46,12 @@ class AssetAsignmentService extends Service
 
     public function getAssets(Builder $query)
     {
-        return $query->where('status', AssetStatus::AVAILABLE)->get();
+        return $query->get();
+    }
+
+    public function getAssetsByAssignment(Builder $query)
+    {
+        return $query->get();
     }
 
     public function assign(array $data): AssetAssignment
@@ -124,9 +131,20 @@ class AssetAsignmentService extends Service
         return $data;
     }
 
-    public function getByReferenceCode(string $reference_code): AssetAssignment
+    public function getByReferenceCode(string $reference_code, array $with = []): AssetAssignment
     {
-        return AssetAssignment::where('reference_code', $reference_code)->firstOrFail();
+        try {
+            $assetAssignment = AssetAssignment::where('reference_code', $reference_code)
+                ->with($with)
+                ->firstOrFail();
+
+            return $assetAssignment;
+        } catch (ModelNotFoundException $e) {
+            throw new ClientException(
+                message: 'Asset assignment not found',
+                description: 'No asset assignment found with the provided reference code.',
+            );
+        }
     }
 
     public function confirmation(string $reference_code): AssetAssignment|bool
