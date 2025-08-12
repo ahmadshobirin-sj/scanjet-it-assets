@@ -36,7 +36,7 @@ class AssetAssignmentPolicy
      */
     public function update(User $user, AssetAssignment $assetAssignment): bool
     {
-        return false;
+        return $user->can('asset_assignment.update');
     }
 
     /**
@@ -44,6 +44,6 @@ class AssetAssignmentPolicy
      */
     public function delete(User $user, AssetAssignment $assetAssignment): bool
     {
-        return false;
+        return $user->can('asset_assignment.delete');
     }
 }
