@@ -98,8 +98,8 @@ export const CalendarDatePicker = React.forwardRef<
         );
 
         // Time state
-        const [timeFrom, setTimeFrom] = React.useState<string>('00:00');
-        const [timeTo, setTimeTo] = React.useState<string>('23:59');
+        const [timeFrom, setTimeFrom] = React.useState<string>(date?.from ? formatInTimeZone(date.from, Intl.DateTimeFormat().resolvedOptions().timeZone, 'HH:mm') : '00:00');
+        const [timeTo, setTimeTo] = React.useState<string>(date?.to ? formatInTimeZone(date.to, Intl.DateTimeFormat().resolvedOptions().timeZone, 'HH:mm') : '23:59');
 
         const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         const {
