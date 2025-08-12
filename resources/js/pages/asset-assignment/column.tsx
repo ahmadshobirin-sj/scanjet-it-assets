@@ -9,4 +9,16 @@ export const columns: TransformersTableResolver<AssetAssignment> = {
             return formatWithBrowserTimezone(row.original.confirmed_at);
         },
     }),
+    assigned_at: (column) => ({
+        ...column,
+        cell: ({ row }) => {
+            return formatWithBrowserTimezone(row.original.assigned_at);
+        },
+    }),
+    returned_at: (column) => ({
+        ...column,
+        cell: ({ row }) => {
+            return formatWithBrowserTimezone(row.original.returned_at);
+        },
+    }),
 };
