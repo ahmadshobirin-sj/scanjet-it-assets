@@ -2,9 +2,9 @@ import { ColumnDef, ColumnFiltersState, PaginationState, RowSelectionState, Sort
 import type { JSX } from 'react';
 
 export interface DataGridState {
-    pagination?: PaginationState;
-    sorting?: SortingState;
-    globalFilter?: string;
+    pagination: PaginationState;
+    sorting: SortingState;
+    globalFilter: string;
     columnFilters?: ColumnFiltersState;
     rowSelection?: RowSelectionState;
     columnVisibility?: VisibilityState;
