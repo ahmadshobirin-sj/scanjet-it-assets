@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\ClientException;
 use App\Http\Requests\Asset\AssetStoreRequest;
 use App\Http\Requests\Asset\AssetUpdateRequest;
 use App\Http\Resources\Asset\AssetResource;
@@ -35,6 +34,7 @@ class AssetController extends Controller
             $this->assetService->getAll()
         );
         $tableSchema = $this->assetService->getTable()->toSchema();
+
         // dd($tableSchema);
         return Inertia::render('assets/list', [
             'assets' => $assets,
@@ -49,9 +49,9 @@ class AssetController extends Controller
     {
         $this->authorize('create', Asset::class);
 
-        $manufactures = Inertia::optional(fn() => $this->manufactureService->getAll($request));
+        $manufactures = Inertia::optional(fn () => $this->manufactureService->getAll($request));
 
-        $categories = Inertia::optional(fn() => $this->assetCategoryService->getAll($request));
+        $categories = Inertia::optional(fn () => $this->assetCategoryService->getAll($request));
 
         return Inertia::render('assets/create', [
             'manufactures' => $manufactures,
@@ -79,6 +79,7 @@ class AssetController extends Controller
             } else {
                 throw $e;
             }
+
             return back();
         }
     }
@@ -112,9 +113,9 @@ class AssetController extends Controller
             'manufacture',
         ]);
 
-        $manufactures = Inertia::optional(fn() => $this->manufactureService->getAll());
+        $manufactures = Inertia::optional(fn () => $this->manufactureService->getAll());
 
-        $categories = Inertia::optional(fn() => $this->assetCategoryService->getAll());
+        $categories = Inertia::optional(fn () => $this->assetCategoryService->getAll());
 
         return Inertia::render('assets/edit', [
             'asset' => new AssetResource($asset),
@@ -143,6 +144,7 @@ class AssetController extends Controller
             } else {
                 throw $e;
             }
+
             return back();
         }
     }
@@ -167,6 +169,7 @@ class AssetController extends Controller
             } else {
                 throw $e;
             }
+
             return back();
         }
     }
