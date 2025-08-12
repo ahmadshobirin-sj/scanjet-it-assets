@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Tables;
+namespace App\Http\Tables;
 
 use App\Http\Filters\NestedRelationSort;
 use App\Tables\Columns\Column;
+use App\Tables\Table;
 
 class AssetTable extends Table
 {

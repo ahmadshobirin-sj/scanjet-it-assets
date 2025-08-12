@@ -5,7 +5,7 @@ namespace App\Http\Services;
 use App\Enums\AssetStatus;
 use App\Exceptions\ClientException;
 use App\Models\Asset;
-use App\Tables\AssetTable;
+use App\Http\Tables\AssetTable;
 use App\Tables\Traits\HasTable;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
