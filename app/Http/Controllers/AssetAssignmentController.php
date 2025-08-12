@@ -68,8 +68,8 @@ class AssetAssignmentController extends Controller
     {
         $this->authorize('create', AssetAssignment::class);
 
-        $employees = Inertia::optional(fn() => $this->assetAssignmentService->getEmployees($this->employeesQueryBuilder($request)));
-        $assets = Inertia::optional(fn() => $this->assetAssignmentService->getAssets($this->assetsQueryBuilder($request, Asset::select())));
+        $employees = Inertia::optional(fn () => $this->assetAssignmentService->getEmployees($this->employeesQueryBuilder($request)));
+        $assets = Inertia::optional(fn () => $this->assetAssignmentService->getAssets($this->assetsQueryBuilder($request, Asset::select())));
 
         return Inertia::render('asset-assignment/assign', [
             'employees' => $employees,
@@ -95,7 +95,7 @@ class AssetAssignmentController extends Controller
                 (
                     new AppNotification(
                         message: 'Asset Assignment Confirmation',
-                        description: 'Assets assigned successfully to ' . $assignments['assigned_user']['email'] . '.',
+                        description: 'Assets assigned successfully to '.$assignments['assigned_user']['email'].'.',
                         data: [
                             'reference_code' => $assetAssignment->reference_code,
                         ],
@@ -136,7 +136,7 @@ class AssetAssignmentController extends Controller
                 $assetAssignment->assignedBy,
                 (new AppNotification(
                     message: 'Asset Assignment Confirmation',
-                    description: 'Asset assignment to ' . $assetAssignment->assignedUser->email . ' confirmed successfully.',
+                    description: 'Asset assignment to '.$assetAssignment->assignedUser->email.' confirmed successfully.',
                     data: [
                         'reference_code' => $assetAssignment->reference_code,
                     ],
@@ -152,7 +152,7 @@ class AssetAssignmentController extends Controller
                     $assetAssignment->assignedBy,
                     (new AppNotification(
                         message: 'Asset Assignment Confirmation Failed',
-                        description: 'There was an error while confirming the assignment to ' . $assetAssignment->assignedUser->email,
+                        description: 'There was an error while confirming the assignment to '.$assetAssignment->assignedUser->email,
                         data: [
                             'reference_code' => $assetAssignment->reference_code,
                         ],
