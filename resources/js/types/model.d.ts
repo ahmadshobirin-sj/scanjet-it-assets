@@ -1,5 +1,4 @@
 import { AssetStatus } from '@/constants/asset-status';
-
 export interface TableServerState {
     sort: string[];
     filters: Record<string, any>;
