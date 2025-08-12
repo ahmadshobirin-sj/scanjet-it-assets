@@ -275,6 +275,7 @@ const AssetAssignmentAssignPage = () => {
                                                         onDateSelect={(date) => onChange(date.from)}
                                                         className="md:w-[200px]"
                                                         numberOfMonths={1}
+                                                        withTime
                                                         {...field}
                                                     />
                                                 </FormControl>
