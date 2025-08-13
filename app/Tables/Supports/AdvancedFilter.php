@@ -4,7 +4,6 @@ namespace App\Tables\Supports;
 
 use App\Tables\Enums\AdvanceOperator;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Log;
 use Spatie\QueryBuilder\Filters\Filter;
 
 /**
@@ -22,16 +21,8 @@ class AdvancedFilter implements Filter
 
     public function __invoke(Builder $query, $value, string $property): Builder
     {
-        // Log for debugging
-        Log::debug('AdvancedFilter invoked', [
-            'property' => $this->property,
-            'value' => $value,
-        ]);
-
         // If value is not an array with 'op' and 'value', skip
         if (! is_array($value) || ! isset($value['op'])) {
-            Log::warning('AdvancedFilter skipped - invalid format', ['value' => $value]);
-
             return $query;
         }
 
@@ -45,8 +36,6 @@ class AdvancedFilter implements Filter
         try {
             $operatorEnum = AdvanceOperator::from($operator);
         } catch (\ValueError $e) {
-            Log::error('Invalid operator', ['operator' => $operator]);
-
             return $query;
         }
 
@@ -79,13 +68,6 @@ class AdvancedFilter implements Filter
      */
     protected function applyDirectFilter(Builder $query, string $column, AdvanceOperator $operator, $filterValue): Builder
     {
-        // Log the operation
-        Log::debug('Applying filter', [
-            'column' => $column,
-            'operator' => $operator->value,
-            'value' => $filterValue,
-        ]);
-
         // Handle operators that don't require values
         if (! $operator->requiresValue()) {
             return match ($operator) {
@@ -101,8 +83,6 @@ class AdvancedFilter implements Filter
 
             // Validate array has required values for BETWEEN operations
             if (in_array($operator, [AdvanceOperator::BETWEEN, AdvanceOperator::NOT_BETWEEN]) && count($values) < 2) {
-                Log::warning('BETWEEN/NOT_BETWEEN requires 2 values', ['values' => $values]);
-
                 return $query;
             }
 
