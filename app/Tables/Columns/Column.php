@@ -219,7 +219,7 @@ class Column
             'custom' => $this->customSort
                 ? AllowedSort::custom($this->name, $this->customSort)
                 : throw new \InvalidArgumentException('Custom sortType requires customSort closure.'),
-            default => throw new \InvalidArgumentException("Unknown sortType: {$this->sortType}")
+            default => AllowedSort::field($this->name) // Default to field sort
         };
     }
 
