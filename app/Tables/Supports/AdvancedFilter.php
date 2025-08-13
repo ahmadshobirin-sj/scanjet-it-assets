@@ -2,10 +2,10 @@
 
 namespace App\Tables\Supports;
 
-use Illuminate\Database\Eloquent\Builder;
-use Spatie\QueryBuilder\Filters\Filter;
 use App\Tables\Enums\AdvanceOperator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Log;
+use Spatie\QueryBuilder\Filters\Filter;
 
 /**
  * Generic Advanced Filter for basic operations
@@ -29,15 +29,16 @@ class AdvancedFilter implements Filter
         ]);
 
         // If value is not an array with 'op' and 'value', skip
-        if (!is_array($value) || !isset($value['op'])) {
+        if (! is_array($value) || ! isset($value['op'])) {
             Log::warning('AdvancedFilter skipped - invalid format', ['value' => $value]);
+
             return $query;
         }
 
         $operator = $value['op'] ?? null;
         $filterValue = $value['value'] ?? null;
 
-        if (!$operator) {
+        if (! $operator) {
             return $query;
         }
 
@@ -45,6 +46,7 @@ class AdvancedFilter implements Filter
             $operatorEnum = AdvanceOperator::from($operator);
         } catch (\ValueError $e) {
             Log::error('Invalid operator', ['operator' => $operator]);
+
             return $query;
         }
 
@@ -85,7 +87,7 @@ class AdvancedFilter implements Filter
         ]);
 
         // Handle operators that don't require values
-        if (!$operator->requiresValue()) {
+        if (! $operator->requiresValue()) {
             return match ($operator) {
                 AdvanceOperator::IS_NULL, AdvanceOperator::IS_NOT_SET => $query->whereNull($column),
                 AdvanceOperator::IS_NOT_NULL, AdvanceOperator::IS_SET => $query->whereNotNull($column),
@@ -100,6 +102,7 @@ class AdvancedFilter implements Filter
             // Validate array has required values for BETWEEN operations
             if (in_array($operator, [AdvanceOperator::BETWEEN, AdvanceOperator::NOT_BETWEEN]) && count($values) < 2) {
                 Log::warning('BETWEEN/NOT_BETWEEN requires 2 values', ['values' => $values]);
+
                 return $query;
             }
 
@@ -160,10 +163,10 @@ class AdvancedFilter implements Filter
         $stringValue = (string) $value;
 
         return match ($operator) {
-            AdvanceOperator::CONTAINS => $query->where($column, 'LIKE', '%' . $stringValue . '%'),
-            AdvanceOperator::NOT_CONTAINS => $query->where($column, 'NOT LIKE', '%' . $stringValue . '%'),
-            AdvanceOperator::STARTS_WITH => $query->where($column, 'LIKE', $stringValue . '%'),
-            AdvanceOperator::ENDS_WITH => $query->where($column, 'LIKE', '%' . $stringValue),
+            AdvanceOperator::CONTAINS => $query->where($column, 'LIKE', '%'.$stringValue.'%'),
+            AdvanceOperator::NOT_CONTAINS => $query->where($column, 'NOT LIKE', '%'.$stringValue.'%'),
+            AdvanceOperator::STARTS_WITH => $query->where($column, 'LIKE', $stringValue.'%'),
+            AdvanceOperator::ENDS_WITH => $query->where($column, 'LIKE', '%'.$stringValue),
             default => $query,
         };
     }
