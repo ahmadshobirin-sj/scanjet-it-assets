@@ -6,10 +6,15 @@ use Closure;
 
 class ClosureHelper
 {
-    public static function evaluate(mixed $value, mixed $context = null): mixed
+    /**
+     * Evaluate a value that might be a Closure
+     */
+    public static function evaluate($value, ...$args)
     {
-        return $value instanceof Closure
-            ? $value($context)
-            : $value;
+        if ($value instanceof Closure) {
+            return $value(...$args);
+        }
+
+        return $value;
     }
 }
