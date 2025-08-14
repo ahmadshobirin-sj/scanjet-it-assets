@@ -6,10 +6,13 @@ use App\Tables\Columns\Column;
 use App\Tables\FilterColumns\FilterColumn;
 use App\Tables\Traits\HasFilter;
 use App\Tables\Traits\HasGlobalSearch;
+use App\Tables\Traits\HasRowSelection;
 use App\Tables\Traits\HasSortable;
 use App\Tables\Traits\HasToggleable;
 use App\Tables\Traits\TableState;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Spatie\QueryBuilder\QueryBuilder;
 
 abstract class NewTable
@@ -19,12 +22,30 @@ abstract class NewTable
     use HasSortable;
     use HasToggleable;
     use TableState;
+    use HasRowSelection;
 
     protected string $name = 'default';
+
+    protected string $rowId = 'id';
+
+    protected string $emptyText = 'No data available';
+
+    protected QueryBuilder|string $query;
+
+    protected QueryBuilder|string $rawQuery; // Original query without state applied
+
+    protected LengthAwarePaginator $rawData; // Data without pagination, used for export and raw queries
 
     public function __construct(string $name)
     {
         $this->name = $name;
+
+        $this->query = $this->makeQuery();
+
+        $this->rawQuery = clone $this->query;
+
+        $this->rawData = $this->makeData($this->query);
+
         $this->applyStateFromRequest();
     }
 
@@ -36,6 +57,16 @@ abstract class NewTable
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function getRowId(): string
+    {
+        return $this->rowId;
+    }
+
+    public function getEmptyText(): string
+    {
+        return $this->emptyText;
     }
 
     abstract public function resource(): Builder|string;
@@ -68,9 +99,24 @@ abstract class NewTable
     }
 
     /**
+     * Define available per page options for dropdown
+     * Override in child class to customize
+     */
+    public function perPageOptions(): array
+    {
+        return [
+            ['label' => '10', 'value' => 10],
+            ['label' => '25', 'value' => 25],
+            ['label' => '50', 'value' => 50],
+            ['label' => '100', 'value' => 100],
+            ['label' => 'All', 'value' => $this->rawData->total()],
+        ];
+    }
+
+    /**
      * Build and execute the query
      */
-    public function query()
+    public function makeQuery()
     {
         // Get active filters
         $activeFilters = $this->getActiveFilters();
@@ -125,6 +171,11 @@ abstract class NewTable
         // Allow customization
         $query = $this->customizeQuery($query);
 
+        return $query;
+    }
+
+    public function makeData(QueryBuilder $query): LengthAwarePaginator
+    {
         // Paginate and return
         $page = $this->getState('page', $this->pagination()['page']);
         $perPage = $this->getState('perPage', $this->pagination()['per_page']);
@@ -134,7 +185,7 @@ abstract class NewTable
         // Build pagination links with proper parameters
         $results->appends($this->buildPaginationParams());
 
-        return $results->toArray();
+        return $results;
     }
 
     /**
@@ -156,7 +207,7 @@ abstract class NewTable
             $filters = array_merge($filters, $globalSearch);
         }
 
-        return array_filter($filters, fn ($item) => filled($item));
+        return array_filter($filters, fn($item) => filled($item));
     }
 
     /**
@@ -237,10 +288,13 @@ abstract class NewTable
     {
         return [
             'name' => $this->getName(),
+            'rowId' => $this->getRowId(),
+            'emptyText' => $this->getEmptyText(),
+            'enableRowSelection' => $this->isRowSelectionEnabled(),
             'columns' => $this->mapColumnsToSchema(),
             'filters' => $this->mapFiltersToSchema(),
             'state' => $this->getFullState(),
-            'results' => $this->query(),
+            'results' => $this->getData(),
             'meta' => [
                 'has_filters' => $this->hasActiveFilters(),
                 'filter_summary' => $this->getFilterSummary(),
@@ -249,6 +303,7 @@ abstract class NewTable
                 'toggleable_columns' => $this->toggleableColumns(),
                 'default_sort' => $this->defaultSort(),
                 'searchable_columns' => $this->getSearchableColumns(),
+                'per_page_options' => $this->perPageOptions(),
             ],
         ];
     }
@@ -259,8 +314,8 @@ abstract class NewTable
     protected function getSearchableColumns(): array
     {
         return collect($this->columns())
-            ->filter(fn (Column $col) => $col->isGlobalSearchable())
-            ->map(fn (Column $col) => $col->getName())
+            ->filter(fn(Column $col) => $col->isGlobalSearchable())
+            ->map(fn(Column $col) => $col->getName())
             ->values()
             ->all();
     }
@@ -270,7 +325,7 @@ abstract class NewTable
      */
     public function getData(): array
     {
-        return $this->query();
+        return $this->rawData->toArray();
     }
 
     /**
@@ -292,12 +347,6 @@ abstract class NewTable
             $queryParams['sort'] = implode(',', $currentSort);
         }
 
-        // Create test query
-        $request = request()->duplicate($queryParams);
-        $testQuery = QueryBuilder::for($this->resource(), $request)
-            ->allowedFilters($this->buildFilters())
-            ->allowedSorts($this->sorts());
-
         return [
             'table_name' => $this->getName(),
             'state' => $this->getState(),
@@ -305,9 +354,9 @@ abstract class NewTable
             'query_params' => $queryParams,
             'request_input' => request()->input($this->getName()),
             'raw_request' => request()->all(),
-            'sql' => $testQuery->toSql(),
-            'bindings' => $testQuery->getBindings(),
-            'count' => $testQuery->count(),
+            'sql' => $this->query->toSql(),
+            'bindings' =>  $this->query->getBindings(),
+            'count' =>  $this->rawData->total(),
         ];
     }
 
@@ -328,30 +377,7 @@ abstract class NewTable
      */
     public function export(): array
     {
-        $activeFilters = $this->getActiveFilters();
-        $currentSort = $this->getState('sort', $this->defaultSort());
-
-        $queryParams = [];
-        if (! empty($activeFilters)) {
-            foreach ($activeFilters as $attribute => $filter) {
-                $queryParams['filter'][$attribute] = $filter;
-            }
-        }
-        if (! empty($currentSort)) {
-            $queryParams['sort'] = implode(',', $currentSort);
-        }
-
-        $request = request()->duplicate($queryParams);
-
-        $query = QueryBuilder::for($this->resource(), $request)
-            ->allowedFilters($this->buildFilters())
-            ->allowedSorts($this->sorts());
-
-        if (! empty($this->with())) {
-            $query->with($this->with());
-        }
-
-        return $this->customizeQuery($query)->get()->toArray();
+        return $this->rawQuery->get()->toArray();
     }
 
     /**
@@ -411,25 +437,7 @@ abstract class NewTable
      */
     public function getTotalCount(): int
     {
-        $activeFilters = $this->getActiveFilters();
-
-        $queryParams = [];
-        if (! empty($activeFilters)) {
-            foreach ($activeFilters as $attribute => $filter) {
-                $queryParams['filter'][$attribute] = $filter;
-            }
-        }
-
-        $request = request()->duplicate($queryParams);
-
-        $query = QueryBuilder::for($this->resource(), $request)
-            ->allowedFilters($this->buildFilters());
-
-        if (! empty($this->with())) {
-            $query->with($this->with());
-        }
-
-        return $this->customizeQuery($query)->count();
+        return $this->query->count();
     }
 
     /**
@@ -496,7 +504,7 @@ abstract class NewTable
         $params = $this->buildPaginationParams();
         $queryString = http_build_query($params);
 
-        return $baseUrl.(str_contains($baseUrl, '?') ? '&' : '?').$queryString;
+        return $baseUrl . (str_contains($baseUrl, '?') ? '&' : '?') . $queryString;
     }
 
     /**
@@ -578,7 +586,7 @@ abstract class NewTable
     public function getColumnsConfig(): array
     {
         return collect($this->columns())
-            ->map(fn (Column $column) => [
+            ->map(fn(Column $column) => [
                 'name' => $column->getName(),
                 'label' => $column->getLabel(),
                 'sortable' => $column->isSortable(),
@@ -611,7 +619,7 @@ abstract class NewTable
                 $errors[] = "Resource class {$resource} does not exist";
             }
         } catch (\Exception $e) {
-            $errors[] = 'Error loading resource: '.$e->getMessage();
+            $errors[] = 'Error loading resource: ' . $e->getMessage();
         }
 
         // Check if columns are defined
