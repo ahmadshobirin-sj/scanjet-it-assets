@@ -201,7 +201,8 @@ trait TableState
     {
         return [
             'filters' => $this->getState('filters', []),
-            'perPage' => $this->getState('perPage', 15),
+            'perPage' => $this->getState('perPage', $this->pagination()['per_page']),
+            'page' => $this->getState('page', $this->pagination()['page']),
             'search' => $this->getState('search'),
             'sort' => $this->getState('sort', []),
         ];
