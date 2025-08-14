@@ -11,7 +11,6 @@ use App\Tables\Traits\HasSortable;
 use App\Tables\Traits\HasToggleable;
 use App\Tables\Traits\TableState;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Spatie\QueryBuilder\QueryBuilder;
 
@@ -19,10 +18,10 @@ abstract class NewTable
 {
     use HasFilter;
     use HasGlobalSearch;
+    use HasRowSelection;
     use HasSortable;
     use HasToggleable;
     use TableState;
-    use HasRowSelection;
 
     protected string $name = 'default';
 
@@ -207,7 +206,7 @@ abstract class NewTable
             $filters = array_merge($filters, $globalSearch);
         }
 
-        return array_filter($filters, fn($item) => filled($item));
+        return array_filter($filters, fn ($item) => filled($item));
     }
 
     /**
@@ -314,8 +313,8 @@ abstract class NewTable
     protected function getSearchableColumns(): array
     {
         return collect($this->columns())
-            ->filter(fn(Column $col) => $col->isGlobalSearchable())
-            ->map(fn(Column $col) => $col->getName())
+            ->filter(fn (Column $col) => $col->isGlobalSearchable())
+            ->map(fn (Column $col) => $col->getName())
             ->values()
             ->all();
     }
@@ -355,8 +354,8 @@ abstract class NewTable
             'request_input' => request()->input($this->getName()),
             'raw_request' => request()->all(),
             'sql' => $this->query->toSql(),
-            'bindings' =>  $this->query->getBindings(),
-            'count' =>  $this->rawData->total(),
+            'bindings' => $this->query->getBindings(),
+            'count' => $this->rawData->total(),
         ];
     }
 
@@ -504,7 +503,7 @@ abstract class NewTable
         $params = $this->buildPaginationParams();
         $queryString = http_build_query($params);
 
-        return $baseUrl . (str_contains($baseUrl, '?') ? '&' : '?') . $queryString;
+        return $baseUrl.(str_contains($baseUrl, '?') ? '&' : '?').$queryString;
     }
 
     /**
@@ -586,7 +585,7 @@ abstract class NewTable
     public function getColumnsConfig(): array
     {
         return collect($this->columns())
-            ->map(fn(Column $column) => [
+            ->map(fn (Column $column) => [
                 'name' => $column->getName(),
                 'label' => $column->getLabel(),
                 'sortable' => $column->isSortable(),
@@ -619,7 +618,7 @@ abstract class NewTable
                 $errors[] = "Resource class {$resource} does not exist";
             }
         } catch (\Exception $e) {
-            $errors[] = 'Error loading resource: ' . $e->getMessage();
+            $errors[] = 'Error loading resource: '.$e->getMessage();
         }
 
         // Check if columns are defined
