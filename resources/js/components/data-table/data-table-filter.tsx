@@ -1,5 +1,5 @@
-import { TrashIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { TrashIcon } from 'lucide-react';
 import DataTableFilterItem from './data-table-filter-item';
 import { useDataTable } from './data-table-provider';
 

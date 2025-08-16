@@ -5,8 +5,7 @@ import { Button } from '../ui/button';
 import { useDataTable } from './data-table-provider';
 
 const DataTableActiveFilters = () => {
-    const { activeFiltersCount, filterStates, handleOnChangeFilter, filters, resource, handleClearFilters, isLoading } =
-        useDataTable();
+    const { activeFiltersCount, filterStates, handleOnChangeFilter, filters, resource, handleClearFilters, isLoading } = useDataTable();
 
     if (activeFiltersCount < 1) return <></>;
 

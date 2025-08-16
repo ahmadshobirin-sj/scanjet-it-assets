@@ -1,3 +1,7 @@
+import { Button } from '@/components/ui/button';
+import { CalendarDatePicker } from '@/components/ui/calendar-date-picker';
+import { Input } from '@/components/ui/input';
+import { MultiSelect } from '@/components/ui/multi-select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import useDidUpdate from '@/hooks/use-did-update';
 import { convertCarbonToDateFns } from '@/lib/convertCarbonToDateFns';
@@ -7,10 +11,6 @@ import { isArray, isEqual } from 'lodash';
 import { FilterIcon, SearchIcon } from 'lucide-react';
 import { FC, useCallback, useMemo, useState } from 'react';
 import { isArrayValue } from '.';
-import { Button } from '@/components/ui/button';
-import { CalendarDatePicker } from '@/components/ui/calendar-date-picker';
-import { Input } from '@/components/ui/input';
-import { MultiSelect } from '@/components/ui/multi-select';
 import { useDataTable } from './data-table-provider';
 import { DataTableFilter, DataTableFilterStateItem } from './data-table.types';
 
@@ -151,17 +151,17 @@ const DateTableFilterItemController = ({ type, options, meta, state, handleChang
                     state.value
                         ? numberOfMonths > 1
                             ? {
-                                from: new Date(state.value[0]),
-                                to: new Date(state.value[1]),
-                            }
+                                  from: new Date(state.value[0]),
+                                  to: new Date(state.value[1]),
+                              }
                             : {
-                                from: new Date(state.value),
-                                to: new Date(state.value),
-                            }
+                                  from: new Date(state.value),
+                                  to: new Date(state.value),
+                              }
                         : {
-                            from: undefined,
-                            to: undefined,
-                        }
+                              from: undefined,
+                              to: undefined,
+                          }
                 }
                 onDateSelect={(date) => {
                     let value;

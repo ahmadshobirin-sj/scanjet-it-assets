@@ -162,7 +162,10 @@ export interface DataTableProviderContext<TData>
     totalSelectedRows: number;
 }
 
-export type DataTableProps<TData> = Pick<DataTableProviderProps<TData>, 'resource' | 'actionsRow' | 'bulkActions' | 'transformerColumns' | 'exportActions'>
+export type DataTableProps<TData> = Pick<
+    DataTableProviderProps<TData>,
+    'resource' | 'actionsRow' | 'bulkActions' | 'transformerColumns' | 'exportActions'
+>;
 
 export interface DataTableClientQuery {
     pagination?: PaginationState;
