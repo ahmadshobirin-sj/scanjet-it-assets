@@ -162,4 +162,31 @@ class DateFilterColumn extends FilterColumn
             }
         };
     }
+
+    public function default(mixed $value): static
+    {
+        if (is_array($value)) {
+            $this->default = array_map(function ($val) {
+                return $this->formatValue($val);
+            }, $value);
+        } else {
+            $this->default = $this->formatValue($value);
+        }
+
+        $this->hasDefaultValue = true;
+
+        return $this;
+    }
+
+    protected function formatValue($value): string
+    {
+        if ($value instanceof \Carbon\Carbon) {
+            return $value->format($this->format);
+        }
+        if (is_int($value) || is_string($value)) {
+            return \Carbon\Carbon::parse($value)->format($this->format);
+        }
+
+        return (string) $value;
+    }
 }
