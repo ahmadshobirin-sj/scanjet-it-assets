@@ -12,6 +12,8 @@ class SelectFilterColumn extends FilterColumn
 
     protected bool $multiple = false;
 
+    protected ?string $remoteUrl = null;
+
     protected function setDefaultClauses(): void
     {
         $operators = AdvanceOperator::selectOperators();
@@ -67,11 +69,24 @@ class SelectFilterColumn extends FilterColumn
         return 'set';
     }
 
+    public function remoteUrl(Closure|string $url): static
+    {
+        $this->remoteUrl = $url;
+
+        return $this;
+    }
+
+    public function getRemoteUrl(): ?string
+    {
+        return ClosureHelper::evaluate($this->remoteUrl);
+    }
+
     public function toArray(): array
     {
         return array_merge(parent::toArray(), [
             'options' => $this->getOptions(),
             'multiple' => $this->multiple,
+            'remoteUrl' => $this->getRemoteUrl(),
         ]);
     }
 }
