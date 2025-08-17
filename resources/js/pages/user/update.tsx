@@ -12,7 +12,6 @@ import { SharedData } from '@/types';
 import { ResponseCollection, Role, User } from '@/types/model';
 import { useForm, usePage } from '@inertiajs/react';
 import { FormEvent, forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
-import { toast } from 'sonner';
 
 export type UserUpdatePageRef = {
     open: () => void;
@@ -25,7 +24,7 @@ const UserUpdatePage = forwardRef<UserUpdatePageRef, { user: User | null; onClos
         props: { roles },
     } = usePage<SharedData & { roles: ResponseCollection<Role> }>();
     const sheetRef = useRef<HTMLDivElement>(null);
-    const { data, setData, put, processing, errors, reset, isDirty, setDefaults } = useForm<{ email: string; roles: string[] }>({
+    const { data, setData, put, processing, errors, reset, isDirty, setDefaults, clearErrors } = useForm<{ email: string; roles: string[] }>({
         email: '',
         roles: [],
     });
@@ -42,10 +41,12 @@ const UserUpdatePage = forwardRef<UserUpdatePageRef, { user: User | null; onClos
         shouldConfirmClose: () => isDirty,
         onConfirmClose: () => {
             reset();
+            clearErrors();
             onClose?.();
         },
         onCloseClean: () => {
             reset();
+            clearErrors();
             onClose?.();
         },
     });
@@ -78,16 +79,11 @@ const UserUpdatePage = forwardRef<UserUpdatePageRef, { user: User | null; onClos
         put(route('user.update', user?.id), {
             onSuccess: (res) => {
                 reset();
-                toast.success((res.props.success as any).message);
                 setOpen(false);
             },
-            onError: (errors) => {
-                if (errors.message) {
-                    toast.error(errors.message, {
-                        ...(errors.error ? { description: errors.error } : {}),
-                    });
-                }
-            },
+            onFinish: () => {
+                // router.reload()
+            }
         });
     };
 
@@ -114,7 +110,7 @@ const UserUpdatePage = forwardRef<UserUpdatePageRef, { user: User | null; onClos
 
     return (
         <Sheet onOpenChange={handleChange} open={open}>
-            <SheetContent ref={sheetRef}>
+            <SheetContent ref={sheetRef} className="w-full sm:max-w-lg">
                 <SheetHeader>
                     <SheetTitle>Update user</SheetTitle>
                     <SheetDescription>Update user information and roles.</SheetDescription>

@@ -23,7 +23,6 @@ import { ResponseCollection, Role } from '@/types/model';
 import { useForm, usePage } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import React, { FormEvent, useCallback, useMemo } from 'react';
-import { toast } from 'sonner';
 
 const UserCreatePage = () => {
     const {
@@ -56,15 +55,7 @@ const UserCreatePage = () => {
         post('/user/create', {
             onSuccess: (res) => {
                 reset();
-                toast.success((res.props.success as any).message);
                 setOpen(false);
-            },
-            onError: (errors) => {
-                if (errors.message) {
-                    toast.error(errors.message, {
-                        ...(errors.error ? { description: errors.error } : {}),
-                    });
-                }
             },
         });
     };
