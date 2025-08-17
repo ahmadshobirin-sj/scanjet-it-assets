@@ -98,12 +98,4 @@ class UserTable extends NewTable
     {
         return ['roles:id,name'];
     }
-
-    public function pagination(): array
-    {
-        return [
-            'per_page' => 10,
-            'page' => 1,
-        ];
-    }
 }
