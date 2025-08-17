@@ -2,10 +2,10 @@
 
 namespace App\Http\Tables;
 
+use App\Http\Filters\NestedRelationSort;
 use App\Models\Role;
 use App\Models\User;
 use App\Tables\Columns\Column;
-use App\Tables\Enums\AdvanceOperator;
 use App\Tables\FilterColumns\DateFilterColumn;
 use App\Tables\FilterColumns\SelectFilterColumn;
 use App\Tables\FilterColumns\TextFilterColumn;
@@ -45,26 +45,18 @@ class UserTable extends NewTable
                 ->label('Created Date')
                 ->sortable()
                 ->toggleable(),
-
-            Column::make('updated_at')
-                ->label('Last Updated')
-                ->sortable()
-                ->toggleable(),
         ];
     }
 
     public function filters(): array
     {
         return [
-            // Text filter for name with custom operators
             TextFilterColumn::make('name')
                 ->label('Full Name'),
 
-            // Text filter for email
             TextFilterColumn::make('email')
                 ->label('Email Address'),
 
-            // Select filter for roles (multiple selection)
             SelectFilterColumn::make('roles.id')
                 ->label('Roles')
                 ->multiple()
@@ -78,14 +70,8 @@ class UserTable extends NewTable
                         ->toArray();
                 }),
 
-            // Date filter for created date with default value
             DateFilterColumn::make('created_at')
-                ->label('Registration Date')
-                ->defaultClause(AdvanceOperator::BETWEEN->value)
-                ->default([
-                    now()->subMonth(),
-                    now(),
-                ]),
+                ->label('Created Date')
         ];
     }
 
