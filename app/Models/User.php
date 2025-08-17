@@ -32,6 +32,10 @@ class User extends Authenticatable
         'office_location',
     ];
 
+    protected $casts = [
+        'business_phones' => 'array',
+    ];
+
     /**
      * The attributes that should be hidden for serialization.
      *
