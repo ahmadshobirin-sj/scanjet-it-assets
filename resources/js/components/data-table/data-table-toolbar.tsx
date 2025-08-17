@@ -26,6 +26,7 @@ const DataTableToolbar = () => {
         bulkActions,
         exportActions,
         activeFiltersCount,
+        filters
     } = useDataTable();
     const isMobile = useIsMobile();
 
@@ -87,9 +88,13 @@ const DataTableToolbar = () => {
                     </DropdownMenu>
                 )}
 
-                <Button variant="outline" intent="secondary" title="Filters" onClick={toggleOpenFilters}>
-                    <FilterIcon className="size-4" /> Filters <Badge intent="secondary">{activeFiltersCount}</Badge>
-                </Button>
+                {
+                    filters && filters.length > 0 && (
+                        <Button variant="outline" intent="secondary" title="Filters" onClick={toggleOpenFilters}>
+                            <FilterIcon className="size-4" /> Filters <Badge intent="secondary">{activeFiltersCount}</Badge>
+                        </Button>
+                    )
+                }
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" intent="secondary" title="Columns">
