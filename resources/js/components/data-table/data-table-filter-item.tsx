@@ -152,17 +152,17 @@ const DateTableFilterItemController = ({ type, options, meta, state, handleChang
                     state.value
                         ? numberOfMonths > 1
                             ? {
-                                from: new Date(state.value[0]),
-                                to: new Date(state.value[1]),
-                            }
+                                  from: new Date(state.value[0]),
+                                  to: new Date(state.value[1]),
+                              }
                             : {
-                                from: new Date(state.value),
-                                to: new Date(state.value),
-                            }
+                                  from: new Date(state.value),
+                                  to: new Date(state.value),
+                              }
                         : {
-                            from: undefined,
-                            to: undefined,
-                        }
+                              from: undefined,
+                              to: undefined,
+                          }
                 }
                 onDateSelect={(date) => {
                     let value;

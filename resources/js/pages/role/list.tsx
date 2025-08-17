@@ -20,7 +20,6 @@ const RoleListPage = () => {
     const breadcrumbs = useBreadcrumb(component);
     const { can } = usePermission();
 
-
     const handleView = (row: Role) => {
         router.visit(route('role.show', { role: row.id }));
     };
@@ -72,12 +71,12 @@ const RoleListPage = () => {
                         ...(can('role.delete') ? [{ name: 'Delete', color: 'destructive', event: handleDelete }] : []),
                     ]}
                     transformerColumns={{
-                        'created_at': (columns) => ({
+                        created_at: (columns) => ({
                             ...columns,
                             cell: ({ row }) => {
-                                return formatWithBrowserTimezone(row.original.created_at)
-                            }
-                        })
+                                return formatWithBrowserTimezone(row.original.created_at);
+                            },
+                        }),
                     }}
                 />
             </AppContainer>
