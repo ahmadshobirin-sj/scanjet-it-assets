@@ -1,108 +1,25 @@
 import AppContainer from '@/components/app-container';
 import AppTitle from '@/components/app-title';
-import { DataGrid, DataGridState } from '@/components/data-grid';
-import { Badge } from '@/components/ui/badge';
+import { DataTable, DataTableResource } from '@/components/data-table';
 import { Button } from '@/components/ui/button';
 import { useBreadcrumb } from '@/hooks/use-breadcrumb';
-import useDidUpdate from '@/hooks/use-did-update';
 import { usePermission } from '@/hooks/use-permissions';
 import AppLayout from '@/layouts/app-layout';
 import { confirmDialog } from '@/lib/confirmDialog';
-import { spatieToTanstackState, tanstackToSpatieParams } from '@/lib/normalize-table-state';
-import { UserRoleStyle } from '@/lib/userRoleStyle';
+import { formatWithBrowserTimezone } from '@/lib/date';
 import { SharedData } from '@/types';
-import { ResponseCollection, Role, TableServerState } from '@/types/model';
+import { Role } from '@/types/model';
 import { router, usePage } from '@inertiajs/react';
-import { ColumnDef, PaginationState, SortingState } from '@tanstack/react-table';
 import { Plus } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { toast } from 'sonner';
 
 const RoleListPage = () => {
     const {
-        props: { roles, table, success, errors },
+        props: { roles },
         component,
-    } = usePage<SharedData & { roles: ResponseCollection<Role>; table: TableServerState }>();
-    const [tableState, setTableState] = useState(spatieToTanstackState(table));
+    } = usePage<SharedData & { roles: DataTableResource<Role> }>();
     const breadcrumbs = useBreadcrumb(component);
     const { can } = usePermission();
 
-    const columns: ColumnDef<Role>[] = [
-        {
-            accessorKey: 'name',
-            header: 'Name',
-            cell: ({ row }) => {
-                return (
-                    <Badge intent={UserRoleStyle.getIntent(row.original.name) as any} variant="fill" size="sm" className="text-xs">
-                        {row.original.name}
-                    </Badge>
-                );
-            },
-        },
-        {
-            accessorKey: 'total_permissions',
-            header: 'Permissions',
-        },
-        {
-            accessorKey: 'created_at',
-            header: 'Created At',
-            cell: ({ row }) => {
-                return row.original.f_created_at;
-            },
-        },
-    ];
-    const updateTableState = useCallback((tableState: DataGridState) => {
-        const query = tanstackToSpatieParams(tableState);
-        router.get(route('role.index'), query, {
-            preserveState: true,
-        });
-    }, []);
-
-    // Toast notification for success or error messages
-    useEffect(() => {
-        if (success) {
-            toast.success((success as any).message as any);
-        }
-        if (errors) {
-            if (errors.message) {
-                toast.error(errors.message, {
-                    ...(errors.error ? { description: errors.error } : {}),
-                });
-            }
-        }
-    }, [success, errors]);
-
-    useDidUpdate(() => {
-        updateTableState(tableState);
-    }, [tableState]);
-
-    const handlePaginationChange = useCallback(
-        (pagination: PaginationState) => {
-            setTableState((prev) => ({ ...prev, pagination }));
-        },
-        [setTableState],
-    );
-
-    const handleSortingChange = useCallback(
-        (sorting: SortingState) => {
-            setTableState((prev) => ({ ...prev, sorting }));
-        },
-        [setTableState],
-    );
-
-    const handleFilterChange = useCallback(
-        (globalFilter: string) => {
-            setTableState((prev) => ({
-                ...prev,
-                globalFilter,
-                pagination: {
-                    ...prev.pagination,
-                    pageIndex: 0,
-                },
-            }));
-        },
-        [setTableState],
-    );
 
     const handleView = (row: Role) => {
         router.visit(route('role.show', { role: row.id }));
@@ -145,24 +62,23 @@ const RoleListPage = () => {
                         </>
                     }
                 />
-
-                <DataGrid
-                    rows={roles?.data || []}
-                    columns={columns}
-                    tableState={tableState}
-                    pageSizeOptions={[10, 25, 50]}
-                    rowCount={roles?.meta?.total || 0}
-                    rowId={(row) => row.id.toString()}
-                    serverSide={true}
-                    emptyText="No data roles available"
-                    onSortingChange={handleSortingChange}
-                    onGlobalFilterChange={handleFilterChange}
-                    onPaginationChange={handlePaginationChange}
+                <DataTable
+                    resource={roles}
+                    bulkActions={[]}
+                    exportActions={[]}
                     actionsRow={() => [
                         ...(can('role.view') ? [{ name: 'View', event: handleView }] : []),
                         ...(can('role.update') ? [{ name: 'Edit', event: handleEdit }] : []),
                         ...(can('role.delete') ? [{ name: 'Delete', color: 'destructive', event: handleDelete }] : []),
                     ]}
+                    transformerColumns={{
+                        'created_at': (columns) => ({
+                            ...columns,
+                            cell: ({ row }) => {
+                                return formatWithBrowserTimezone(row.original.created_at)
+                            }
+                        })
+                    }}
                 />
             </AppContainer>
         </AppLayout>
