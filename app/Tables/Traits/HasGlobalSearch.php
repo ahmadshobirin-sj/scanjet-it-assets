@@ -8,22 +8,31 @@ use Spatie\QueryBuilder\AllowedFilter;
 
 trait HasGlobalSearch
 {
-    /**
-     * Return filters and search filters for QueryBuilder.
-     */
     public function globalSearchResolver(): array
     {
-        $columns = collect($this->columns());
+        $searchableColumns = $this->getGlobalSearchableColumns();
 
-        $globalSearchableColumns = $columns
-            ->filter(fn (Column $col) => $col->isGlobalSearchable())
-            ->map(fn (Column $col) => $col->getName())
-            ->values()
+        if (empty($searchableColumns)) {
+            return [];
+        }
+        // Extract column names (exclude count columns)
+        $columnNames = array_map(function ($col) {
+            return $col instanceof Column ? $col->getName() : $col;
+        }, $searchableColumns);
+
+        // Use GlobalSearchNew filter for regular columns only
+        return [
+            AllowedFilter::custom(
+                'search',
+                new GlobalSearchNew($columnNames)
+            ),
+        ];
+    }
+
+    protected function getGlobalSearchableColumns(): array
+    {
+        return collect($this->columns())
+            ->filter(fn (Column $col) => $col->isGlobalSearchable() && ! $col->isCountColumn())
             ->all();
-
-        $globalSearch = AllowedFilter::custom('search', new GlobalSearchNew($globalSearchableColumns));
-
-        return collect([$globalSearch])
-            ->toArray();
     }
 }

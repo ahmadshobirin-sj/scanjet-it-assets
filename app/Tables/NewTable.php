@@ -147,12 +147,43 @@ abstract class NewTable
         // Create a new request with our parameters
         $request = request()->duplicate($queryParams);
 
+        // Get resource first
+        $resource = $this->resource();
+        if (is_string($resource) && class_exists($resource)) {
+            $baseQuery = $resource::query();
+        } else {
+            $baseQuery = $resource;
+        }
+
+        // ⚠️ ADD: Apply count columns BEFORE QueryBuilder
+        foreach ($this->columns() as $column) {
+            if ($column->isCountColumn()) {
+                $countConfig = $column->getCountConfig();
+                $countAlias = $column->getName();
+
+                // Use withCount for relations
+                if ($countConfig['relation'] !== 'self') {
+                    $relationQuery = [
+                        $countConfig['relation'].' as '.$countAlias => function ($q) use ($countConfig) {
+                            if ($countConfig['conditions']) {
+                                foreach ($countConfig['conditions'] as $field => $value) {
+                                    $q->where($field, $value);
+                                }
+                            }
+                        },
+                    ];
+
+                    $baseQuery->withCount($relationQuery);
+                }
+            }
+        }
+
         // Get allowed filters and sorts
         $allowedFilters = $this->buildFilters();
         $allowedSorts = $this->sorts();
 
-        // Create QueryBuilder instance
-        $query = QueryBuilder::for($this->resource(), $request)
+        // Create QueryBuilder with baseQuery that already has counts
+        $query = QueryBuilder::for($baseQuery, $request)
             ->allowedFilters($allowedFilters)
             ->allowedSorts($allowedSorts);
 
