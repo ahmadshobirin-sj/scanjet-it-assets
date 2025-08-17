@@ -3,15 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\DTOs\TableStateDTO;
+use App\Enums\AppNotificationStatus;
 use App\Http\Requests\User\StoreRequest;
 use App\Http\Requests\User\UpdateRequest;
 use App\Http\Resources\RoleResource;
 use App\Http\Resources\UserResource;
 use App\Http\Services\UserService;
+use App\Http\Tables\UserTable;
 use App\Models\Role;
 use App\Models\User;
+use App\Notifications\AppNotification;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -24,12 +29,23 @@ class UserController extends Controller
     {
         $this->authorize('viewAny', User::class);
 
-        $tableState = TableStateDTO::fromRequest($request);
+        $users = [];
+        $roles = [];
+
+        try {
+            $users = UserTable::make('users')->toSchema();
+            $roles = RoleResource::collection(Role::all());
+        } catch (\Throwable $th) {
+            if (app()->isProduction()) {
+                report($th);
+            } else {
+                throw $th;
+            }
+        }
 
         return Inertia::render('user/list', [
-            'user' => UserResource::collection($this->userService->getAll($request)),
-            'roles' => RoleResource::collection(Role::all()),
-            'table' => $tableState->toArray(),
+            'users' => $users,
+            'roles' => $roles,
         ]);
     }
 
@@ -45,14 +61,25 @@ class UserController extends Controller
         try {
             $this->userService->create($request->validated());
 
-            return to_route('user.index')
-                ->with('success', [
-                    'message' => 'User created successfully.',
-                ]);
-        } catch (\Throwable $e) {
+            Notification::send(
+                Auth::user(),
+                (
+                    new AppNotification(
+                        message: 'User created successfully.',
+                    )
+                )
+                    ->status(AppNotificationStatus::SUCCESS)
+                    ->afterCommit()
+            );
 
-            return back()
-                ->withErrors(['message' => 'Failed to create user.', 'error' => $e->getMessage()]);
+            return to_route('user.index');
+        } catch (\Throwable $e) {
+            if (app()->isProduction()) {
+                report($e);
+            } else {
+                throw $e;
+            }
+            return back();
         }
     }
 
@@ -63,9 +90,25 @@ class UserController extends Controller
         try {
             $this->userService->update($user, $request->validated());
 
-            return to_route('user.index')->with('success', ['message' => 'User updated successfully.']);
+            Notification::send(
+                Auth::user(),
+                (
+                    new AppNotification(
+                        message: 'User updated successfully.',
+                    )
+                )
+                    ->status(AppNotificationStatus::SUCCESS)
+                    ->afterCommit()
+            );
+
+            return to_route('user.index');
         } catch (\Throwable $e) {
-            return back()->withErrors(['message' => 'Failed to update user.', 'error' => $e->getMessage()]);
+            if (app()->isProduction()) {
+                report($e);
+            } else {
+                throw $e;
+            }
+            return back();
         }
     }
 
@@ -76,9 +119,20 @@ class UserController extends Controller
         try {
             $this->userService->delete($user);
 
-            return to_route('user.index')->with('success', ['message' => 'User deleted successfully.']);
+            Notification::send(
+                Auth::user(),
+                (
+                    new AppNotification(
+                        message: 'User deleted successfully.',
+                    )
+                )
+                    ->status(AppNotificationStatus::SUCCESS)
+                    ->afterCommit()
+            );
+
+            return to_route('user.index');
         } catch (\Throwable $e) {
-            return back()->withErrors(['message' => 'Failed to delete user.', 'error' => $e->getMessage()]);
+            return back();
         }
     }
 }
