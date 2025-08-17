@@ -2,7 +2,6 @@
 
 namespace App\Http\Tables;
 
-use App\Http\Filters\NestedRelationSort;
 use App\Models\Role;
 use App\Models\User;
 use App\Tables\Columns\Column;
@@ -71,7 +70,7 @@ class UserTable extends NewTable
                 }),
 
             DateFilterColumn::make('created_at')
-                ->label('Created Date')
+                ->label('Created Date'),
         ];
     }
 

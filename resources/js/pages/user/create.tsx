@@ -53,7 +53,7 @@ const UserCreatePage = () => {
 
     const postData = () => {
         post('/user/create', {
-            onSuccess: (res) => {
+            onSuccess: () => {
                 reset();
                 setOpen(false);
             },

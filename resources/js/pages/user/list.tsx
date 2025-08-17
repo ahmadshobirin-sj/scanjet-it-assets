@@ -1,12 +1,12 @@
 import AppContainer from '@/components/app-container';
 import AppTitle from '@/components/app-title';
-import { DataGrid, type DataGridState } from '@/components/data-grid';
+import { DataTable, DataTableResource } from '@/components/data-table';
 import { Badge } from '@/components/ui/badge';
 import { useBreadcrumb } from '@/hooks/use-breadcrumb';
-import useDidUpdate from '@/hooks/use-did-update';
 import { usePermission } from '@/hooks/use-permissions';
 import AppLayout from '@/layouts/app-layout';
 import { confirmDialog } from '@/lib/confirmDialog';
+import { formatWithBrowserTimezone } from '@/lib/date';
 import { UserRoleStyle } from '@/lib/userRoleStyle';
 import { SharedData } from '@/types';
 import type { User } from '@/types/model';
@@ -15,20 +15,17 @@ import { useCallback, useRef, useState } from 'react';
 import UserCreatePage from './create';
 import UserDetailPage, { UserDetailPageRef } from './detail';
 import UserUpdatePage, { UserUpdatePageRef } from './update';
-import { DataTable, DataTableResource } from '@/components/data-table';
-import { formatWithBrowserTimezone } from '@/lib/date';
 
 function UserListPage() {
     const {
         props: { users },
         component,
-    } = usePage<SharedData & { users: DataTableResource<User>; }>();
+    } = usePage<SharedData & { users: DataTableResource<User> }>();
     const userUpdateRef = useRef<UserUpdatePageRef>(null);
     const userDetailPage = useRef<UserDetailPageRef>(null);
     const [userSelected, setUserSelected] = useState<User | null>(null);
     const breadcrumbs = useBreadcrumb(component);
     const { can } = usePermission();
-
 
     const handleUpdateRow = useCallback((row: User) => {
         setUserSelected(row);

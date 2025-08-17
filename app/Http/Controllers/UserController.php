@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\DTOs\TableStateDTO;
 use App\Enums\AppNotificationStatus;
 use App\Http\Requests\User\StoreRequest;
 use App\Http\Requests\User\UpdateRequest;
 use App\Http\Resources\RoleResource;
-use App\Http\Resources\UserResource;
 use App\Http\Services\UserService;
 use App\Http\Tables\UserTable;
 use App\Models\Role;
@@ -79,6 +77,7 @@ class UserController extends Controller
             } else {
                 throw $e;
             }
+
             return back();
         }
     }
@@ -108,6 +107,7 @@ class UserController extends Controller
             } else {
                 throw $e;
             }
+
             return back();
         }
     }

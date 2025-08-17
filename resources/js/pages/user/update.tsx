@@ -77,13 +77,10 @@ const UserUpdatePage = forwardRef<UserUpdatePageRef, { user: User | null; onClos
 
     const postData = () => {
         put(route('user.update', user?.id), {
-            onSuccess: (res) => {
+            onSuccess: () => {
                 reset();
                 setOpen(false);
             },
-            onFinish: () => {
-                // router.reload()
-            }
         });
     };
 
