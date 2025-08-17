@@ -7,99 +7,28 @@ import useDidUpdate from '@/hooks/use-did-update';
 import { usePermission } from '@/hooks/use-permissions';
 import AppLayout from '@/layouts/app-layout';
 import { confirmDialog } from '@/lib/confirmDialog';
-import { spatieToTanstackState, tanstackToSpatieParams } from '@/lib/normalize-table-state';
 import { UserRoleStyle } from '@/lib/userRoleStyle';
 import { SharedData } from '@/types';
-import type { ResponseCollection, TableServerState, User } from '@/types/model';
+import type { User } from '@/types/model';
 import { router, usePage } from '@inertiajs/react';
-import { ColumnDef, PaginationState, SortingState } from '@tanstack/react-table';
 import { useCallback, useRef, useState } from 'react';
-import { toast } from 'sonner';
 import UserCreatePage from './create';
 import UserDetailPage, { UserDetailPageRef } from './detail';
 import UserUpdatePage, { UserUpdatePageRef } from './update';
+import { DataTable, DataTableResource } from '@/components/data-table';
+import { formatWithBrowserTimezone } from '@/lib/date';
 
 function UserListPage() {
     const {
-        props: { user, table },
+        props: { users },
         component,
-    } = usePage<SharedData & { user: ResponseCollection<User>; table: TableServerState }>();
-    const [tableState, setTableState] = useState(spatieToTanstackState(table));
+    } = usePage<SharedData & { users: DataTableResource<User>; }>();
     const userUpdateRef = useRef<UserUpdatePageRef>(null);
     const userDetailPage = useRef<UserDetailPageRef>(null);
     const [userSelected, setUserSelected] = useState<User | null>(null);
     const breadcrumbs = useBreadcrumb(component);
     const { can } = usePermission();
 
-    const columns: ColumnDef<User>[] = [
-        {
-            accessorKey: 'name',
-            header: 'Name',
-        },
-        {
-            accessorKey: 'email',
-            header: 'Email',
-        },
-        {
-            accessorKey: 'roles',
-            header: 'Roles',
-            cell: ({ row }) => {
-                return (
-                    <div className="flex flex-wrap gap-1">
-                        {row.original.roles.map((role) => (
-                            <Badge key={role.id} intent={UserRoleStyle.getIntent(role.name) as any} variant="fill" size="sm" className="text-xs">
-                                {role.name}
-                            </Badge>
-                        ))}
-                    </div>
-                );
-            },
-            enableSorting: false,
-        },
-        {
-            accessorKey: 'created_at',
-            header: 'Created At',
-        },
-    ];
-
-    const updateTableState = useCallback((tableState: DataGridState) => {
-        const query = tanstackToSpatieParams(tableState);
-        router.get('/user', query, {
-            preserveState: true,
-        });
-    }, []);
-
-    useDidUpdate(() => {
-        updateTableState(tableState);
-    }, [tableState]);
-
-    const handlePaginationChange = useCallback(
-        (pagination: PaginationState) => {
-            setTableState((prev) => ({ ...prev, pagination }));
-        },
-        [setTableState],
-    );
-
-    const handleSortingChange = useCallback(
-        (sorting: SortingState) => {
-            setTableState((prev) => ({ ...prev, sorting }));
-        },
-        [setTableState],
-    );
-
-    const handleFilterChange = useCallback(
-        (globalFilter: string) => {
-            setTableState((prev) => ({
-                ...prev,
-                globalFilter,
-                pagination: {
-                    ...prev.pagination,
-                    pageIndex: 0,
-                },
-            }));
-        },
-        [setTableState],
-    );
 
     const handleUpdateRow = useCallback((row: User) => {
         setUserSelected(row);
@@ -118,18 +47,6 @@ function UserListPage() {
             onConfirm: () => {
                 router.delete(route('user.destroy', row.id), {
                     preserveScroll: true,
-                    onSuccess: (res) => {
-                        if (res.props.success) {
-                            toast.success((res.props.success as any).message);
-                        }
-                    },
-                    onError: (errors) => {
-                        if (errors.message) {
-                            toast.error(errors.message, {
-                                ...(errors.error ? { description: errors.error } : {}),
-                            });
-                        }
-                    },
                 });
             },
         });
@@ -144,23 +61,44 @@ function UserListPage() {
         <AppLayout breadcrumbs={breadcrumbs}>
             <AppContainer className="space-y-6">
                 <AppTitle title="Users" subtitle="List of all users" actions={<>{can('user.create') && <UserCreatePage />}</>} />
-                <DataGrid
-                    rows={user?.data || []}
-                    columns={columns}
-                    tableState={tableState}
-                    pageSizeOptions={[10, 25, 50]}
-                    rowCount={user?.meta?.total || 0}
-                    rowId={(row) => row.id.toString()}
-                    serverSide={true}
-                    emptyText="No data user available"
-                    onSortingChange={handleSortingChange}
-                    onGlobalFilterChange={handleFilterChange}
-                    onPaginationChange={handlePaginationChange}
+
+                <DataTable
+                    resource={users}
+                    bulkActions={[]}
+                    exportActions={[]}
                     actionsRow={() => [
                         ...(can('user.view') ? [{ name: 'View', event: handleViewDetail }] : []),
                         ...(can('user.update') ? [{ name: 'Edit', event: handleUpdateRow }] : []),
                         ...(can('user.delete') ? [{ name: 'Delete', color: 'destructive', event: handleDeleteRow }] : []),
                     ]}
+                    transformerColumns={{
+                        'roles.name': (column) => ({
+                            ...column,
+                            cell: ({ row }) => {
+                                return (
+                                    <div className="flex flex-wrap gap-1">
+                                        {row.original.roles.map((role) => (
+                                            <Badge
+                                                key={role.id}
+                                                intent={UserRoleStyle.getIntent(role.name) as any}
+                                                variant="fill"
+                                                size="sm"
+                                                className="text-xs"
+                                            >
+                                                {role.name}
+                                            </Badge>
+                                        ))}
+                                    </div>
+                                );
+                            },
+                        }),
+                        created_at: (columns) => ({
+                            ...columns,
+                            cell: ({ row }) => {
+                                return formatWithBrowserTimezone(row.original.created_at);
+                            },
+                        }),
+                    }}
                 />
 
                 <UserUpdatePage user={userSelected} ref={userUpdateRef} onClose={() => setUserSelected(null)} />
