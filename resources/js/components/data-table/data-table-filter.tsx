@@ -12,7 +12,7 @@ const DataTableFilter = () => {
 
     return (
         <>
-            <div className="flex flex-row items-center gap-4 bg-gray-50 px-4 py-3">
+            <div className="flex flex-row items-center gap-4 px-4 py-3">
                 <div className="border-r pr-3 leading-none">
                     <Button variant="light" intent="destructive" size="icon" onClick={handleClearFilters}>
                         <TrashIcon className="size-4" />

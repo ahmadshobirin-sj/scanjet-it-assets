@@ -71,6 +71,7 @@ const DataTableFilterItem: FC<DataTableFilterItemProps> = ({ label, attribute, c
                 <button
                     className={cn(
                         'cursor-pointer rounded-md border border-dashed border-black bg-white px-3 py-1 text-sm shadow-sm',
+                        'dark:border-white dark:bg-accent',
                         isLoading && 'opacity-60',
                     )}
                 >
@@ -151,17 +152,17 @@ const DateTableFilterItemController = ({ type, options, meta, state, handleChang
                     state.value
                         ? numberOfMonths > 1
                             ? {
-                                  from: new Date(state.value[0]),
-                                  to: new Date(state.value[1]),
-                              }
+                                from: new Date(state.value[0]),
+                                to: new Date(state.value[1]),
+                            }
                             : {
-                                  from: new Date(state.value),
-                                  to: new Date(state.value),
-                              }
+                                from: new Date(state.value),
+                                to: new Date(state.value),
+                            }
                         : {
-                              from: undefined,
-                              to: undefined,
-                          }
+                            from: undefined,
+                            to: undefined,
+                        }
                 }
                 onDateSelect={(date) => {
                     let value;

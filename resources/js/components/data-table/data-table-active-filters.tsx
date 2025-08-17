@@ -10,7 +10,7 @@ const DataTableActiveFilters = () => {
     if (activeFiltersCount < 1) return <></>;
 
     return (
-        <div className="flex flex-wrap items-center justify-between gap-2 bg-gray-50 px-3 py-1">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-1">
             <div className="flex flex-wrap items-center gap-2">
                 {filters.map((filter, index) => {
                     if (filterStates[filter.attribute].enabled) {
