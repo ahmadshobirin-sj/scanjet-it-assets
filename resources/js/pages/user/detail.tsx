@@ -55,16 +55,16 @@ const UserDetailPage = forwardRef<UserDetailPageRef, { user: User | null; onClos
                                 <InfoListContent className="flex flex-wrap gap-1">
                                     {user?.roles && user.roles.length > 0
                                         ? user.roles.map((role) => (
-                                              <Badge
-                                                  key={role.id}
-                                                  intent={UserRoleStyle.getIntent(role.name) as any}
-                                                  variant="fill"
-                                                  size="md"
-                                                  className="text-xs"
-                                              >
-                                                  {role.name}
-                                              </Badge>
-                                          ))
+                                            <Badge
+                                                key={role.id}
+                                                intent={UserRoleStyle.getIntent(role.name) as any}
+                                                variant="fill"
+                                                size="md"
+                                                className="text-xs"
+                                            >
+                                                {role.name}
+                                            </Badge>
+                                        ))
                                         : '-'}
                                 </InfoListContent>
                             </InfoList>
@@ -88,7 +88,7 @@ const UserDetailPage = forwardRef<UserDetailPageRef, { user: User | null; onClos
                             </InfoList>
                             <InfoList direction="column">
                                 <InfoListLabel>Business phones</InfoListLabel>
-                                <InfoListContent>{user?.business_phones?.join(', ') || '-'}</InfoListContent>
+                                <InfoListContent>{user?.business_phones && user?.business_phones.length > 0 ? user?.business_phones.join(', ') : '-'}</InfoListContent>
                             </InfoList>
                             <InfoList direction="column">
                                 <InfoListLabel>Mobile phones</InfoListLabel>
