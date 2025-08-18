@@ -9,3 +9,7 @@ export type FormField = {
     note?: string;
     reference_link?: string;
 };
+
+export type UpdateFormField = FormField & {
+    status: string;
+};

@@ -8,16 +8,19 @@ import { FormMessage } from '@/components/ui/form-message';
 import { GroupForm, GroupFormField, GroupFormGroup, GroupFormItem } from '@/components/ui/group-form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { AssetStatusHelper } from '@/constants/asset-status';
 import { useBreadcrumb } from '@/hooks/use-breadcrumb';
 import AppLayout from '@/layouts/app-layout';
 import { SharedData } from '@/types';
 import { Asset, AssetCategory, Manufacture, ResponseCollection, ResponseResource } from '@/types/model';
 import { router, useForm, usePage } from '@inertiajs/react';
+import { SelectValue } from '@radix-ui/react-select';
 import { Globe } from 'lucide-react';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
-import { FormField } from './type';
+import { UpdateFormField } from './type';
 
 const AssetUpdatePage = () => {
     const {
@@ -26,7 +29,7 @@ const AssetUpdatePage = () => {
     } = usePage<SharedData & { asset: ResponseResource<Asset> }>();
     const breadcrumbs = useBreadcrumb(component);
 
-    const { data, setData, processing, errors, reset, put, setDefaults } = useForm<FormField>({
+    const { data, setData, processing, errors, reset, put, setDefaults } = useForm<UpdateFormField>({
         name: '',
         category_id: '',
         manufacture_id: '',
@@ -34,10 +37,11 @@ const AssetUpdatePage = () => {
         location: '',
         reference_link: '',
         note: '',
+        status: '',
     });
 
     useEffect(() => {
-        const value: FormField = {
+        const value: UpdateFormField = {
             name: asset.data.name,
             category_id: asset.data.category ? asset.data.category.id : '',
             manufacture_id: asset.data.manufacture ? asset.data.manufacture.id : '',
@@ -47,6 +51,7 @@ const AssetUpdatePage = () => {
             note: asset.data.note || '',
             warranty_expired: asset.data.warranty_expired ? new Date(asset.data.warranty_expired) : undefined,
             purchase_date: asset.data.purchase_date ? new Date(asset.data.purchase_date) : undefined,
+            status: asset.data.status || '',
         };
 
         setDefaults(value);
@@ -263,6 +268,30 @@ const AssetUpdatePage = () => {
                                         <Label htmlFor="reference-link">Note</Label>
                                         <Textarea id="reference-link" value={data.note} onChange={(e) => setData('note', e.target.value)} />
                                         {errors.note && <FormMessage error>{errors.note}</FormMessage>}
+                                    </GroupFormField>
+                                </GroupFormItem>
+
+                                <GroupFormItem>
+                                    <GroupFormField>
+                                        <Label htmlFor="status">Status</Label>
+                                        <Select
+                                            value={data.status}
+                                            onValueChange={(value) => {
+                                                setData('status', value);
+                                            }}
+                                        >
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {AssetStatusHelper.getOptions().map((item, index) => (
+                                                    <SelectItem key={index} value={item.value}>
+                                                        {item.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        {errors.status && <FormMessage error>{errors.status}</FormMessage>}
                                     </GroupFormField>
                                 </GroupFormItem>
                             </GroupFormGroup>

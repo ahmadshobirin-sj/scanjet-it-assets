@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests\Asset;
 
+use App\Enums\AssetStatus;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 
 class AssetUpdateRequest extends FormRequest
 {
@@ -32,6 +34,7 @@ class AssetUpdateRequest extends FormRequest
             'purchase_date' => 'date|nullable',
             'note' => 'string|nullable',
             'reference_link' => 'string|nullable|max:255',
+            'status' => ['required', 'string',  new Enum(AssetStatus::class)],
         ];
     }
 }
