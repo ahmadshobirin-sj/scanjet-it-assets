@@ -1,6 +1,6 @@
 // src/hooks/useFlashOnce.ts
+import { router, usePage } from '@inertiajs/react';
 import { useEffect, useMemo } from 'react';
-import { usePage, router } from '@inertiajs/react';
 
 type Intent = 'success' | 'destructive';
 type Notify = (args: { message: string; intent: Intent }) => void;
@@ -38,7 +38,9 @@ function initVisitCounter(storage?: Storage) {
         try {
             const curr = parseInt(storage.getItem(VISIT_KEY) || '1', 10) || 1;
             storage.setItem(VISIT_KEY, String(curr + 1));
-        } catch { }
+        } catch {
+            // Handle error
+        }
     });
 
     listenerInstalled = true;
@@ -79,32 +81,19 @@ export function useFlashOnce({
     // extractor default yang “tahan banting”
     const data = useMemo<PickResult>(() => {
         if (pick) return pick(props);
-        const s =
-            props?.success?.message ??
-            props?.success ??
-            props?.flash?.success ??
-            props?.flash?.message ??
-            '';
-        const e =
-            props?.errors?.message ??
-            props?.error?.message ??
-            props?.error ??
-            props?.flash?.error ??
-            '';
+        const s = props?.success?.message ?? props?.success ?? props?.flash?.success ?? props?.flash?.message ?? '';
+        const e = props?.errors?.message ?? props?.error?.message ?? props?.error ?? props?.flash?.error ?? '';
         return { success: s, errors: e };
     }, [props, pick]);
 
-    const path =
-        scope === 'global' || typeof window === 'undefined'
-            ? ''
-            : window.location.pathname + window.location.search;
+    const path = scope === 'global' || typeof window === 'undefined' ? '' : window.location.pathname + window.location.search;
 
     const entries = useMemo(
         () => [
             ...toArr(data.success).map((t) => ({ text: String(t), intent: 'success' as Intent })),
             ...toArr(data.errors).map((t) => ({ text: String(t), intent: 'destructive' as Intent })),
         ],
-        [data.success, data.errors]
+        [data.success, data.errors],
     );
 
     useEffect(() => {
@@ -135,26 +124,15 @@ export function useFlashOnce({
 }
 
 /** Wrapper khusus props Inertia umum */
-export function useInertiaFlashToastOnce(
-    notify: Notify,
-    opts?: Omit<Options, 'notify' | 'pick'>
-) {
+export function useInertiaFlashToastOnce(notify: Notify, opts?: Omit<Options, 'notify' | 'pick'>) {
     return useFlashOnce({
         notify,
         scope: opts?.scope ?? 'path',
         storage: opts?.storage,
         storageKey: opts?.storageKey,
         pick: (props) => ({
-            success:
-                props?.success?.message ??
-                props?.flash?.success ??
-                props?.success ??
-                '',
-            errors:
-                props?.errors?.message ??
-                props?.flash?.error ??
-                props?.error ??
-                '',
+            success: props?.success?.message ?? props?.flash?.success ?? props?.success ?? '',
+            errors: props?.errors?.message ?? props?.flash?.error ?? props?.error ?? '',
         }),
     });
 }

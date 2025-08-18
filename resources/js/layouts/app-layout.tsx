@@ -12,12 +12,14 @@ interface AppLayoutProps {
 }
 
 export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => {
-
-    useInertiaFlashToastOnce(({ message, intent }) => {
-        AppToast({ message, intent })
-    }, {
-        scope: 'global',
-    });
+    useInertiaFlashToastOnce(
+        ({ message, intent }) => {
+            AppToast({ message, intent });
+        },
+        {
+            scope: 'global',
+        },
+    );
 
     return (
         <AppLayoutTemplate breadcrumbs={breadcrumbs} {...props}>
@@ -25,5 +27,5 @@ export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => {
             <Toaster richColors position="top-right" />
             <ConfirmDialog />
         </AppLayoutTemplate>
-    )
+    );
 };
