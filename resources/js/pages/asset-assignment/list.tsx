@@ -1,25 +1,23 @@
 import AppContainer from '@/components/app-container';
 import AppTitle from '@/components/app-title';
-import { DataGrid, useTableResolver } from '@/components/data-grid';
+import { DataTable, DataTableResource } from '@/components/data-table';
 import { Button } from '@/components/ui/button';
 import { useBreadcrumb } from '@/hooks/use-breadcrumb';
 import { usePermission } from '@/hooks/use-permissions';
 import AppLayout from '@/layouts/app-layout';
 import { SharedData } from '@/types';
-import { AssetAssignment, ResponseCollection } from '@/types/model';
-import { TableServer } from '@/types/table';
+import { AssetAssignment } from '@/types/model';
 import { router } from '@inertiajs/core';
 import { usePage } from '@inertiajs/react';
 import { PackagePlus } from 'lucide-react';
-import { columns as TableColumns } from './column';
+import { columns } from './column';
 
 const AssetAssignmentListPage = () => {
     const {
         component,
-        props: { assignments, table },
-    } = usePage<SharedData & { assignments: ResponseCollection<AssetAssignment>; table: TableServer<AssetAssignment> }>();
+        props: { assignments },
+    } = usePage<SharedData & { assignments: DataTableResource<AssetAssignment> }>();
     const breadcrumbs = useBreadcrumb(component);
-    const { columns, tableState } = useTableResolver(table, TableColumns);
     const { can } = usePermission();
 
     const handleReturn = (row: AssetAssignment) => {
@@ -40,16 +38,10 @@ const AssetAssignmentListPage = () => {
                         </>
                     }
                 />
-
-                <DataGrid
-                    columns={columns}
-                    rows={assignments?.data || []}
-                    pageSizeOptions={[10, 25, 50]}
-                    tableState={tableState}
-                    serverSide
-                    rowCount={assignments?.meta?.total || 0}
-                    rowId={(row) => (row.id ? row.id.toString() : '')}
-                    enableRowSelection
+                <DataTable
+                    resource={assignments}
+                    bulkActions={[]}
+                    exportActions={[]}
                     actionsRow={() => [
                         ...(can('asset_return.create')
                             ? [
@@ -60,6 +52,7 @@ const AssetAssignmentListPage = () => {
                               ]
                             : []),
                     ]}
+                    transformerColumns={columns}
                 />
             </AppContainer>
         </AppLayout>

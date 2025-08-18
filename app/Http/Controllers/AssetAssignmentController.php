@@ -7,8 +7,8 @@ use App\Enums\AppNotificationType;
 use App\Enums\AssetStatus;
 use App\Http\Filters\GlobalSearchNew;
 use App\Http\Requests\AssetAssignment\AssetAssigmentRequest;
-use App\Http\Resources\AssetAssignment\AssetAssignmentResource;
 use App\Http\Services\AssetAsignmentService;
+use App\Http\Tables\AssetAssignmentTable;
 use App\Models\Asset;
 use App\Models\AssetAssignment;
 use App\Models\ExternalUser;
@@ -42,11 +42,7 @@ class AssetAssignmentController extends Controller
         $tableSchema = [];
 
         try {
-            $assetAssignments = AssetAssignmentResource::collection(
-                $this->assetAssignmentService->getAll()
-            );
-
-            $tableSchema = $this->assetAssignmentService->getTable()->toSchema();
+            $assetAssignments = AssetAssignmentTable::make('assig')->toSchema();
         } catch (\Throwable $th) {
             if (app()->isProduction()) {
                 report($th);

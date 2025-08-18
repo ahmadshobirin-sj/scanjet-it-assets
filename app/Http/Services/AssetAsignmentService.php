@@ -7,10 +7,8 @@ use App\Enums\AssetAssignmentAssetStatus;
 use App\Enums\AssetStatus;
 use App\Exceptions\ClientException;
 use App\Helpers\GenerateRefCode;
-use App\Http\Tables\AssetAssignmentTable;
 use App\Models\Asset;
 use App\Models\AssetAssignment;
-use App\Tables\Traits\HasTable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Arr;
@@ -20,23 +18,9 @@ use Illuminate\Support\Facades\Schema;
 
 class AssetAsignmentService extends Service
 {
-    use HasTable;
-
-    public function __construct(protected AssetAssignmentTable $assetAssignmentTable) {}
-
     public function attributes(): array
     {
         return Schema::getColumnListing((new AssetAssignment)->getTable());
-    }
-
-    /**
-     * Get all assets.
-     */
-    public function getAll()
-    {
-        $query = $this->buildTable(AssetAssignment::class, $this->assetAssignmentTable);
-
-        return $this->executeTableQuery($query);
     }
 
     public function getEmployees(Builder $query)

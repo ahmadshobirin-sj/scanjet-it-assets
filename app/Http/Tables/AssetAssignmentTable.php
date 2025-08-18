@@ -2,12 +2,19 @@
 
 namespace App\Http\Tables;
 
+use App\Models\AssetAssignment;
 use App\Tables\Columns\Column;
-use App\Tables\Table;
+use App\Tables\NewTable;
+use Illuminate\Database\Eloquent\Builder;
 use Spatie\QueryBuilder\QueryBuilder;
 
-class AssetAssignmentTable extends Table
+class AssetAssignmentTable extends NewTable
 {
+    public function resource(): Builder|string
+    {
+        return AssetAssignment::class;
+    }
+
     public function columns(): array
     {
         return [
@@ -18,12 +25,10 @@ class AssetAssignmentTable extends Table
                 ->toggleable(),
             Column::make('assigned_user.email')
                 ->label('Assigned To')
-                ->sortable()
                 ->globallySearchable()
                 ->toggleable(),
             Column::make('assigned_by.email')
                 ->label('Assigned By')
-                ->sortable()
                 ->globallySearchable()
                 ->toggleable(),
             Column::make('assigned_at')
@@ -39,6 +44,11 @@ class AssetAssignmentTable extends Table
                 ->globallySearchable()
                 ->toggleable(),
         ];
+    }
+
+    public function filters(): array
+    {
+        return [];
     }
 
     public function with(): array
