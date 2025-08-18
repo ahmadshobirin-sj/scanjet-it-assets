@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\AppNotificationStatus;
 use App\Http\Requests\User\StoreRequest;
 use App\Http\Requests\User\UpdateRequest;
 use App\Http\Resources\RoleResource;
@@ -10,11 +9,8 @@ use App\Http\Services\UserService;
 use App\Http\Tables\UserTable;
 use App\Models\Role;
 use App\Models\User;
-use App\Notifications\AppNotification;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Notification;
 use Inertia\Inertia;
 
 class UserController extends Controller
@@ -59,18 +55,9 @@ class UserController extends Controller
         try {
             $this->userService->create($request->validated());
 
-            Notification::send(
-                Auth::user(),
-                (
-                    new AppNotification(
-                        message: 'User created successfully.',
-                    )
-                )
-                    ->status(AppNotificationStatus::SUCCESS)
-                    ->afterCommit()
-            );
-
-            return to_route('user.index');
+            return to_route('user.index')->with('success', [
+                'message' => 'User created successfully.',
+            ]);
         } catch (\Throwable $e) {
             if (app()->isProduction()) {
                 report($e);
@@ -89,18 +76,9 @@ class UserController extends Controller
         try {
             $this->userService->update($user, $request->validated());
 
-            Notification::send(
-                Auth::user(),
-                (
-                    new AppNotification(
-                        message: 'User updated successfully.',
-                    )
-                )
-                    ->status(AppNotificationStatus::SUCCESS)
-                    ->afterCommit()
-            );
-
-            return to_route('user.index');
+            return to_route('user.index')->with('success', [
+                'message' => 'User updated successfully.',
+            ]);
         } catch (\Throwable $e) {
             if (app()->isProduction()) {
                 report($e);
@@ -119,18 +97,9 @@ class UserController extends Controller
         try {
             $this->userService->delete($user);
 
-            Notification::send(
-                Auth::user(),
-                (
-                    new AppNotification(
-                        message: 'User deleted successfully.',
-                    )
-                )
-                    ->status(AppNotificationStatus::SUCCESS)
-                    ->afterCommit()
-            );
-
-            return to_route('user.index');
+            return to_route('user.index')->with('success', [
+                'message' => 'User deleted successfully.',
+            ]);
         } catch (\Throwable $e) {
             return back();
         }

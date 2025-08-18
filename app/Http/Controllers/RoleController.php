@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\AppNotificationStatus;
 use App\Http\Requests\Role\RoleStoreRequest;
 use App\Http\Requests\Role\RoleUpdateRequest;
 use App\Http\Resources\Permissions\PermissionResource;
@@ -11,11 +10,8 @@ use App\Http\Services\RoleService;
 use App\Http\Tables\RoleTable;
 use App\Models\Permission;
 use App\Models\Role;
-use App\Notifications\AppNotification;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Notification;
 use Inertia\Inertia;
 
 class RoleController extends Controller
@@ -61,18 +57,9 @@ class RoleController extends Controller
         try {
             $this->roleService->create($request->validated());
 
-            Notification::send(
-                Auth::user(),
-                (
-                    new AppNotification(
-                        message: 'Role created successfully.',
-                    )
-                )
-                    ->status(AppNotificationStatus::SUCCESS)
-                    ->afterCommit()
-            );
-
-            return to_route('role.index');
+            return to_route('role.index')->with('success', [
+                'message' => 'Role created successfully.',
+            ]);
         } catch (\Throwable $e) {
             if (app()->isProduction()) {
                 report($e);
@@ -80,7 +67,9 @@ class RoleController extends Controller
                 throw $e;
             }
 
-            return back();
+            return back()->withErrors([
+                'message' => 'Failed to create user.',
+            ]);
         }
     }
 
@@ -119,18 +108,9 @@ class RoleController extends Controller
         try {
             $this->roleService->update($role, $request->validated());
 
-            Notification::send(
-                Auth::user(),
-                (
-                    new AppNotification(
-                        message: 'Role updated successfully.',
-                    )
-                )
-                    ->status(AppNotificationStatus::SUCCESS)
-                    ->afterCommit()
-            );
-
-            return to_route('role.index');
+            return to_route('role.index')->with('success', [
+                'message' => 'Role updated successfully.',
+            ]);
         } catch (\Throwable $e) {
             if (app()->isProduction()) {
                 report($e);
@@ -149,19 +129,11 @@ class RoleController extends Controller
         try {
             $this->roleService->delete($role);
 
-            Notification::send(
-                Auth::user(),
-                (
-                    new AppNotification(
-                        message: 'Role deleted successfully.',
-                    )
-                )
-                    ->status(AppNotificationStatus::SUCCESS)
-                    ->afterCommit()
-            );
-
             return redirect()
-                ->route('role.index');
+                ->route('role.index')
+                ->with('success', [
+                    'message' => 'Role deleted successfully.',
+                ]);
         } catch (\Throwable $e) {
             if (app()->isProduction()) {
                 report($e);
@@ -169,7 +141,9 @@ class RoleController extends Controller
                 throw $e;
             }
 
-            return back();
+            return back()->withErrors([
+                'message' => 'Failed to delete role.',
+            ]);
         }
     }
 }
