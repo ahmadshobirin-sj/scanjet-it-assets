@@ -20,7 +20,6 @@ import useControlledModal from '@/hooks/use-controlled-modal';
 import { useForm } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { FormEvent } from 'react';
-import { toast } from 'sonner';
 
 const AssetCategoryCreatePage = () => {
     const { data, setData, post, processing, errors, reset, isDirty } = useForm<{ name: string; description: string }>({
@@ -47,17 +46,9 @@ const AssetCategoryCreatePage = () => {
 
     const postData = () => {
         post(route('asset_category.store'), {
-            onSuccess: (res) => {
+            onSuccess: () => {
                 reset();
-                toast.success((res.props.success as any).message);
                 setOpen(false);
-            },
-            onError: (errors) => {
-                if (errors.message) {
-                    toast.error(errors.message, {
-                        ...(errors.error ? { description: errors.error } : {}),
-                    });
-                }
             },
         });
     };

@@ -10,7 +10,6 @@ import useControlledModal from '@/hooks/use-controlled-modal';
 import { AssetCategory } from '@/types/model';
 import { useForm } from '@inertiajs/react';
 import { FormEvent, forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
-import { toast } from 'sonner';
 
 export type AssetCategoryUpdatePageRef = {
     open: () => void;
@@ -65,17 +64,9 @@ const AssetCategoryUpdatePage = forwardRef<AssetCategoryUpdatePageRef, { assetCa
 
         const postData = () => {
             put(route('asset_category.update', assetCategory?.id), {
-                onSuccess: (res) => {
+                onSuccess: () => {
                     reset();
-                    toast.success((res.props.success as any).message);
                     setOpen(false);
-                },
-                onError: (errors) => {
-                    if (errors.message) {
-                        toast.error(errors.message, {
-                            ...(errors.error ? { description: errors.error } : {}),
-                        });
-                    }
                 },
             });
         };

@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\DTOs\TableStateDTO;
 use App\Http\Requests\AssetCategory\AssetCategoryStoreRequest;
 use App\Http\Requests\AssetCategory\AssetCategoryUpdateRequest;
-use App\Http\Resources\AssetCategoryResource;
 use App\Http\Services\AssetCategoryService;
+use App\Http\Tables\AssetCategoryTable;
 use App\Models\AssetCategory;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -22,17 +21,20 @@ class AssetCategoryController extends Controller
     {
 
         $this->authorize('viewAny', AssetCategory::class);
+        $assetCategories = [];
 
-        $assetCategories = AssetCategoryResource::collection(
-            $this->assetCategoryService->getAll($request)
-        );
-
-        $tableState = TableStateDTO::fromRequest($request);
-        $tableState->setSort(['-created_at']);
+        try {
+            $assetCategories = AssetCategoryTable::make('asscat')->toSchema();
+        } catch (\Throwable $e) {
+            if (app()->isProduction()) {
+                report($e);
+            } else {
+                throw $e;
+            }
+        }
 
         return Inertia::render('asset-category/list', [
             'asset_categories' => $assetCategories,
-            'table' => $tableState->toArray(),
         ]);
     }
 
