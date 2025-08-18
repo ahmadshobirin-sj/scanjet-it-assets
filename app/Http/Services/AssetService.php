@@ -4,29 +4,13 @@ namespace App\Http\Services;
 
 use App\Enums\AssetStatus;
 use App\Exceptions\ClientException;
-use App\Http\Tables\AssetTable;
 use App\Models\Asset;
-use App\Tables\Traits\HasTable;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class AssetService extends Service
 {
-    use HasTable;
-
-    public function __construct(protected AssetTable $assetTable) {}
-
-    /**
-     * Get all assets.
-     */
-    public function getAll()
-    {
-        $query = $this->buildTable(Asset::class, $this->assetTable);
-
-        return $this->executeTableQuery($query);
-    }
-
     /**
      * Store a new asset.
      */

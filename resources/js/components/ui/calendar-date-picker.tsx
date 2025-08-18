@@ -61,6 +61,8 @@ interface CalendarDatePickerProps
     withTime?: boolean;
 }
 
+const selectClassName = "w-[100px] border border-border rounded-md px-2 py-2 text-sm";
+
 export const CalendarDatePicker = React.forwardRef<
     HTMLButtonElement,
     CalendarDatePickerProps
@@ -438,85 +440,72 @@ export const CalendarDatePicker = React.forwardRef<
                                 <div className="flex flex-col">
                                     <div className="flex items-center gap-4">
                                         <div className="flex gap-2 ml-3">
-                                            <Select
-                                                onValueChange={(value) => {
-                                                    handleMonthChange(months.indexOf(value), "from");
+                                            <select
+                                                onChange={(e) => {
+                                                    handleMonthChange(months.indexOf(e.target.value), "from");
                                                     setSelectedRange(null);
-                                                }}
+                                                }
+                                                }
                                                 value={
                                                     monthFrom ? months[monthFrom.getMonth()] : undefined
                                                 }
+                                                className={selectClassName}
                                             >
-                                                <SelectTrigger className="flex w-[122px] focus:ring-0 focus:ring-offset-0 font-medium hover:bg-accent hover:text-accent-foreground">
-                                                    <SelectValue placeholder="Month" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {months.map((month, idx) => (
-                                                        <SelectItem key={idx} value={month}>
-                                                            {month}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <Select
-                                                onValueChange={(value) => {
-                                                    handleYearChange(Number(value), "from");
+                                                {months.map((month, idx) => (
+                                                    <option key={idx} value={month}>
+                                                        {month}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <select
+                                                onChange={(e) => {
+                                                    handleYearChange(Number(e.target.value), "from");
                                                     setSelectedRange(null);
-                                                }}
+                                                }
+                                                }
                                                 value={yearFrom ? yearFrom.toString() : undefined}
+                                                className={selectClassName}
                                             >
-                                                <SelectTrigger className="flex w-[122px] focus:ring-0 focus:ring-offset-0 font-medium hover:bg-accent hover:text-accent-foreground">
-                                                    <SelectValue placeholder="Year" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {years.map((year, idx) => (
-                                                        <SelectItem key={idx} value={year.toString()}>
-                                                            {year}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
+                                                {years.map((year, idx) => (
+                                                    <option key={idx} value={year.toString()}>
+                                                        {year}
+                                                    </option>
+                                                ))}
+                                            </select>
                                         </div>
                                         {numberOfMonths === 2 && (
                                             <div className="flex gap-2">
-                                                <Select
-                                                    onValueChange={(value) => {
-                                                        handleMonthChange(months.indexOf(value), "to");
+                                                <select
+                                                    onChange={(e) => {
+                                                        handleMonthChange(months.indexOf(e.target.value), "to");
                                                         setSelectedRange(null);
-                                                    }}
+                                                    }
+                                                    }
                                                     value={
                                                         monthTo ? months[monthTo.getMonth()] : undefined
                                                     }
+                                                    className={selectClassName}
                                                 >
-                                                    <SelectTrigger className="hidden sm:flex w-[122px] focus:ring-0 focus:ring-offset-0 font-medium hover:bg-accent hover:text-accent-foreground">
-                                                        <SelectValue placeholder="Month" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {months.map((month, idx) => (
-                                                            <SelectItem key={idx} value={month}>
-                                                                {month}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                                <Select
-                                                    onValueChange={(value) => {
-                                                        handleYearChange(Number(value), "to");
+                                                    {months.map((month, idx) => (
+                                                        <option key={idx} value={month}>
+                                                            {month}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                <select
+                                                    onChange={(e) => {
+                                                        handleYearChange(Number(e.target.value), "to");
                                                         setSelectedRange(null);
                                                     }}
                                                     value={yearTo ? yearTo.toString() : undefined}
+                                                    className={selectClassName}
                                                 >
-                                                    <SelectTrigger className="hidden sm:flex w-[122px] focus:ring-0 focus:ring-offset-0 font-medium hover:bg-accent hover:text-accent-foreground">
-                                                        <SelectValue placeholder="Year" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {years.map((year, idx) => (
-                                                            <SelectItem key={idx} value={year.toString()}>
-                                                                {year}
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
+                                                    {years.map((year, idx) => (
+                                                        <option key={idx} value={year.toString()}>
+                                                            {year}
+                                                        </option>
+                                                    ))}
+                                                </select>
                                             </div>
                                         )}
                                     </div>

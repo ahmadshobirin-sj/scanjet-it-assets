@@ -2,12 +2,18 @@
 
 namespace App\Http\Tables;
 
-use App\Http\Filters\NestedRelationSort;
+use App\Models\Asset;
 use App\Tables\Columns\Column;
-use App\Tables\Table;
+use App\Tables\NewTable;
+use Illuminate\Database\Eloquent\Builder;
 
-class AssetTable extends Table
+class AssetTable extends NewTable
 {
+    public function resource(): Builder|string
+    {
+        return Asset::class;
+    }
+
     public function columns(): array
     {
         return [
@@ -16,11 +22,9 @@ class AssetTable extends Table
                 ->globallySearchable()
                 ->toggleable(),
             Column::make('category.name')
-                ->sortable('custom', new NestedRelationSort)
                 ->globallySearchable()
                 ->toggleable(),
             Column::make('manufacture.name')
-                ->sortable('custom', new NestedRelationSort)
                 ->globallySearchable()
                 ->toggleable(),
             Column::make('serial_number')
@@ -48,6 +52,11 @@ class AssetTable extends Table
                 ->globallySearchable()
                 ->toggleable(),
         ];
+    }
+
+    public function filters(): array
+    {
+        return [];
     }
 
     public function with(): array

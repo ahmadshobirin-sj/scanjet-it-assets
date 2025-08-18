@@ -8,6 +8,7 @@ use App\Http\Resources\Asset\AssetResource;
 use App\Http\Services\AssetCategoryService;
 use App\Http\Services\AssetService;
 use App\Http\Services\ManufactureService;
+use App\Http\Tables\AssetTable;
 use App\Models\Asset;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -29,16 +30,20 @@ class AssetController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', Asset::class);
+        $assets = [];
 
-        $assets = AssetResource::collection(
-            $this->assetService->getAll()
-        );
-        $tableSchema = $this->assetService->getTable()->toSchema();
+        try {
+            $assets = AssetTable::make('assets')->toSchema();
+        } catch (\Throwable $e) {
+            if (app()->isProduction()) {
+                report($e);
+            } else {
+                throw $e;
+            }
+        }
 
-        // dd($tableSchema);
         return Inertia::render('assets/list', [
             'assets' => $assets,
-            'table' => $tableSchema,
         ]);
     }
 
@@ -80,7 +85,9 @@ class AssetController extends Controller
                 throw $e;
             }
 
-            return back();
+            return back()->withErrors([
+                'message' => 'Failed to create asset',
+            ]);
         }
     }
 
@@ -145,7 +152,9 @@ class AssetController extends Controller
                 throw $e;
             }
 
-            return back();
+            return back()->withErrors([
+                'message' => 'Failed to update asset',
+            ]);
         }
     }
 
@@ -170,7 +179,9 @@ class AssetController extends Controller
                 throw $e;
             }
 
-            return back();
+            return back()->withErrors([
+                'message' => 'Failed to delete asset',
+            ]);
         }
     }
 }
