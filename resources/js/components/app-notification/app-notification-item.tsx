@@ -13,7 +13,7 @@ type AppNotificationEvent = {
     onClick?: (transformIsRead: () => void, transformIsUnread: () => void) => void | Promise<void>;
 };
 
-interface AppNotificationItemProps {
+export interface AppNotificationItemProps {
     message: string;
     description?: string;
     datetime?: string;
