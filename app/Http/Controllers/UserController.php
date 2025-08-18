@@ -101,6 +101,12 @@ class UserController extends Controller
                 'message' => 'User deleted successfully.',
             ]);
         } catch (\Throwable $e) {
+            if (app()->isProduction()) {
+                report($e);
+            } else {
+                throw $e;
+            }
+
             return back();
         }
     }
