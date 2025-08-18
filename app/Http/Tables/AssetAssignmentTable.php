@@ -4,11 +4,11 @@ namespace App\Http\Tables;
 
 use App\Models\AssetAssignment;
 use App\Tables\Columns\Column;
-use App\Tables\NewTable;
+use App\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\QueryBuilder\QueryBuilder;
 
-class AssetAssignmentTable extends NewTable
+class AssetAssignmentTable extends Table
 {
     public function resource(): Builder|string
     {

@@ -5,10 +5,10 @@ namespace App\Http\Tables;
 use App\Models\Role;
 use App\Tables\Columns\Column;
 use App\Tables\FilterColumns\DateFilterColumn;
-use App\Tables\NewTable;
+use App\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-class RoleTable extends NewTable
+class RoleTable extends Table
 {
     protected string $name = 'roles';
 

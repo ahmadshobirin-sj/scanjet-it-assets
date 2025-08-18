@@ -4,10 +4,10 @@ namespace App\Http\Tables;
 
 use App\Models\Asset;
 use App\Tables\Columns\Column;
-use App\Tables\NewTable;
+use App\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-class AssetTable extends NewTable
+class AssetTable extends Table
 {
     public function resource(): Builder|string
     {

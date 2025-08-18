@@ -4,10 +4,10 @@ namespace App\Http\Tables;
 
 use App\Models\AssetCategory;
 use App\Tables\Columns\Column;
-use App\Tables\NewTable;
+use App\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-class AssetCategoryTable extends NewTable
+class AssetCategoryTable extends Table
 {
     public function resource(): Builder|string
     {

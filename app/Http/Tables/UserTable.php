@@ -8,10 +8,10 @@ use App\Tables\Columns\Column;
 use App\Tables\FilterColumns\DateFilterColumn;
 use App\Tables\FilterColumns\SelectFilterColumn;
 use App\Tables\FilterColumns\TextFilterColumn;
-use App\Tables\NewTable;
+use App\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-class UserTable extends NewTable
+class UserTable extends Table
 {
     public function resource(): Builder|string
     {

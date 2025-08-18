@@ -4,10 +4,10 @@ namespace App\Http\Tables;
 
 use App\Models\Manufacture;
 use App\Tables\Columns\Column;
-use App\Tables\NewTable;
+use App\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-class ManufactureTable extends NewTable
+class ManufactureTable extends Table
 {
     public function resource(): Builder|string
     {
