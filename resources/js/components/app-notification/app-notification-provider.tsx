@@ -3,8 +3,7 @@ import { SharedData } from '@/types';
 import { Page } from '@inertiajs/core';
 import { useEchoNotification } from '@laravel/echo-react';
 import { FC, useEffect } from 'react';
-import { toast } from 'sonner';
-import { AppNotificationItem } from './app-notification-item';
+import AppToast from '../toast';
 import { notificationColorResolver } from './lib';
 
 type AppNotificationProviderProps = Page<SharedData>;
@@ -24,23 +23,18 @@ const EchoNotificationHandler: FC<AppNotificationProviderProps> = ({ props }) =>
     const { leaveChannel } = useEchoNotification(
         `App.Models.User.${auth.user.id}`,
         (notification: any) => {
-            console.log('New notification received:', notification);
             if (notification.type === 'App\\Notifications\\AppNotification') {
                 incrementUnreadNotificationsCount();
                 setNotifications(notification);
             }
 
-            toast.custom((t) => (
-                <AppNotificationItem
-                    keyToast={t}
-                    toast={toast}
-                    intent={notificationColorResolver(notification.status)}
-                    message={notification.message}
-                    description={notification.description}
-                    isFloating
-                    duration={3000}
-                />
-            ));
+            AppToast({
+                intent: notificationColorResolver(notification.status),
+                message: notification.message,
+                description: notification.description,
+                isFloating: true,
+                duration: 3000,
+            });
         },
         ['App.Notifications.AppNotification', 'App.Notifications.AppErrorNotification'],
     );
