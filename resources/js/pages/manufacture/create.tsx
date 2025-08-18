@@ -13,7 +13,6 @@ import { useBreadcrumb } from '@/hooks/use-breadcrumb';
 import AppLayout from '@/layouts/app-layout';
 import { useForm, usePage } from '@inertiajs/react';
 import { Globe } from 'lucide-react';
-import { toast } from 'sonner';
 
 const ManufactureCreatePage = () => {
     const { component } = usePage();
@@ -77,13 +76,6 @@ const ManufactureCreatePage = () => {
         post(route('manufacture.store'), {
             onSuccess: () => {
                 reset();
-            },
-            onError: (errors) => {
-                if (errors.message) {
-                    toast.error(errors.message, {
-                        ...(errors.error ? { description: errors.error } : {}),
-                    });
-                }
             },
             preserveScroll: true,
             preserveState: true,

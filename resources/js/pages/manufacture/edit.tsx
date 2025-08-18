@@ -16,7 +16,6 @@ import { Manufacture, ResponseResource } from '@/types/model';
 import { router, useForm, usePage } from '@inertiajs/react';
 import { Globe } from 'lucide-react';
 import { useEffect } from 'react';
-import { toast } from 'sonner';
 
 const ManufactureUpdatePage = () => {
     const {
@@ -101,13 +100,6 @@ const ManufactureUpdatePage = () => {
         put(route('manufacture.update', { manufacture: manufacture.data.id }), {
             onSuccess: () => {
                 reset();
-            },
-            onError: (errors) => {
-                if (errors.message) {
-                    toast.error(errors.message, {
-                        ...(errors.error ? { description: errors.error } : {}),
-                    });
-                }
             },
             preserveScroll: true,
             preserveState: true,
