@@ -13,8 +13,6 @@ use Illuminate\Database\Eloquent\Builder;
 
 class UserTable extends NewTable
 {
-    protected bool $enableRowSelection = true;
-
     public function resource(): Builder|string
     {
         return User::class;
