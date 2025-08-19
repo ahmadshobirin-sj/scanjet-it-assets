@@ -33,8 +33,8 @@ export default defineConfig(({ mode }) => {
             },
         },
         server: {
-            host: '0.0.0.0',
-            port: 5173,
+            host: env.APP_FE_SERVER_HOST || '127.0.0.1',
+            port: env.APP_FE_SERVER_PORT ? Number(env.APP_FE_SERVER_PORT) : 5123,
             https: hasHTTPS
                 ? {
                       key: fs.readFileSync(env.LOCAL_CERTIFICATE_KEY_PATH),
