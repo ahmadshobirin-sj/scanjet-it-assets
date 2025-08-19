@@ -30,7 +30,7 @@ class AssetReturn extends Model
         return $this->belongsTo(AssetAssignment::class, 'asset_assignment_id');
     }
 
-    public function receivedBy()
+    public function received_by()
     {
         return $this->belongsTo(User::class, 'received_by_user_id');
     }

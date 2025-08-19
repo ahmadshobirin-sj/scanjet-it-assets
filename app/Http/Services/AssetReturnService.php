@@ -132,13 +132,13 @@ class AssetReturnService
             }
 
             // 7) Kalau semua item sudah kembali, set returned_at di assignment (pakai waktu header)
-            if ($assignment->isFullyReturned()) {
+            if ($assignment->is_fully_returned()) {
                 $assignment->update(['returned_at' => $returnedAt]);
             }
 
             return new AssetReturnResult(
-                $assignment->fresh(['assets', 'returns', 'assignedBy']),
-                $return->fresh('receivedBy'),
+                $assignment->fresh(['assets', 'returns', 'assigned_by']),
+                $return->fresh('received_by'),
             );
         });
     }

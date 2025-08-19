@@ -53,7 +53,7 @@ class User extends Authenticatable
         return [];
     }
 
-    public function assetAssignments()
+    public function asset_assignments()
     {
         return $this->hasMany(AssetAssignment::class, 'user_id');
     }

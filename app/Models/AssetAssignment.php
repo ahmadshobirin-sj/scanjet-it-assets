@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Enums\AssetAssignmentAssetStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -29,20 +28,6 @@ class AssetAssignment extends Model
         'confirmed_at' => 'datetime',
     ];
 
-    protected $appends = ['status'];
-
-    public function getStatusAttribute(): string
-    {
-        if ($this->returned_at) {
-            return AssetAssignmentAssetStatus::RETURNED->value;
-        }
-        $hasOutstanding = $this->assets()->wherePivotNull('returned_at')->exists();
-
-        return $hasOutstanding
-            ? AssetAssignmentAssetStatus::ASSIGNED->value
-            : AssetAssignmentAssetStatus::RETURNED->value;
-    }
-
     public function assets()
     {
         return $this->belongsToMany(Asset::class, 'asset_assignment_has_assets', 'asset_assignment_id', 'asset_id')
@@ -52,22 +37,22 @@ class AssetAssignment extends Model
     }
 
     // aset-aset yang masih dipinjam pada assignment ini
-    public function assignedAssets()
+    public function assigned_assets()
     {
         return $this->assets()->wherePivotNull('returned_at');
     }
 
-    public function assignedUser()
+    public function assigned_user()
     {
         return $this->belongsTo(ExternalUser::class, 'assigned_user_id');
     }
 
-    public function assignedBy()
+    public function assigned_by()
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function isFullyReturned(): bool
+    public function is_fully_returned(): bool
     {
         return ! $this->assets()->wherePivotNull('returned_at')->exists();
     }

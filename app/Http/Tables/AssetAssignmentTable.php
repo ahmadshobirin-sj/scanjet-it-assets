@@ -6,7 +6,6 @@ use App\Models\AssetAssignment;
 use App\Tables\Columns\Column;
 use App\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Spatie\QueryBuilder\QueryBuilder;
 
 class AssetAssignmentTable extends Table
 {
@@ -53,16 +52,11 @@ class AssetAssignmentTable extends Table
 
     public function with(): array
     {
-        return ['assignedUser:id,name,email', 'assignedBy:id,name,email'];
+        return ['assigned_user:id,name,email', 'assigned_by:id,name,email'];
     }
 
     public function defaultSort(): array
     {
         return ['-assigned_at'];
-    }
-
-    public function customizeQuery(QueryBuilder $query): QueryBuilder
-    {
-        return $query;
     }
 }

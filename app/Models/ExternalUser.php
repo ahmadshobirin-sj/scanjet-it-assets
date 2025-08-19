@@ -15,7 +15,7 @@ class ExternalUser extends Model
 
     protected $keyType = 'string';
 
-    public function assetAssignments()
+    public function asset_assignments()
     {
         return $this->hasMany(AssetAssignment::class, 'assigned_user_id');
     }

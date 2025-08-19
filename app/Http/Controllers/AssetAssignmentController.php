@@ -42,7 +42,7 @@ class AssetAssignmentController extends Controller
         $tableSchema = [];
 
         try {
-            $assetAssignments = AssetAssignmentTable::make('assig')->toSchema();
+            $assetAssignments = AssetAssignmentTable::make('assignments')->toSchema();
         } catch (\Throwable $th) {
             if (app()->isProduction()) {
                 report($th);
@@ -129,10 +129,10 @@ class AssetAssignmentController extends Controller
             }
 
             Notification::send(
-                $assetAssignment->assignedBy,
+                $assetAssignment->assigned_by,
                 (new AppNotification(
                     message: 'Asset Assignment Confirmation',
-                    description: 'Asset assignment to '.$assetAssignment->assignedUser->email.' confirmed successfully.',
+                    description: 'Asset assignment to '.$assetAssignment->assigned_user->email.' confirmed successfully.',
                     data: [
                         'reference_code' => $assetAssignment->reference_code,
                     ],
@@ -145,10 +145,10 @@ class AssetAssignmentController extends Controller
 
             if (isset($assetAssignment) && $assetAssignment) {
                 Notification::send(
-                    $assetAssignment->assignedBy,
+                    $assetAssignment->assigned_by,
                     (new AppNotification(
                         message: 'Asset Assignment Confirmation Failed',
-                        description: 'There was an error while confirming the assignment to '.$assetAssignment->assignedUser->email,
+                        description: 'There was an error while confirming the assignment to '.$assetAssignment->assigned_user->email,
                         data: [
                             'reference_code' => $assetAssignment->reference_code,
                         ],

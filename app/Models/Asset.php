@@ -51,7 +51,7 @@ class Asset extends Model
     }
 
     // assignment aktif untuk aset ini (belum dikembalikan)
-    public function currentAssignment()
+    public function current_assignment()
     {
         return $this->assignments()
             ->wherePivotNull('returned_at')

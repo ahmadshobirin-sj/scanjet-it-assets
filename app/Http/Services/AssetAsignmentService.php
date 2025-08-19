@@ -107,7 +107,7 @@ class AssetAsignmentService extends Service
                     ],
                 ];
             })->toArray(),
-            'assigned_user' => $assetAssignment->assignedUser->only(['id', 'name', 'email', 'job_title', 'office_location']),
+            'assigned_user' => $assetAssignment->assigned_user->only(['id', 'name', 'email', 'job_title', 'office_location']),
             'assigned_at' => $assetAssignment->assigned_at->toIsoString(),
             'notes' => $assetAssignment['notes'] ?? null,
         ];

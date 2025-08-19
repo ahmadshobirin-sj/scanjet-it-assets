@@ -36,7 +36,7 @@ class AssetAssignmentItem extends Pivot
         return $this->belongsTo(AssetAssignment::class, 'asset_assignment_id');
     }
 
-    public function returnForm()
+    public function return_log()
     {
         return $this->belongsTo(AssetReturn::class, 'asset_return_id');
     }
