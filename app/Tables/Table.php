@@ -283,7 +283,7 @@ abstract class Table
     /**
      * Customize query before execution
      */
-    public function customizeQuery(QueryBuilder $query): QueryBuilder
+    protected function customizeQuery(QueryBuilder $query): QueryBuilder
     {
         return $query;
     }
