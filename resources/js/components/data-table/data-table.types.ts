@@ -134,7 +134,7 @@ export interface DataTableState {
 export interface DataTableProviderProps<TData> {
     bulkActions: DataTableBulkActions[];
     exportActions: DataTableExportActions[];
-    actionsRow: (row: TData) => DataTableActionsRow<TData>[];
+    actionsRow?: (row: TData) => DataTableActionsRow<TData>[];
     resource: DataTableResource<TData>;
     children: React.ReactNode;
     transformerColumns?: DataTableTransformersTableResolver<TData>;

@@ -14,6 +14,7 @@ import { DropdownMenuGroup } from '@radix-ui/react-dropdown-menu';
 import { ColumnDef, getCoreRowModel, PaginationState, RowSelectionState, SortingState, useReactTable } from '@tanstack/react-table';
 import { debounce } from 'lodash';
 import { EllipsisVerticalIcon } from 'lucide-react';
+import qs from 'qs';
 import { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import {
     DataTableClientQuery,
@@ -56,7 +57,8 @@ export const DataTableProvider = <TData,>({
 
     const defaultColumns = useMemo<ColumnDef<TData>[]>(() => {
         const baseColumns = [...resource.columns];
-        const hasActions = typeof actionsRow === 'function';
+        const hasActions = actionsRow && typeof actionsRow === 'function';
+
         const selectionColumn: ColumnDef<TData> = {
             id: 'select-rows',
             header: ({ table }) => (
@@ -169,12 +171,16 @@ export const DataTableProvider = <TData,>({
 
     const fetchData = useCallback(
         debounce((params: DataTableClientQuery) => {
+            const queryObj = {
+                [resource.name]: transformStateToQuery(params),
+            };
+            const queryString = qs.stringify(queryObj);
+            const url = `${window.location.pathname}?${queryString}`;
             router.get(
-                route(route().current() as string, {
-                    [resource.name]: transformStateToQuery(params),
-                }),
+                url,
                 {},
                 {
+                    only: [resource.name],
                     async: true,
                     showProgress: false,
                     preserveState: true,
