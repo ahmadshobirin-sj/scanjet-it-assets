@@ -23,6 +23,12 @@ use Inertia\Inertia;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
+/**
+ * TODO:
+ * add cancel feature for assigned and returned
+ * Max 7 assets for assignment
+ * automatically confirm if document assignment more than equals 5 days (run a cronjob every Midnight)
+ */
 class AssetAssignmentController extends Controller
 {
     use AuthorizesRequests;
