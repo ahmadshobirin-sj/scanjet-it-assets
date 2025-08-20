@@ -9,6 +9,7 @@ use App\Enums\AssetStatus;
 use App\Http\Filters\GlobalSearchNew;
 use App\Http\Requests\AssetReturn\AssetReturnStoreRequest;
 use App\Http\Services\AssetReturnService;
+use App\Http\Tables\AssignmentReturnLogTable;
 use App\Models\AssetReturn;
 use App\Notifications\AppNotification;
 use Illuminate\Database\Eloquent\Builder;
@@ -33,27 +34,29 @@ class AssetReturnController
         $this->authorize('create', AssetReturn::class);
         $assetAssignment = null;
         $assets = [];
+        $returnLog = [];
 
         try {
             $assetAssignment = $this->assetReturnService->getByReferenceCode($reference_code, [
-                'assignedUser:id,name,email,job_title,office_location',
-                'assignedBy:id,name,email,job_title,office_location',
+                'assigned_user:id,name,email,job_title,office_location',
+                'assigned_by:id,name,email,job_title,office_location',
             ]);
 
-            $assets = Inertia::optional(fn () => $this->assetReturnService->getAssets($this->assetsQueryBuilder($request, $assetAssignment->assignedAssets())));
+            $returnLog = AssignmentReturnLogTable::make('returnLog', $assetAssignment->id)->toSchema();
+
+            $assets = Inertia::optional(fn () => $this->assetReturnService->getAssets($this->assetsQueryBuilder($request, $assetAssignment->assigned_assets())));
         } catch (\Throwable $th) {
             if (app()->isProduction()) {
                 report($th);
             } else {
-                throw $th; // biar kelihatan stacktrace saat dev
+                throw $th;
             }
-
-            return back();
         }
 
         return Inertia::render('asset-assignment/return', [
             'assetAssignment' => $assetAssignment,
             'assets' => $assets,
+            'returnLog' => $returnLog,
         ]);
     }
 
@@ -70,14 +73,12 @@ class AssetReturnController
             /** @var AssetReturnResult $result */
             $result = $this->assetReturnService->returnAssets($data, $reference_code);
 
-            $assignment = $result->assignment->loadMissing('assignedBy'); // jaga-jaga
-            $return = $result->return->loadMissing('receivedBy');
+            $assignment = $result->assignment->loadMissing('assigned_by'); // jaga-jaga
+            $return = $result->return->loadMissing('received_by');
             $actor = Auth::user();               // yang mengeksekusi aksi
-            $assignedBy = $assignment->assignedBy;    // pembuat assignment (bisa null)
-            $receivedBy = $return->receivedBy;        // penerima pengembalian (bisa null)
+            $assignedBy = $assignment->assigned_by;    // pembuat assignment (bisa null)
 
-            $differentHandlers = $assignedBy && $receivedBy && $assignedBy->id !== $receivedBy->id;
-            $handledByOther = $receivedBy && $actor && $receivedBy->id !== $actor->id;
+            $handledByOther = $assignedBy->id !== $actor->id;
 
             // 1) Notifikasi ke aktor (selalu)
             $desc = 'Assets returned successfully for reference code '.$assignment->reference_code.'.';
@@ -102,7 +103,7 @@ class AssetReturnController
             );
 
             // 2) Jika assigned_by ≠ received_by, beritahu pembuat assignment
-            if ($differentHandlers) {
+            if ($handledByOther) {
                 Notification::send(
                     $assignedBy,
                     (new AppNotification(
