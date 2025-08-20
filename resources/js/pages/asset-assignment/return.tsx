@@ -2,6 +2,7 @@ import AppContainer from '@/components/app-container';
 import AppTitle from '@/components/app-title';
 import AssetList, { AssetListSelector } from '@/components/asset-asignment/asset-list';
 import AssignmentConfirmation from '@/components/asset-asignment/assignment-confirmation';
+import { DataTable, DataTableResource } from '@/components/data-table';
 import MemberPill from '@/components/member-pill';
 import { MultipleSelector, Option } from '@/components/multiple-selector';
 import { Badge } from '@/components/ui/badge';
@@ -17,10 +18,10 @@ import { useBreadcrumb } from '@/hooks/use-breadcrumb';
 import AppLayout from '@/layouts/app-layout';
 import { formatWithBrowserTimezone } from '@/lib/date';
 import { SharedData } from '@/types';
-import { AssetAssignment } from '@/types/model';
+import { AssetAssignment, AssetAssignmentReturnLog } from '@/types/model';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router, useForm as useFormInertia, usePage } from '@inertiajs/react';
-import { Boxes, Check, Notebook, X } from 'lucide-react';
+import { Boxes, Check, LogsIcon, Notebook, X } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { ReturnFormFields, returnFormSchema } from './form.schema';
@@ -28,8 +29,8 @@ import { ReturnFormFields, returnFormSchema } from './form.schema';
 const AssetAssignmentReturn = () => {
     const {
         component,
-        props: { assetAssignment },
-    } = usePage<SharedData & { assetAssignment: AssetAssignment }>();
+        props: { assetAssignment, returnLog },
+    } = usePage<SharedData & { assetAssignment: AssetAssignment; returnLog: DataTableResource<AssetAssignmentReturnLog> }>();
     const breadcrumbs = useBreadcrumb(component);
     const [assetsSelected, setAssetsSelected] = useState<Option[]>([]);
     const [confirmationOpen, setConfirmationOpen] = useState(false);
@@ -53,7 +54,6 @@ const AssetAssignmentReturn = () => {
     useBeforeUnloadPrompt(form.formState.isDirty);
 
     const fetchAssets = (search: string): Promise<any[]> => {
-        console.log('fetching assets with search');
         return new Promise((resolve) => {
             router.get(
                 route('asset-assignment.return', {
@@ -123,7 +123,6 @@ const AssetAssignmentReturn = () => {
     };
 
     const onConfirm = () => {
-        // console.log(route('asset-assignment.storeReturn', { reference_code: assetAssignment.reference_code }))
         put(route('asset-assignment.storeReturn', { reference_code: assetAssignment.reference_code }));
     };
 
@@ -391,6 +390,65 @@ const AssetAssignmentReturn = () => {
                         </Form>
                     </div>
                 </div>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <Badge size="md" className="p-1.5" intent="success" variant="light">
+                                <LogsIcon className="!size-5" />
+                            </Badge>
+                            Return Log
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <DataTable
+                            resource={returnLog}
+                            bulkActions={[]}
+                            exportActions={[]}
+                            transformerColumns={{
+                                'received_by.email': (column) => ({
+                                    ...column,
+                                    cell: ({ row }) => {
+                                        return (
+                                            <MemberPill
+                                                user={[
+                                                    {
+                                                        label: 'Name',
+                                                        value: row.original.received_by.name || '?',
+                                                    },
+                                                    {
+                                                        label: 'Email',
+                                                        value: row.original.received_by.email || '-',
+                                                    },
+                                                    {
+                                                        label: 'Job Title',
+                                                        value: (
+                                                            <Badge intent="info" variant="light">
+                                                                {row.original.received_by.job_title || 'N/A'}
+                                                            </Badge>
+                                                        ),
+                                                    },
+                                                    {
+                                                        label: 'Office Location',
+                                                        value: row.original.received_by.office_location || '-',
+                                                    },
+                                                ]}
+                                                text={row.original.received_by.name || row.original.received_by.email || '?'}
+                                                intent="info"
+                                                variant="light"
+                                                size="sm"
+                                            />
+                                        );
+                                    },
+                                }),
+                                returned_at: (column) => ({
+                                    ...column,
+                                    cell: ({ row }) => formatWithBrowserTimezone(row.original.returned_at),
+                                }),
+                            }}
+                        />
+                    </CardContent>
+                </Card>
 
                 {assetsSelected.length > 0 && (
                     <AssignmentConfirmation

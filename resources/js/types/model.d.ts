@@ -161,3 +161,29 @@ export interface AppNotification {
     ui_type: string;
     created_at: string;
 }
+
+export interface AssetAssignmentReturnLog {
+    id: string;
+    asset_assignment_id: string;
+    received_by_user_id: string;
+    returned_at: string;
+    notes: string;
+    created_at: string;
+    updated_at: string;
+    received_by: UserLite;
+    assignment: AssetAssignmentReturnLogAssignment;
+}
+
+export interface UserLite {
+    id: string;
+    name: string;
+    email: string;
+    job_title: string;
+    office_location: string;
+}
+
+export interface AssetAssignmentReturnLogAssignment {
+    id: string;
+    reference_code: string;
+    status: string;
+}
