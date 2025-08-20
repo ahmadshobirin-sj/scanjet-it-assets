@@ -95,7 +95,7 @@ export const DataTableProvider = <TData,>({
                             <DropdownMenuGroup>
                                 {actions.map((action, index) => (
                                     <DropdownMenuItem variant={action.color as any} key={index} onClick={() => action.event?.(row.original)}>
-                                        {action.name}
+                                        {action.icon} {action.name}
                                     </DropdownMenuItem>
                                 ))}
                             </DropdownMenuGroup>
