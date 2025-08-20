@@ -47,7 +47,7 @@ class AssetTable extends Table
                 ->sortable()
                 ->globallySearchable()
                 ->toggleable(),
-            Column::make('updated_at')
+            Column::make('status')
                 ->sortable()
                 ->globallySearchable()
                 ->toggleable(),

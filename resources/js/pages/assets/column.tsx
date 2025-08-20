@@ -1,4 +1,6 @@
 import { TransformersTableResolver } from '@/components/data-grid';
+import { Badge } from '@/components/ui/badge';
+import { AssetStatusHelper } from '@/constants/asset-status';
 import { formatWithBrowserTimezone } from '@/lib/date';
 import { Asset } from '@/types/model';
 
@@ -29,10 +31,14 @@ export const columns: TransformersTableResolver<Asset> = {
             return formatWithBrowserTimezone(row.original.created_at);
         },
     }),
-    updated_at: (column) => ({
+    status: (column) => ({
         ...column,
         cell: ({ row }) => {
-            return formatWithBrowserTimezone(row.original.updated_at);
+            return (
+                <Badge intent={AssetStatusHelper.getIntent(row.original.status) as any} size="md">
+                    {AssetStatusHelper.getLabel(row.original.status)}
+                </Badge>
+            );
         },
     }),
 };
