@@ -44,7 +44,7 @@ const AssetAssignmentReturn = () => {
         },
     });
 
-    const { processing, put, transform } = useFormInertia<ReturnFormFields>();
+    const { processing, post, transform } = useFormInertia<ReturnFormFields>();
 
     const assetField = useFieldArray({
         control: form.control,
@@ -123,7 +123,7 @@ const AssetAssignmentReturn = () => {
     };
 
     const onConfirm = () => {
-        put(route('asset-assignment.storeReturn', { reference_code: assetAssignment.reference_code }));
+        post(route('asset-assignment.storeReturn', { reference_code: assetAssignment.reference_code }));
     };
 
     return (
