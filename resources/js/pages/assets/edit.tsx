@@ -224,6 +224,7 @@ const AssetUpdatePage = () => {
                                         <CalendarDatePicker
                                             id="warranty-expired"
                                             variant="outline"
+                                            intent="secondary"
                                             numberOfMonths={1}
                                             date={{
                                                 from: data.warranty_expired,
@@ -240,6 +241,7 @@ const AssetUpdatePage = () => {
                                         <CalendarDatePicker
                                             id="purchase-date"
                                             variant="outline"
+                                            intent="secondary"
                                             numberOfMonths={1}
                                             date={{
                                                 from: data.purchase_date,
