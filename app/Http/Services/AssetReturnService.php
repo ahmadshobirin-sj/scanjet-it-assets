@@ -56,11 +56,15 @@ class AssetReturnService
             $assetIds = array_values(array_unique(Arr::pluck($data['assets'] ?? [], $assetKey)));
 
             if (empty($assetIds)) {
-                throw new ClientException('Failed to return assets', 'No assets provided.');
+                throw new ClientException('Failed to return assets, no assets provided');
             }
 
             // 1) Ambil assignment
             $assignment = $this->getByReferenceCode($reference_code);
+
+            if (empty($assignment->confirmed_at)) {
+                throw new ClientException('Failed to return asset, this assignment has not been confirmed by the user');
+            }
 
             // 2) Kunci baris pivot terkait untuk hindari race condition
             $pivotRows = DB::table('asset_assignment_has_assets')
