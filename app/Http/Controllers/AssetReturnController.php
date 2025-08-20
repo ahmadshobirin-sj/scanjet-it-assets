@@ -6,6 +6,7 @@ use App\DTOs\AssetReturnResult;
 use App\Enums\AppNotificationStatus;
 use App\Enums\AppNotificationType;
 use App\Enums\AssetStatus;
+use App\Exceptions\ClientException;
 use App\Http\Filters\GlobalSearchNew;
 use App\Http\Requests\AssetReturn\AssetReturnStoreRequest;
 use App\Http\Services\AssetReturnService;
@@ -41,6 +42,10 @@ class AssetReturnController
                 'assigned_user:id,name,email,job_title,office_location',
                 'assigned_by:id,name,email,job_title,office_location',
             ]);
+
+            if (empty($assignment->confirmed_at)) {
+                throw new ClientException('This assignment has not been confirmed by the user', code: 404);
+            }
 
             $returnLog = AssignmentReturnLogTable::make('returnLog', $assetAssignment->id)->toSchema();
 
