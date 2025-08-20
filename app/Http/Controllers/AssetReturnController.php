@@ -21,6 +21,10 @@ use Inertia\Inertia;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
+/**
+ * TODO:
+ * Tidak boleh return sebelum di confirm
+ */
 class AssetReturnController
 {
     use AuthorizesRequests;
@@ -116,6 +120,10 @@ class AssetReturnController
                 );
             }
 
+            /**
+             * TODO:
+             * pindah ke halaman detail return
+             */
             return redirect()->route('asset-assignment.index');
         } catch (\Throwable $th) {
             if (app()->isProduction()) {
