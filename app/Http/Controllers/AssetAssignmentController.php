@@ -14,6 +14,7 @@ use App\Models\AssetAssignment;
 use App\Models\ExternalUser;
 use App\Notifications\AppNotification;
 use App\Notifications\AssetAssignmentConfirmation;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -70,8 +71,8 @@ class AssetAssignmentController extends Controller
     {
         $this->authorize('create', AssetAssignment::class);
 
-        $employees = Inertia::optional(fn () => $this->assetAssignmentService->getEmployees($this->employeesQueryBuilder($request)));
-        $assets = Inertia::optional(fn () => $this->assetAssignmentService->getAssets($this->assetsQueryBuilder($request, Asset::select())));
+        $employees = Inertia::optional(fn() => $this->assetAssignmentService->getEmployees($this->employeesQueryBuilder($request)));
+        $assets = Inertia::optional(fn() => $this->assetAssignmentService->getAssets($this->assetsQueryBuilder($request, Asset::select())));
 
         return Inertia::render('asset-assignment/assign', [
             'employees' => $employees,
@@ -97,7 +98,7 @@ class AssetAssignmentController extends Controller
                 (
                     new AppNotification(
                         message: 'Asset Assignment Confirmation',
-                        description: 'Assets assigned successfully to '.$assignments['assigned_user']['email'].'.',
+                        description: 'Assets assigned successfully to ' . $assignments['assigned_user']['email'] . '.',
                         data: [
                             'reference_code' => $assetAssignment->reference_code,
                         ],
@@ -112,7 +113,9 @@ class AssetAssignmentController extends Controller
                 ->notify((new AssetAssignmentConfirmation($assignments))->afterCommit());
 
             return redirect()
-                ->route('asset-assignment.index');
+                ->route('asset-assignment.index')->with('success', [
+                    'message' => 'Assets assigned successfully.',
+                ]);
         } catch (\Throwable $th) {
             if (app()->isProduction()) {
                 report($th);
@@ -120,7 +123,9 @@ class AssetAssignmentController extends Controller
                 throw $th;
             }
 
-            return back();
+            return back()->withErrors([
+                'message' => 'Failed to assign assets.',
+            ]);
         }
     }
 
@@ -138,7 +143,7 @@ class AssetAssignmentController extends Controller
                 $assetAssignment->assigned_by,
                 (new AppNotification(
                     message: 'Asset Assignment Confirmation',
-                    description: 'Asset assignment to '.$assetAssignment->assigned_user->email.' confirmed successfully.',
+                    description: 'Asset assignment to ' . $assetAssignment->assigned_user->email . ' confirmed successfully.',
                     data: [
                         'reference_code' => $assetAssignment->reference_code,
                     ],
@@ -154,7 +159,7 @@ class AssetAssignmentController extends Controller
                     $assetAssignment->assigned_by,
                     (new AppNotification(
                         message: 'Asset Assignment Confirmation Failed',
-                        description: 'There was an error while confirming the assignment to '.$assetAssignment->assigned_user->email,
+                        description: 'There was an error while confirming the assignment to ' . $assetAssignment->assigned_user->email,
                         data: [
                             'reference_code' => $assetAssignment->reference_code,
                         ],
@@ -174,28 +179,60 @@ class AssetAssignmentController extends Controller
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(AssetAssignment $assetAssignment)
+    public function exportPDF(Request $request, string $reference_code)
     {
-        //
-    }
+        $this->authorize('exportPdf', AssetAssignment::class);
+        try {
+            $assetAssignment = $this->assetAssignmentService->getByReferenceCode(
+                $reference_code,
+                [
+                    'assigned_user:id,name,email,job_title,office_location',
+                    'assigned_by:id,name,email,job_title,office_location',
+                ]
+            );
+            $assetAssignment->load([
+                'assets' => function ($q) use ($assetAssignment) {
+                    $q->select('assets.id', 'assets.name', 'assets.serial_number', 'assets.asset_tag', 'assets.category_id')
+                        ->with('category:id,name')
+                        ->withExists([
+                            'assignments as assigned_before_this' => fn($qq) => $qq->where('asset_assignment_id', '!=', $assetAssignment->id),
+                        ]);
+                },
+            ]);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, AssetAssignment $assetAssignment)
-    {
-        //
-    }
+            $data = [
+                'header' => [
+                    'title' => 'IT Hardware Asset Assignment Form',
+                    'code' => 'FRM-IT-01-HW-2025',
+                    'version' => '1.0',
+                    'last_revised' => '',
+                    'issued_by' => 'Wibowo, Rio Eibat',
+                    'approved_by' => '',
+                    'issue_date' => '',
+                    'approved_date' => '',
+                ],
+                'assignment' => $assetAssignment->toArray(),
+            ];
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(AssetAssignment $assetAssignment)
-    {
-        //
+            $pdf = Pdf::loadView('pdf.asset_assignment', $data)
+                ->setOption([
+                    'isPhpEnabled' => true,
+                    'isRemoteEnabled' => true,
+                ])
+                ->setPaper('A4', 'portrait'); // ukuran A4
+
+            return $pdf->stream("{$assetAssignment->reference_code}.pdf");
+        } catch (\Throwable $th) {
+            if (app()->isProduction()) {
+                report($th);
+            } else {
+                throw $th;
+            }
+
+            return back()->withError([
+                'message' => 'Failed to export the PDF. Please try again later.',
+            ]);
+        }
     }
 
     private function employeesQueryBuilder(Request $request)

@@ -46,4 +46,9 @@ class AssetAssignmentPolicy
     {
         return $user->can('asset_assignment.delete');
     }
+
+    public function exportPdf(User $user): bool
+    {
+        return $user->can('asset_assignment.exportPdf');
+    }
 }

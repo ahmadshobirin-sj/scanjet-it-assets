@@ -13,8 +13,10 @@ Route::middleware('MsGraphAuthenticated')->prefix('asset-assignment')->group(fun
         ->name('asset-assignment.storeAssign');
     Route::get('/return/{reference_code}', [AssetReturnController::class, 'create'])
         ->name('asset-assignment.return');
-    Route::put('/return/{reference_code}/test', [AssetReturnController::class, 'store'])
+    Route::post('/return/{reference_code}', [AssetReturnController::class, 'store'])
         ->name('asset-assignment.storeReturn');
+    Route::get('/export/pdf/{reference_code}', [AssetAssignmentController::class, 'exportPdf'])
+        ->name('asset-assignment.exportPdf');
 });
 
 Route::middleware('signed')->prefix('asset-assignment')->group(function () {

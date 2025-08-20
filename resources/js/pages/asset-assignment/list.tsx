@@ -9,7 +9,7 @@ import { SharedData } from '@/types';
 import { AssetAssignment } from '@/types/model';
 import { router } from '@inertiajs/core';
 import { usePage } from '@inertiajs/react';
-import { FileInputIcon, PackagePlus } from 'lucide-react';
+import { FileInputIcon, FileTextIcon, PackagePlus } from 'lucide-react';
 import { columns } from './column';
 
 const AssetAssignmentListPage = () => {
@@ -22,6 +22,10 @@ const AssetAssignmentListPage = () => {
 
     const handleReturn = (row: AssetAssignment) => {
         router.visit(route('asset-assignment.return', { reference_code: row.reference_code }));
+    };
+
+    const handleExportPdf = (row: AssetAssignment) => {
+        window.open(route('asset-assignment.exportPdf', { reference_code: row.reference_code }), '_blank');
     };
 
     return (
@@ -49,7 +53,15 @@ const AssetAssignmentListPage = () => {
                                       icon: <FileInputIcon style={{ color: 'inherit' }} />,
                                       name: 'Return',
                                       event: handleReturn,
-                                      color: 'info',
+                                  },
+                              ]
+                            : []),
+                        ...(can('asset_assignment.exportPdf')
+                            ? [
+                                  {
+                                      icon: <FileTextIcon style={{ color: 'inherit' }} />,
+                                      name: 'Export PDF',
+                                      event: handleExportPdf,
                                   },
                               ]
                             : []),
