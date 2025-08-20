@@ -4,14 +4,13 @@ import {
     Building2,
     ClipboardList,
     LayoutGrid,
-    Logs,
     NotebookPen,
     PackagePlus,
-    Server,
     ShieldUser,
     SquareUser,
     Table,
     Tags,
+    UserCogIcon,
 } from 'lucide-react';
 
 export const mainNavItemsRaw: NavItem[] = [
@@ -77,6 +76,7 @@ export const mainNavItemsRaw: NavItem[] = [
     },
     {
         title: 'Manage',
+        icon: UserCogIcon,
         items: [
             {
                 title: 'User',
@@ -93,17 +93,6 @@ export const mainNavItemsRaw: NavItem[] = [
                 meta: {
                     permission: ['role.viewAny'],
                 },
-            },
-        ],
-    },
-    {
-        title: 'Systems',
-        icon: Server,
-        items: [
-            {
-                title: 'Logs',
-                href: '#',
-                icon: Logs,
             },
         ],
     },
