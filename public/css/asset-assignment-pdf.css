@@ -127,8 +127,8 @@ header {
 }
 
 .tb-signature {
-    margin-top: 20pt;
-    margin-bottom: 20pt;
+    margin-top: 5pt;
+    margin-bottom: 5pt;
     table-layout:fixed;
     width: 100%;
 }
