@@ -43,7 +43,7 @@ class AssetReturnController
                 'assigned_by:id,name,email,job_title,office_location',
             ]);
 
-            if (empty($assignment->confirmed_at)) {
+            if (empty($assetAssignment->confirmed_at)) {
                 throw new ClientException('This assignment has not been confirmed by the user', code: 404);
             }
 
