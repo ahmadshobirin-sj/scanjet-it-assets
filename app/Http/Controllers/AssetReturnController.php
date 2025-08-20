@@ -21,10 +21,6 @@ use Inertia\Inertia;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\QueryBuilder;
 
-/**
- * TODO:
- * Tidak boleh return sebelum di confirm
- */
 class AssetReturnController
 {
     use AuthorizesRequests;
