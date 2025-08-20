@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
-use Illuminate\Database\Eloquent\Factories\Factory;
-use Spatie\Permission\Models\Role;
 use App\Enums\UserRole;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use Spatie\Permission\Models\Role;
 
 class RoleFactory extends Factory
 {
@@ -16,7 +16,7 @@ class RoleFactory extends Factory
         return [
             'id' => Str::uuid()->toString(),
             'name' => $this->faker->unique()->randomElement(
-                array_map(fn(UserRole $case) => $case->value, UserRole::cases())
+                array_map(fn (UserRole $case) => $case->value, UserRole::cases())
             ),
             'guard_name' => config('auth.defaults.guard', 'web'),
         ];

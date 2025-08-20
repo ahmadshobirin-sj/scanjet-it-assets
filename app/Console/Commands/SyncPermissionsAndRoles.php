@@ -22,6 +22,7 @@ class SyncPermissionsAndRoles extends Command
         $policyPath = app_path('Policies');
         if (! is_dir($policyPath)) {
             $this->error("Policy directory not found at {$policyPath}");
+
             return 1;
         }
 
@@ -52,10 +53,10 @@ class SyncPermissionsAndRoles extends Command
                 continue;
             }
 
-            $className = 'App\\Policies\\' . Str::before($file, '.php');
+            $className = 'App\\Policies\\'.Str::before($file, '.php');
 
             if (! class_exists($className)) {
-                require_once $policyPath . '/' . $file;
+                require_once $policyPath.'/'.$file;
             }
 
             $reflect = new ReflectionClass($className);
@@ -137,6 +138,7 @@ class SyncPermissionsAndRoles extends Command
 
         if (! $superAdminRole) {
             $this->error('Super Admin role not found!');
+
             return;
         }
 
