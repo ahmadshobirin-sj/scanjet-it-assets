@@ -1,0 +1,150 @@
+* {
+    box-sizing: border-box;
+}
+
+@page {
+    size: A4;
+    margin: 4.5cm 2.4cm 2.2cm 2.4cm; /* atas, kanan, bawah, kiri */
+}
+
+html,body {
+    font-family: 'Arial';
+    font-weight: normal;
+    font-size: 11pt;
+}
+
+body {
+    counter-reset: pageTotal;
+}
+
+p {
+    margin: 0;
+    line-height: 1;
+}
+
+table, th, td {
+    border: 1px solid black;
+    border-collapse: collapse;
+}
+table th,
+table td {
+    text-align: left;
+    padding: 6pt;
+}
+
+header {
+    position: fixed;
+    top: -3.2cm;
+    left: 0px;
+    right: 0px;
+}
+
+.pagenum:before {
+    content: counter(page) ;
+}
+
+.number-bracket {
+  list-style-type: decimal;
+}
+
+.tb-full {
+    width: 100%;
+}
+
+.tb-border-none, .tb-border-none tr, .tb-border-none th, .tb-border-none td {
+    border: 0px;
+}
+
+.tb-padding-none th,
+.tb-padding-none td {
+    padding: 0;
+}
+
+.mt-4 {
+    margin-top: 14pt;
+}
+
+.page-break {
+    page-break-after: always;
+}
+
+.hdc {
+    width: 100%;
+    font-size: 8pt;
+}
+
+.hdc th, .hdc td {
+   padding: 2pt;
+}
+
+.hdc-logo-wrapper {
+    width: 25pt;
+}
+.hdc-logo {
+    width: 100%;
+    display: inline-block;
+    height: auto;
+}
+
+.pg-title {
+    font-size: 14pt;
+    font-weight: bold;
+    text-align: center;
+    margin: 0;
+}
+
+.pg-section {
+    padding-top: 8pt;
+    padding-bottom: 8pt;
+}
+
+.pg-section-title {
+    font-weight: bold;
+}
+
+.pg-section-desc {
+    font-weight: normal;
+    text-align: justify;
+}
+
+.pg-select {
+    padding-left: 20pt;
+}
+
+.pg-select-item {
+    gap: 4px;
+}
+.pg-select-box {
+    border: 1px solid black;
+    width: 14px;
+    height: 14px;
+    display: inline-block;
+    margin-right: 10px;
+}
+.pg-select-desc {
+    display: inline-block;
+    line-height: 0.7;
+}
+
+.tb-signature {
+    margin-top: 20pt;
+    margin-bottom: 20pt;
+    table-layout:fixed;
+    width: 100%;
+}
+.tb-signature-cell {
+    width: 46%;
+}
+.tb-signature-input {
+    vertical-align: bottom;
+}
+.tb-signature-line,
+.tb-signature-desc {
+    vertical-align: top;
+}
+
+.sig-line {
+    height: 0.2px;
+    background-color: black;
+    width: 100%;
+}
