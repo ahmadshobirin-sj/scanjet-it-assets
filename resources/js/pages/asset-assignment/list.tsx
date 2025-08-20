@@ -9,7 +9,7 @@ import { SharedData } from '@/types';
 import { AssetAssignment } from '@/types/model';
 import { router } from '@inertiajs/core';
 import { usePage } from '@inertiajs/react';
-import { PackagePlus } from 'lucide-react';
+import { FileInputIcon, PackagePlus } from 'lucide-react';
 import { columns } from './column';
 
 const AssetAssignmentListPage = () => {
@@ -42,12 +42,14 @@ const AssetAssignmentListPage = () => {
                     resource={assignments}
                     bulkActions={[]}
                     exportActions={[]}
-                    actionsRow={() => [
-                        ...(can('asset_return.create')
+                    actionsRow={(row) => [
+                        ...(can('asset_return.create') && row.confirmed_at
                             ? [
                                   {
+                                      icon: <FileInputIcon style={{ color: 'inherit' }} />,
                                       name: 'Return',
                                       event: handleReturn,
+                                      color: 'info',
                                   },
                               ]
                             : []),
