@@ -1,3 +1,10 @@
+@php
+    $userHasSigned = !empty($assignment['confirmed_at']);
+    $confirmed_at = null;
+    if ($userHasSigned) {
+        $confirmed_at = \Carbon\Carbon::parse($assignment['confirmed_at'])->format('d F Y');
+    }
+@endphp
 <!DOCTYPE html>
 <html lang="en">
 
@@ -47,8 +54,12 @@
             </p>
             <table class="tb-full tb-medium">
                 <tr>
-                    <td style="width: 100px">Ref. Code</td>
-                    <td></td>
+                    <td style="width: 100px">
+                        Ref. Code
+                    </td>
+                    <td>
+                        {{ $assignment['reference_code'] }}
+                    </td>
                 </tr>
             </table>
         </div>
@@ -68,13 +79,19 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                        <td></td>
-                    </tr>
+                    @foreach ($assignment['assets'] as $asset)
+                        <tr>
+                            <td>{{ $asset['category']['name'] }}</td>
+                            <td>{{ $asset['name'] }}</td>
+                            <td>{{ $asset['serial_number'] }}</td>
+                            <td>{{ $asset['asset_tag'] }}</td>
+                            @if ($asset['assigned_before_this'])
+                                <td>{{ 'Reassignment' }}</td>
+                            @else
+                                <td>{{ 'Deployment' }}</td>
+                            @endif
+                        </tr>
+                    @endforeach
                 </tbody>
             </table>
         </div>
@@ -88,15 +105,17 @@
             <table class="tb-full">
                 <tr>
                     <td style="width: 150px">User Name</td>
-                    <td></td>
+                    <td>
+                        {{ $assignment['assigned_user']['name'] }}
+                    </td>
                 </tr>
                 <tr>
                     <td>Department</td>
-                    <td></td>
+                    <td>-</td>
                 </tr>
                 <tr>
                     <td>Email <small style="font-style: italic">(@scanjet.net)</small></td>
-                    <td></td>
+                    <td>{{ $assignment['assigned_user']['email'] }}</td>
                 </tr>
             </table>
         </div>
@@ -126,10 +145,14 @@
                 <tr>
                     <td class="tb-signature-cell tb-signature-input">
                         {{-- User Signature --}}
+                        @if ($userHasSigned)
+                            Digitally signed by {{ $assignment['assigned_user']['name'] }}
+                        @endif
                     </td>
                     <td rowspan="3"></td>
                     <td class="tb-signature-cell tb-signature-input">
                         {{-- Date --}}
+                        {{ $confirmed_at }}
                     </td>
                 </tr>
                 <tr>
@@ -158,11 +181,11 @@
             <table class="tb-full">
                 <tr>
                     <td style="width: 150px">Name</td>
-                    <td></td>
+                    <td>{{ $assignment['assigned_by']['name'] }}</td>
                 </tr>
                 <tr>
                     <td>Department</td>
-                    <td></td>
+                    <td>-</td>
                 </tr>
             </table>
         </div>
@@ -172,10 +195,14 @@
                 <tr>
                     <td class="tb-signature-cell tb-signature-input">
                         {{-- Signature --}}
+                        @if ($userHasSigned)
+                            Digitally signed by {{ $assignment['assigned_by']['name'] }}
+                        @endif
                     </td>
                     <td rowspan="3"></td>
                     <td class="tb-signature-cell tb-signature-input">
                         {{-- Date --}}
+                        {{ $confirmed_at }}
                     </td>
                 </tr>
                 <tr>
