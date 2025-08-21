@@ -18,7 +18,7 @@ interface DataTableFilterItemProps extends DataTableFilter {
     state: DataTableFilterStateItem;
 }
 
-const DataTableFilterItem: FC<DataTableFilterItemProps> = ({ label, attribute, clauses, type, meta, options, state: defaultState }) => {
+const DataTableFilterItem: FC<DataTableFilterItemProps> = ({ label, attribute, clauses, type, meta, state: defaultState }) => {
     const { handleOnChangeFilter, isLoading } = useDataTable();
     const [state, setState] = useState<DataTableFilterStateItem>(defaultState);
 
@@ -98,13 +98,7 @@ const DataTableFilterItem: FC<DataTableFilterItemProps> = ({ label, attribute, c
                         <div>
                             <SearchIcon className="size-5" />
                         </div>
-                        <DateTableFilterItemController
-                            type={type}
-                            meta={meta}
-                            options={options}
-                            state={state}
-                            handleChange={handleChangeController}
-                        />
+                        <DateTableFilterItemController type={type} meta={meta} state={state} handleChange={handleChangeController} />
                     </div>
                 </div>
                 {state.value !== null && (
@@ -119,11 +113,11 @@ const DataTableFilterItem: FC<DataTableFilterItemProps> = ({ label, attribute, c
     );
 };
 
-interface DateTableFilterItemControllerProps extends Pick<DataTableFilterItemProps, 'type' | 'meta' | 'options' | 'state'> {
+interface DateTableFilterItemControllerProps extends Pick<DataTableFilterItemProps, 'type' | 'meta' | 'state'> {
     handleChange: (state: DataTableFilterStateItem) => void;
 }
 
-const DateTableFilterItemController = ({ type, options, meta, state, handleChange }: DateTableFilterItemControllerProps) => {
+const DateTableFilterItemController = ({ type, meta, state, handleChange }: DateTableFilterItemControllerProps) => {
     const numberOfMonths = useMemo(() => (isArrayValue.includes(state.clause) ? 2 : 1), [state.clause]);
 
     if (type === 'text') {
@@ -182,13 +176,13 @@ const DateTableFilterItemController = ({ type, options, meta, state, handleChang
         );
     }
 
-    if (type === 'set') {
+    if (type === 'select') {
         return (
             <MultiSelect
                 single={!isArrayValue.includes(state.clause)}
                 defaultValue={state.value ? (!isArray(state.value) ? [state.value] : state.value) : []}
                 value={state.value || []}
-                options={options as any}
+                options={meta?.options || []}
                 onValueChange={(value) => {
                     handleChange({
                         ...state,

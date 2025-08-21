@@ -183,6 +183,7 @@ export const DataTableProvider = <TData,>({
                     only: [resource.name],
                     async: true,
                     showProgress: false,
+                    replace: true,
                     preserveState: true,
                     preserveScroll: true,
                     onBefore: () => setIsLoading(true),

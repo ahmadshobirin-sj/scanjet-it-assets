@@ -22,14 +22,12 @@ export interface DataTableColumn {
 }
 
 export interface DataTableFilter {
-    type: 'text' | 'date' | 'set';
+    type: 'text' | 'date' | 'select';
     attribute: string;
     label: string;
     clauses: DataTableFilterClause[];
-    meta?: DataTableFilterMeta;
+    meta: DataTableFilterMeta | null;
     hasDefaultValue: boolean;
-    options?: DataTableFilterOption[];
-    multiple?: boolean;
 }
 
 export interface DataTableFilterClause {
@@ -40,6 +38,10 @@ export interface DataTableFilterClause {
 export interface DataTableFilterMeta {
     format?: string;
     picker?: string;
+    options?: DataTableFilterOption[];
+    multiple?: boolean;
+    searchable?: boolean;
+    placeholder?: string;
 }
 
 export interface DataTableFilterOption {
