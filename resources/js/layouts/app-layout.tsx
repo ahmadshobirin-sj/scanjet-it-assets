@@ -1,6 +1,6 @@
+import AppFlashMessage from '@/components/app-flash-message';
 import AppToast from '@/components/toast';
 import { Toaster } from '@/components/ui/sonner';
-import { useInertiaFlashToastOnce } from '@/hooks/useFlash';
 import AppLayoutTemplate from '@/layouts/app/app-header-layout';
 import { ConfirmDialog } from '@/lib/confirmDialog';
 import { type BreadcrumbItem } from '@/types';
@@ -12,17 +12,14 @@ interface AppLayoutProps {
 }
 
 export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => {
-    useInertiaFlashToastOnce(
-        ({ message, intent }) => {
-            AppToast({ message, intent });
-        },
-        {
-            scope: 'global',
-        },
-    );
-
     return (
         <AppLayoutTemplate breadcrumbs={breadcrumbs} {...props}>
+            <AppFlashMessage
+                notify={({ intent, message }) => {
+                    AppToast({ message, intent });
+                }}
+            />
+
             {children}
             <Toaster richColors position="top-right" />
             <ConfirmDialog />

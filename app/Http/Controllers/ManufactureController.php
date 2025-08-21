@@ -53,11 +53,9 @@ class ManufactureController extends Controller
         try {
             $this->manufactureService->create($request->validated());
 
-            return redirect()->route('manufacture.index')->with('success', [
-                'message' => 'Manufacture created successfully.',
-            ]);
+            return redirect()->route('manufacture.index')->withSuccessFlash('Manufacture created successfully.');
         } catch (\Throwable $e) {
-            return redirect()->back()->withErrors(['message' => 'Failed to create manufacture', 'error' => $e->getMessage()]);
+            return redirect()->back()->withErrorsFlash('Failed to create manufacture');
         }
     }
 
@@ -86,11 +84,9 @@ class ManufactureController extends Controller
         try {
             $this->manufactureService->update($manufacture, $request->validated());
 
-            return redirect()->route('manufacture.index')->with('success', [
-                'message' => 'Manufacture updated successfully.',
-            ]);
+            return redirect()->route('manufacture.index')->withSuccessFlash('Manufacture updated successfully.');
         } catch (\Throwable $e) {
-            return redirect()->back()->withErrors(['message' => 'Failed to update manufacture', 'error' => $e->getMessage()]);
+            return redirect()->back()->withErrorsFlash('Failed to update manufacture.');
         }
     }
 
@@ -101,11 +97,9 @@ class ManufactureController extends Controller
         try {
             $this->manufactureService->delete($manufacture);
 
-            return redirect(url()->previous())->with('success', [
-                'message' => 'Manufacture deleted successfully.',
-            ]);
+            return redirect(url()->previous())->withSuccessFlash('Manufacture deleted successfully.');
         } catch (\Throwable $e) {
-            return redirect(url()->previous())->withErrors(['message' => 'Failed to delete manufacture', 'error' => $e->getMessage()]);
+            return redirect(url()->previous())->withErrorsFlash('Failed to delete manufacture.');
         }
     }
 }

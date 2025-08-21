@@ -41,7 +41,14 @@ export interface SharedData {
     ziggy: Config & { location: string };
     sidebarOpen: boolean;
     success?: Record<string, string>;
+    flash: SharedFlashData;
     [key: string]: unknown;
+}
+
+export interface SharedFlashData {
+    id?: string;
+    success?: string | string[];
+    errors?: string | string[];
 }
 
 export interface AuthUser {

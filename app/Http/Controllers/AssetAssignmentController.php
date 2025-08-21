@@ -113,9 +113,7 @@ class AssetAssignmentController extends Controller
                 ->notify((new AssetAssignmentConfirmation($assignments))->afterCommit());
 
             return redirect()
-                ->route('asset-assignment.index')->with('success', [
-                    'message' => 'Assets assigned successfully.',
-                ]);
+                ->route('asset-assignment.index')->withSuccessFlash('Assets assigned successfully.');
         } catch (\Throwable $th) {
             if (app()->isProduction()) {
                 report($th);
@@ -123,9 +121,7 @@ class AssetAssignmentController extends Controller
                 throw $th;
             }
 
-            return back()->withErrors([
-                'message' => 'Failed to assign assets.',
-            ]);
+            return back()->withErrorsFlash('Failed to assign assets.');
         }
     }
 

@@ -45,11 +45,9 @@ class AssetCategoryController extends Controller
         try {
             $this->assetCategoryService->create($request->validated());
 
-            return redirect(url()->previous())->with('success', [
-                'message' => 'Asset category created successfully.',
-            ]);
+            return redirect(url()->previous())->withSuccessFlash('Asset category created successfully.');
         } catch (\Throwable $e) {
-            return redirect(url()->previous())->withErrors(['message' => 'Failed to create asset category', 'error' => $e->getMessage()]);
+            return redirect(url()->previous())->withErrorsFlash('Failed to create asset category');
         }
     }
 
@@ -70,11 +68,9 @@ class AssetCategoryController extends Controller
         try {
             $this->assetCategoryService->update($assetCategory, $request->validated());
 
-            return redirect(url()->previous())->with('success', [
-                'message' => 'Asset category updated successfully.',
-            ]);
+            return redirect(url()->previous())->withSuccessFlash('Asset category updated successfully.');
         } catch (\Throwable $e) {
-            return redirect(url()->previous())->withErrors(['message' => 'Failed to update asset category', 'error' => $e->getMessage()]);
+            return redirect(url()->previous())->withErrorsFlash('Failed to update asset category');
         }
     }
 
@@ -85,11 +81,9 @@ class AssetCategoryController extends Controller
         try {
             $this->assetCategoryService->delete($assetCategory);
 
-            return redirect(url()->previous())->with('success', [
-                'message' => 'Asset category deleted successfully.',
-            ]);
+            return redirect(url()->previous())->withSuccessFlash('Asset category deleted successfully.');
         } catch (\Throwable $e) {
-            return redirect(url()->previous())->withErrors(['message' => 'Failed to delete asset category', 'error' => $e->getMessage()]);
+            return redirect(url()->previous())->withErrorsFlash('Failed to delete asset category');
         }
     }
 }

@@ -57,9 +57,7 @@ class RoleController extends Controller
         try {
             $this->roleService->create($request->validated());
 
-            return to_route('role.index')->with('success', [
-                'message' => 'Role created successfully.',
-            ]);
+            return to_route('role.index')->withSuccessFlash('Role created successfully.');
         } catch (\Throwable $e) {
             if (app()->isProduction()) {
                 report($e);
@@ -67,9 +65,7 @@ class RoleController extends Controller
                 throw $e;
             }
 
-            return back()->withErrors([
-                'message' => 'Failed to create user.',
-            ]);
+            return back()->withErrorsFlash('Failed to create user.');
         }
     }
 
@@ -108,9 +104,7 @@ class RoleController extends Controller
         try {
             $this->roleService->update($role, $request->validated());
 
-            return to_route('role.index')->with('success', [
-                'message' => 'Role updated successfully.',
-            ]);
+            return to_route('role.index')->withSuccessFlash('Role updated successfully.');
         } catch (\Throwable $e) {
             if (app()->isProduction()) {
                 report($e);
@@ -118,7 +112,7 @@ class RoleController extends Controller
                 throw $e;
             }
 
-            return back();
+            return back()->withErrorsFlash('Failed to update role.');
         }
     }
 
@@ -131,9 +125,7 @@ class RoleController extends Controller
 
             return redirect()
                 ->route('role.index')
-                ->with('success', [
-                    'message' => 'Role deleted successfully.',
-                ]);
+                ->withSuccessFlash('Role deleted successfully.');
         } catch (\Throwable $e) {
             if (app()->isProduction()) {
                 report($e);
@@ -141,9 +133,7 @@ class RoleController extends Controller
                 throw $e;
             }
 
-            return back()->withErrors([
-                'message' => 'Failed to delete role.',
-            ]);
+            return back()->withErrorsFlash('Failed to delete role.');
         }
     }
 }

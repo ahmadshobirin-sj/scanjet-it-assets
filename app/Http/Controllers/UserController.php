@@ -55,9 +55,7 @@ class UserController extends Controller
         try {
             $this->userService->create($request->validated());
 
-            return to_route('user.index')->with('success', [
-                'message' => 'User created successfully.',
-            ]);
+            return to_route('user.index')->withSuccessFlash('User created successfully.');
         } catch (\Throwable $e) {
             if (app()->isProduction()) {
                 report($e);
@@ -65,7 +63,7 @@ class UserController extends Controller
                 throw $e;
             }
 
-            return back();
+            return back()->withErrorsFlash('Failed to created user. Please try again later.');
         }
     }
 
@@ -76,9 +74,7 @@ class UserController extends Controller
         try {
             $this->userService->update($user, $request->validated());
 
-            return to_route('user.index')->with('success', [
-                'message' => 'User updated successfully.',
-            ]);
+            return to_route('user.index')->withSuccessFlash('User updated successfully.');
         } catch (\Throwable $e) {
             if (app()->isProduction()) {
                 report($e);
@@ -86,7 +82,7 @@ class UserController extends Controller
                 throw $e;
             }
 
-            return back();
+            return back()->withErrorsFlash('Failed to update user. Please try again later.');
         }
     }
 
@@ -97,9 +93,7 @@ class UserController extends Controller
         try {
             $this->userService->delete($user);
 
-            return to_route('user.index')->with('success', [
-                'message' => 'User deleted successfully.',
-            ]);
+            return to_route('user.index')->withSuccessFlash('User deleted successfully.');
         } catch (\Throwable $e) {
             if (app()->isProduction()) {
                 report($e);
@@ -107,7 +101,7 @@ class UserController extends Controller
                 throw $e;
             }
 
-            return back();
+            return back()->withErrorsFlash('Failed to delete user. Please try again later.');
         }
     }
 }

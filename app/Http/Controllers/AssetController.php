@@ -75,9 +75,7 @@ class AssetController extends Controller
             $this->assetService->store($request->validated());
 
             return to_route('asset.index')
-                ->with('success', [
-                    'message' => 'Asset created successfully.',
-                ]);
+                ->withSuccessFlash('Asset created successfully.');
         } catch (\Throwable $e) {
             if (app()->isProduction()) {
                 report($e);
@@ -85,9 +83,7 @@ class AssetController extends Controller
                 throw $e;
             }
 
-            return back()->withErrors([
-                'message' => 'Failed to create asset',
-            ]);
+            return back()->withErrorsFlash('Failed to create asset');
         }
     }
 
@@ -142,9 +138,7 @@ class AssetController extends Controller
             $this->assetService->update($asset, $request->validated());
 
             return to_route('asset.index')
-                ->with('success', [
-                    'message' => 'Asset updated successfully.',
-                ]);
+                ->withSuccessFlash('Asset updated successfully.');
         } catch (\Throwable $e) {
             if (app()->isProduction()) {
                 report($e);
@@ -152,9 +146,7 @@ class AssetController extends Controller
                 throw $e;
             }
 
-            return back()->withErrors([
-                'message' => 'Failed to update asset',
-            ]);
+            return back()->withErrorsFlash('Failed to update asset.');
         }
     }
 
@@ -169,9 +161,7 @@ class AssetController extends Controller
             $this->assetService->delete($asset);
 
             return to_route('asset.index')
-                ->with('success', [
-                    'message' => 'Asset deleted successfully.',
-                ]);
+                ->withSuccessFlash('Asset deleted successfully.');
         } catch (\Throwable $e) {
             if (app()->isProduction()) {
                 report($e);
@@ -179,9 +169,7 @@ class AssetController extends Controller
                 throw $e;
             }
 
-            return back()->withErrors([
-                'message' => 'Failed to delete asset',
-            ]);
+            return back()->withErrors('Failed to delete asset.');
         }
     }
 }
