@@ -4,7 +4,7 @@ import { useState } from 'react';
 type Opts = {
     shouldConfirmClose: () => boolean;
     onConfirmClose?: () => void; // dipanggil ketika user konfirmasi menutup (dirty)
-    onCloseClean?: () => void;   // dipanggil saat close biasa / dipaksa (non-confirm)
+    onCloseClean?: () => void; // dipanggil saat close biasa / dipaksa (non-confirm)
 };
 
 const useControlledModal = ({ shouldConfirmClose, onConfirmClose, onCloseClean }: Opts) => {
@@ -15,15 +15,15 @@ const useControlledModal = ({ shouldConfirmClose, onConfirmClose, onCloseClean }
             const confirmed = confirm('You have unsaved changes. Are you sure you want to close?');
             if (!confirmed) return; // tetap open
             // confirmed
-            onConfirmClose?.();      // 1) cleanup dulu
-            setOpen(false);          // 2) baru tutup
+            onConfirmClose?.(); // 1) cleanup dulu
+            setOpen(false); // 2) baru tutup
             return;
         }
 
         if (!nextOpen) {
-            onCloseClean?.();        // 1) cleanup dulu
+            onCloseClean?.(); // 1) cleanup dulu
         }
-        setOpen(nextOpen);         // 2) set open
+        setOpen(nextOpen); // 2) set open
     };
 
     return { open, setOpen, handleChange };
