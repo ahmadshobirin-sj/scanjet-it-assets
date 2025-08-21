@@ -50,13 +50,24 @@ class Asset extends Model
             ->withTimestamps();
     }
 
-    // assignment aktif untuk aset ini (belum dikembalikan)
+    public function current_assignment_item()
+    {
+        return $this->hasOne(AssetAssignmentItem::class, 'asset_id', 'id')
+            ->whereNull('returned_at')
+            ->orderByDesc('created_at'); // atau join ke assigned_at kalau perlu
+    }
+
     public function current_assignment()
     {
-        return $this->assignments()
-            ->wherePivotNull('returned_at')
-            ->orderBy('asset_assignments.assigned_at', 'desc')
-            ->first();
+        return $this->hasOneThrough(
+            AssetAssignment::class,
+            AssetAssignmentItem::class,
+            'asset_id',                 // Foreign key pada pivot -> assets
+            'id',                       // Foreign key pada assignments
+            'id',                       // Local key assets
+            'asset_assignment_id'       // Local key pada pivot yang mengarah ke assignments
+        )->whereNull('asset_assignment_has_assets.returned_at')
+            ->orderByDesc('asset_assignments.assigned_at');
     }
 
     // semua return form yang pernah mengembalikan aset ini
