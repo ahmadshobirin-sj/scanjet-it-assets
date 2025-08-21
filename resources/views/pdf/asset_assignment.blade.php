@@ -27,9 +27,10 @@
         <div class="pg-section">
             <p class="pg-section-title">Purpose:</p>
             <p class="pg-section-desc">
-                This form documents the Deployment or Reassignment of IT hardware assets in accordance with PT. Scanjet
-                Production
-                Indah's IT Hardware Management Policy. It ensures traceability, asset accountability, and lifecycle
+                This form documents the Deployment or Reassignment of IT hardware assets in accordance with
+                {{ $header['company_name'] }}'s IT Hardware Management Policy. It ensures traceability, asset
+                accountability, and
+                lifecycle
                 tracking.
             </p>
         </div>
@@ -123,7 +124,7 @@
         <div class="pg-section">
             <p>By signing this form, I acknowledge and agree to the following:</p>
             <ol style="margin: 0;" class="number-bracket">
-                <li>The hardware assigned to me is the property of [Company Name].</li>
+                <li>The hardware assigned to me is the property of {{ $header['company_name'] }}.</li>
                 <li>I will exercise reasonable care in using, storing, and transporting the hardware.</li>
                 <li>I will not loan the hardware to other individuals without IT Department approval.</li>
                 <li>I will use the hardware only for authorized business purposes unless permitted otherwise by [Company
@@ -131,12 +132,13 @@
                 <li>I will immediately report any loss, theft, damage, or malfunction to the IT Department.</li>
                 <li>I understand I may be held accountable for the return of the hardware in good condition, except for
                     normal wear and tear.</li>
-                <li>Upon employment termination, reassignment, or when requested by [Company Name], I will return all
+                <li>Upon employment termination, reassignment, or when requested by {{ $header['company_name'] }}, I
+                    will return all
                     assigned hardware promptly.</li>
                 <li>I will not attempt to repair the device myself or use unauthorized service providers.</li>
                 <li>Failure to return the equipment may result in financial recovery actions, including payroll
                     deduction or
-                    legal action as per [Company Name] policy.</li>
+                    legal action as per {{ $header['company_name'] }} policy.</li>
             </ol>
         </div>
 

@@ -200,12 +200,13 @@ class AssetAssignmentController extends Controller
                 'header' => [
                     'title' => 'IT Hardware Asset Assignment Form',
                     'code' => 'FRM-IT-01-HW-2025',
-                    'version' => '1.0',
-                    'last_revised' => '',
+                    'version' => '1.1',
+                    'last_revised' => '21-Aug-2025',
                     'issued_by' => 'Wibowo, Rio Eibat',
-                    'approved_by' => '',
-                    'issue_date' => '',
-                    'approved_date' => '',
+                    'approved_by' => 'Wibowo, Rio Eibat',
+                    'issue_date' => '21-Aug-2025',
+                    'approved_date' => '21-Aug-2025',
+                    'company_name' => 'PT. Scanjet Production Indah',
                 ],
                 'assignment' => $assetAssignment->toArray(),
             ];
