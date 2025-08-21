@@ -1,6 +1,6 @@
 import { SharedData, SharedFlashData } from '@/types';
 import { usePage } from '@inertiajs/react';
-import React, { useEffect } from 'react'
+import { useEffect } from 'react';
 
 export type Notify = (args: { message: string; intent: any }) => void;
 
@@ -49,10 +49,8 @@ function hash(str: string) {
  */
 export default function AppFlashMessage({
     notify,
-    storageKey = SEEN_IDS_KEY,
 }: {
-    notify: Notify;         // contoh: (p) => toast({ description: p.message, variant: p.intent === 'destructive' ? 'destructive' : 'default' })
-    storageKey?: string;    // override kalau perlu
+    notify: Notify; // contoh: (p) => toast({ description: p.message, variant: p.intent === 'destructive' ? 'destructive' : 'default' })
 }) {
     const { props } = usePage<SharedData>();
 
