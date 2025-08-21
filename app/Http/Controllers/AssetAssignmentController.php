@@ -229,7 +229,7 @@ class AssetAssignmentController extends Controller
                 throw $th;
             }
 
-            return back()->withError([
+            return back()->withErrors([
                 'message' => 'Failed to export the PDF. Please try again later.',
             ]);
         }
