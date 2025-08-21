@@ -2,6 +2,12 @@
 
 namespace App\Tables\Enums;
 
+/**
+ * AdvanceOperator
+ * ----------------
+ * Kumpulan operator generik untuk filter/sort/where yang dipakai
+ * di berbagai FilterColumn dan AdvancedFilter engine.
+ */
 enum AdvanceOperator: string
 {
     case EQUALS = 'equals';
@@ -22,14 +28,18 @@ enum AdvanceOperator: string
     case IS_NOT_NULL = 'is_not_null';
     case IS_TRUE = 'is_true';
     case IS_FALSE = 'is_false';
-    // Date specific aliases
+
+    // Date-specific aliases
     case BEFORE = 'before';
     case AFTER = 'after';
     case EQUAL_OR_BEFORE = 'equal_or_before';
     case EQUAL_OR_AFTER = 'equal_or_after';
+
+    // Presence aliases (umum dipakai untuk nullable field)
     case IS_SET = 'is_set';
     case IS_NOT_SET = 'is_not_set';
 
+    /** Label manusiawi untuk FE */
     public function label(): string
     {
         return match ($this) {
@@ -60,9 +70,7 @@ enum AdvanceOperator: string
         };
     }
 
-    /**
-     * Get SQL operator equivalent
-     */
+    /** Operator SQL ekuivalen (untuk komparasi dasar) */
     public function toSqlOperator(): string
     {
         return match ($this) {
@@ -76,9 +84,7 @@ enum AdvanceOperator: string
         };
     }
 
-    /**
-     * Check if operator requires value
-     */
+    /** Apakah operator butuh nilai? */
     public function requiresValue(): bool
     {
         return ! in_array($this, [
@@ -86,12 +92,10 @@ enum AdvanceOperator: string
             self::IS_NOT_NULL,
             self::IS_SET,
             self::IS_NOT_SET,
-        ]);
+        ], true);
     }
 
-    /**
-     * Check if operator requires array value
-     */
+    /** Apakah operator butuh array nilai? (BETWEEN/IN dsb.) */
     public function requiresArrayValue(): bool
     {
         return in_array($this, [
@@ -99,12 +103,10 @@ enum AdvanceOperator: string
             self::NOT_BETWEEN,
             self::IN,
             self::NOT_IN,
-        ]);
+        ], true);
     }
 
-    /**
-     * Get all text operators
-     */
+    /** Kelompok operator untuk text */
     public static function textOperators(): array
     {
         return [
@@ -117,9 +119,7 @@ enum AdvanceOperator: string
         ];
     }
 
-    /**
-     * Get all numeric operators
-     */
+    /** Kelompok operator untuk angka */
     public static function numericOperators(): array
     {
         return [
@@ -134,9 +134,7 @@ enum AdvanceOperator: string
         ];
     }
 
-    /**
-     * Get all date operators
-     */
+    /** Kelompok operator untuk tanggal */
     public static function dateOperators(): array
     {
         return [
@@ -153,9 +151,7 @@ enum AdvanceOperator: string
         ];
     }
 
-    /**
-     * Get all select/set operators
-     */
+    /** Kelompok operator untuk select/set */
     public static function selectOperators(): array
     {
         return [
@@ -166,9 +162,7 @@ enum AdvanceOperator: string
         ];
     }
 
-    /**
-     * Get all boolean operators
-     */
+    /** Kelompok operator untuk boolean */
     public static function booleanOperators(): array
     {
         return [
@@ -177,6 +171,7 @@ enum AdvanceOperator: string
         ];
     }
 
+    /** Opsi untuk FE (value+label) */
     public static function options(): array
     {
         return array_map(

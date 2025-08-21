@@ -8,18 +8,27 @@ use App\Tables\FilterColumns\FilterColumn;
 use App\Tables\FilterColumns\SelectFilterColumn;
 use Illuminate\Support\Collection;
 
+/**
+ * HasFilter
+ * ---------
+ * - Mengelola daftar FilterColumn
+ * - Build AllowedFilter untuk Spatie
+ * - State default/aktif dari filter
+ * - Ringkasan filter untuk FE
+ *
+ * Catatan:
+ * - Kini trait ini juga “menyuntik” connection hints global dari Table
+ *   (jika Table menyediakan method filterConnectionHints()) ke setiap FilterColumn
+ *   yang belum punya hints sendiri.
+ */
 trait HasFilter
 {
     protected ?Collection $filterColumns = null;
 
-    /**
-     * Define filter columns for the table
-     */
+    /** Definisikan filter (wajib di-override di Table turunan) */
     abstract protected function filters(): array;
 
-    /**
-     * Get filter columns collection
-     */
+    /** Ambil koleksi FilterColumn (dibuat 1x) */
     public function getFilterColumns(): Collection
     {
         if ($this->filterColumns === null) {
@@ -30,19 +39,44 @@ trait HasFilter
     }
 
     /**
-     * Return filters for QueryBuilder
+     * Menyuntik default connection hints dari Table ke semua FilterColumn
+     * yang belum punya hints sendiri.
      */
+    protected function applyDefaultConnectionHintsToFilterColumns(): void
+    {
+        if (! method_exists($this, 'filterConnectionHints')) {
+            return;
+        }
+
+        $globalHints = $this->filterConnectionHints();
+        if (empty($globalHints)) {
+            return;
+        }
+
+        $this->filterColumns = $this->getFilterColumns()->map(function (FilterColumn $col) use ($globalHints) {
+            $current = $col->getConnectionHints();
+            if (empty($current)) {
+                // Pasang global hints bila column belum punya hints
+                $col->connectionHints($globalHints);
+            }
+
+            return $col;
+        });
+    }
+
+    /** Konstruksi AllowedFilter untuk Spatie (dipakai Table::makeQuery) */
     public function filterResolver(): array
     {
+        // Suntik connection hints global (sekali di awal)
+        $this->applyDefaultConnectionHintsToFilterColumns();
+
         return $this->getFilterColumns()
             ->map(fn (FilterColumn $column) => $column->getAllowedFilter())
             ->values()
             ->toArray();
     }
 
-    /**
-     * Get filter columns as array for frontend
-     */
+    /** Peta filter → array schema untuk FE */
     public function getFiltersArray(): array
     {
         return $this->getFilterColumns()
@@ -51,18 +85,14 @@ trait HasFilter
             ->toArray();
     }
 
-    /**
-     * Get filter column by name
-     */
+    /** Ambil FilterColumn by name */
     public function getFilterColumn(string $name): ?FilterColumn
     {
         return $this->getFilterColumns()
             ->first(fn (FilterColumn $column) => $column->getName() === $name);
     }
 
-    /**
-     * Get default filters state
-     */
+    /** Default state untuk semua filter (berdasarkan default value di column) */
     public function defaultFilters(): array
     {
         $defaults = [];
@@ -79,48 +109,39 @@ trait HasFilter
         return $defaults;
     }
 
-    /**
-     * Build active filters from state
-     */
+    /** Ambil filter aktif dari state */
     public function getActiveFilters(): array
     {
         $state = $this->getState('filters', []);
-        $activeFilters = [];
+        $active = [];
 
         foreach ($state as $attribute => $filter) {
             if ($filter['enabled'] ?? false) {
-                $activeFilters[$attribute] = [
+                $active[$attribute] = [
                     'op' => $filter['clause'],
                     'value' => $filter['value'],
                 ];
             }
         }
 
-        return $activeFilters;
+        return $active;
     }
 
-    /**
-     * Check if any filter is active
-     */
+    /** Apakah ada filter aktif? */
     public function hasActiveFilters(): bool
     {
         $filters = $this->getState('filters', []);
 
-        return collect($filters)
-            ->contains(fn ($filter) => $filter['enabled'] ?? false);
+        return collect($filters)->contains(fn ($f) => $f['enabled'] ?? false);
     }
 
-    /**
-     * Clear all filters
-     */
+    /** Reset semua filter ke default */
     public function clearFilters(): void
     {
         $this->setState('filters', $this->defaultFilters());
     }
 
-    /**
-     * Apply filter to specific column
-     */
+    /** Terapkan filter ke satu attribute */
     public function applyFilter(string $attribute, mixed $value, ?string $clause = null): void
     {
         $filters = $this->getState('filters', []);
@@ -130,7 +151,7 @@ trait HasFilter
             return;
         }
 
-        // Validate clause if provided
+        // Validasi clause bila diberikan
         if ($clause && ! $this->isValidClause($attribute, $clause)) {
             throw new \InvalidArgumentException("Invalid clause '{$clause}' for column '{$attribute}'");
         }
@@ -144,24 +165,18 @@ trait HasFilter
         $this->setState('filters', $filters);
     }
 
-    /**
-     * Remove filter from specific column
-     */
+    /** Hapus filter pada attribute */
     public function removeFilter(string $attribute): void
     {
         $filters = $this->getState('filters', []);
-
         if (isset($filters[$attribute])) {
             $filters[$attribute]['enabled'] = false;
             $filters[$attribute]['value'] = null;
         }
-
         $this->setState('filters', $filters);
     }
 
-    /**
-     * Get filter summary for display
-     */
+    /** Ringkasan filter untuk FE */
     public function getFilterSummary(): array
     {
         $summary = [];
@@ -185,13 +200,10 @@ trait HasFilter
         return $summary;
     }
 
-    /**
-     * Format filter value for display
-     */
+    /** Format nilai untuk ringkasan FE */
     protected function formatFilterValue(FilterColumn $column, mixed $value): string
     {
         if (is_array($value)) {
-            // For BETWEEN, IN operations
             return implode(' - ', $value);
         }
 
@@ -199,7 +211,7 @@ trait HasFilter
             $options = $column->getOptions();
             $option = collect($options)->firstWhere('value', $value);
 
-            return $option['label'] ?? $value;
+            return $option['label'] ?? (string) $value;
         }
 
         if ($column instanceof BooleanFilterColumn) {
@@ -209,9 +221,7 @@ trait HasFilter
         return (string) $value;
     }
 
-    /**
-     * Get human-readable clause label using AdvanceOperator enum
-     */
+    /** Ambil label operator untuk ringkasan FE */
     protected function getClauseLabel(string $clause): string
     {
         try {
@@ -219,59 +229,56 @@ trait HasFilter
 
             return strtolower($operator->label());
         } catch (\ValueError $e) {
-            // Fallback for any unmapped clauses
             return str_replace('_', ' ', $clause);
         }
     }
 
     /**
-     * Validate if a clause is valid for a column
+     * Validasi clause untuk sebuah column.
+     * Perbaikan: clauses disimpan sebagai array of ['label','value'], jadi
+     * kita bandingkan ke daftar value-nya.
      */
     public function isValidClause(string $attribute, string $clause): bool
     {
         $column = $this->getFilterColumn($attribute);
-
         if (! $column) {
             return false;
         }
 
-        return in_array($clause, $column->getClauses());
+        $values = array_map(
+            fn ($c) => is_array($c) ? ($c['value'] ?? null) : $c,
+            $column->getClauses()
+        );
+
+        return in_array($clause, array_filter($values), true);
     }
 
-    /**
-     * Get available operators for a specific column
-     */
+    /** Ambil daftar operator tersedia (untuk FE) */
     public function getAvailableOperators(string $attribute): array
     {
         $column = $this->getFilterColumn($attribute);
-
         if (! $column) {
             return [];
         }
 
-        $operators = [];
+        $ops = [];
         foreach ($column->getClauses() as $clause) {
+            $val = is_array($clause) ? ($clause['value'] ?? null) : $clause;
+            if (! $val) {
+                continue;
+            }
             try {
-                $operator = AdvanceOperator::from($clause);
-                $operators[] = [
-                    'value' => $operator->value,
-                    'label' => $operator->label(),
-                ];
+                $operator = AdvanceOperator::from($val);
+                $ops[] = ['value' => $operator->value, 'label' => $operator->label()];
             } catch (\ValueError $e) {
-                // Fallback for unmapped operators
-                $operators[] = [
-                    'value' => $clause,
-                    'label' => $this->getClauseLabel($clause),
-                ];
+                $ops[] = ['value' => $val, 'label' => $this->getClauseLabel($val)];
             }
         }
 
-        return $operators;
+        return $ops;
     }
 
-    /**
-     * Apply multiple filters at once
-     */
+    /** Terapkan banyak filter sekaligus */
     public function applyFilters(array $filters): void
     {
         foreach ($filters as $attribute => $filterData) {
@@ -287,13 +294,10 @@ trait HasFilter
         }
     }
 
-    /**
-     * Get filters as query string parameters
-     */
+    /** Serialize aktif filter → query params */
     public function getFiltersAsQueryParams(): array
     {
         $params = [];
-
         foreach ($this->getActiveFilters() as $attribute => $filter) {
             $params["filter[{$attribute}][op]"] = $filter['op'];
             $params["filter[{$attribute}][value]"] = $filter['value'];
@@ -302,9 +306,7 @@ trait HasFilter
         return $params;
     }
 
-    /**
-     * Check if a specific filter is active
-     */
+    /** Cek sebuah filter aktif */
     public function isFilterActive(string $attribute): bool
     {
         $filters = $this->getState('filters', []);
@@ -312,9 +314,7 @@ trait HasFilter
         return $filters[$attribute]['enabled'] ?? false;
     }
 
-    /**
-     * Get filter value for a specific attribute
-     */
+    /** Ambil nilai filter untuk attribute */
     public function getFilterValue(string $attribute): mixed
     {
         $filters = $this->getState('filters', []);
@@ -322,9 +322,7 @@ trait HasFilter
         return $filters[$attribute]['value'] ?? null;
     }
 
-    /**
-     * Get filter clause for a specific attribute
-     */
+    /** Ambil clause filter untuk attribute */
     public function getFilterClause(string $attribute): ?string
     {
         $filters = $this->getState('filters', []);
@@ -332,25 +330,18 @@ trait HasFilter
         return $filters[$attribute]['clause'] ?? null;
     }
 
-    /**
-     * Count active filters
-     */
+    /** Hitung jumlah filter aktif */
     public function countActiveFilters(): int
     {
         $filters = $this->getState('filters', []);
 
-        return collect($filters)
-            ->filter(fn ($filter) => $filter['enabled'] ?? false)
-            ->count();
+        return collect($filters)->filter(fn ($f) => $f['enabled'] ?? false)->count();
     }
 
-    /**
-     * Toggle filter state
-     */
+    /** Toggle on/off sebuah filter */
     public function toggleFilter(string $attribute): void
     {
         $filters = $this->getState('filters', []);
-
         if (isset($filters[$attribute])) {
             $filters[$attribute]['enabled'] = ! ($filters[$attribute]['enabled'] ?? false);
             $this->setState('filters', $filters);

@@ -9,6 +9,14 @@ use Illuminate\Support\Str;
 use Spatie\QueryBuilder\Filters\Filter;
 use Spatie\QueryBuilder\Sorts\Sort;
 
+/**
+ * Column
+ * ------
+ * Deskriptor kolom untuk Table:
+ * - label/sortable/toggleable/globalSearchable/hidden
+ * - dukungan count columns (withCount)
+ * - opsi "searchableCount" → supaya alias count bisa turut dicari di global search (HAVING)
+ */
 class Column
 {
     private string $name;
@@ -17,7 +25,7 @@ class Column
 
     private bool $sortable = false;
 
-    private ?string $sortType = null;
+    private ?string $sortType = null;         // 'field' | 'custom'
 
     private Closure|Sort|null $customSort = null;
 
@@ -42,24 +50,25 @@ class Column
 
     private bool $countDistinct = false;
 
-    private bool $searchableCount = false;
+    private bool $searchableCount = false; // agar alias count ikut di global search HAVING
 
     public function __construct(string $name)
     {
         $this->name = $name;
     }
 
+    /** Factory */
     public static function make(string $name): static
     {
         return new static($name);
     }
 
+    // -------- Count Helpers --------
+
     /**
-     * Create a count column
-     * Examples:
-     * - Column::count('posts') // Count all posts
-     * - Column::count('posts', 'id') // Count posts by id
-     * - Column::count('posts', 'id', ['status' => 'published']) // Count published posts
+     * Column::count('posts')
+     * Column::count('posts', 'id')
+     * Column::count('posts', 'id', ['status' => 'published'])
      */
     public static function count(string $relation, ?string $column = null, ?array $conditions = null): static
     {
@@ -68,16 +77,12 @@ class Column
         $instance->countRelation = $relation;
         $instance->countColumn = $column;
         $instance->countConditions = $conditions;
-
-        // Set default label
         $instance->label = Str::headline($relation).' Count';
 
         return $instance;
     }
 
-    /**
-     * Create a distinct count column
-     */
+    /** Distinct count pada kolom relasi */
     public static function countDistinct(string $relation, string $column, ?array $conditions = null): static
     {
         $instance = static::count($relation, $column, $conditions);
@@ -87,12 +92,7 @@ class Column
         return $instance;
     }
 
-    /**
-     * Make count column searchable
-     */
-    /**
-     * Make count column searchable in global search
-     */
+    /** Alias count (withCount) ikut searchable di global search (HAVING) */
     public function searchableCount(bool $searchable = true): self
     {
         if ($this->isCountColumn) {
@@ -102,17 +102,12 @@ class Column
         return $this;
     }
 
-    /**
-     * Check if count column is searchable
-     */
     public function isSearchableCount(): bool
     {
         return $this->searchableCount && $this->isCountColumn;
     }
 
-    /**
-     * Make count column sortable
-     */
+    /** Jadikan count column sortable (akan pakai AllowedSort::field alias) */
     public function sortableCount(): self
     {
         if (! $this->isCountColumn) {
@@ -125,9 +120,7 @@ class Column
         return $this;
     }
 
-    /**
-     * Set count conditions
-     */
+    /** Tambah kondisi untuk count relasi */
     public function where(array $conditions): self
     {
         $this->countConditions = $conditions;
@@ -135,9 +128,7 @@ class Column
         return $this;
     }
 
-    /**
-     * Set distinct count
-     */
+    /** Set distinct count */
     public function distinct(bool $distinct = true): self
     {
         $this->countDistinct = $distinct;
@@ -145,17 +136,11 @@ class Column
         return $this;
     }
 
-    /**
-     * Check if this is a count column
-     */
     public function isCountColumn(): bool
     {
         return $this->isCountColumn;
     }
 
-    /**
-     * Get count configuration
-     */
     public function getCountConfig(): array
     {
         return [
@@ -167,8 +152,8 @@ class Column
     }
 
     /**
-     * Build count query for Eloquent
-     * This will be used in the table query builder
+     * Build config untuk count apabila ingin dipakai manual;
+     * saat ini withCount ditangani di Table::makeQuery()
      */
     public function buildCountQuery(): array
     {
@@ -178,66 +163,28 @@ class Column
 
         $countAs = $this->name;
 
-        // Build the count query configuration
-        $query = [
-            'method' => 'withCount',
-            'args' => [],
-        ];
-
-        // Handle different count scenarios
-        if ($this->countRelation === 'self') {
-            // Count on the same table
-            $query['method'] = 'selectRaw';
-
-            if ($this->countDistinct && $this->countColumn) {
-                $query['args'] = ["COUNT(DISTINCT {$this->countColumn}) as {$countAs}"];
-            } else {
-                $column = $this->countColumn ?? '*';
-                $query['args'] = ["COUNT({$column}) as {$countAs}"];
-            }
-        } else {
-            // Count on relation
-            if ($this->countConditions || $this->countColumn || $this->countDistinct) {
-                // Complex count with conditions
-                $query['args'] = [
-                    [
-                        $this->countRelation => function ($query) {
-                            if ($this->countConditions) {
-                                foreach ($this->countConditions as $field => $value) {
-                                    if (is_array($value)) {
-                                        $query->whereIn($field, $value);
-                                    } else {
-                                        $query->where($field, $value);
-                                    }
-                                }
-                            }
-
-                            if ($this->countDistinct && $this->countColumn) {
-                                $query->selectRaw("COUNT(DISTINCT {$this->countColumn})");
-                            } elseif ($this->countColumn) {
-                                $query->select($this->countColumn);
-                            }
-                        },
-                    ],
-                ];
-
-                // Custom alias for the count
-                $query['as'] = $countAs;
-            } else {
-                // Simple count
-                $query['args'] = [$this->countRelation.' as '.$countAs];
-            }
+        // default: gunakan withCount di Table
+        if ($this->countRelation !== 'self') {
+            return [
+                'method' => 'withCount',
+                'args' => [$this->countRelation.' as '.$countAs],
+            ];
         }
 
-        return $query;
+        // count pada diri sendiri (jarang dipakai)
+        return [
+            'method' => 'selectRaw',
+            'args' => ['COUNT('.($this->countColumn ?? '*').") as {$countAs}"],
+        ];
     }
+
+    // -------- Getters --------
 
     public function __toString(): string
     {
         return $this->name;
     }
 
-    // Getters
     public function getName(): string
     {
         return $this->name;
@@ -258,7 +205,7 @@ class Column
         return $this->sortType;
     }
 
-    public function getCustomSort(): ?Closure
+    public function getCustomSort(): Closure|Sort
     {
         return $this->customSort;
     }
@@ -288,7 +235,8 @@ class Column
         return $this->hidden;
     }
 
-    // Setters (Fluent Interface)
+    // -------- Setters (fluent) --------
+
     public function setName(string $name): self
     {
         $this->name = $name;
@@ -359,18 +307,25 @@ class Column
         return $this;
     }
 
-    // Fluent Interface Methods (Chainable)
+    // -------- Fluent helpers --------
+
     public function label(string $label): self
     {
         return $this->setLabel($label);
     }
 
+    /**
+     * sortable
+     * --------
+     * - true/false → pakai sort field biasa
+     * - 'custom' + setCustomSort(Sort|Closure) → pakai custom sort (mis. AdvancedSort)
+     */
     public function sortable(bool|string $sortable = true, Closure|Sort|null $custom = null): self
     {
         if (is_bool($sortable)) {
             $this->setSortable($sortable);
             if ($sortable) {
-                $this->setSortType('field'); // Default sort type
+                $this->setSortType('field');
             }
         } else {
             $this->setSortable(true);
@@ -399,19 +354,31 @@ class Column
         return $this->setHidden($hidden);
     }
 
-    // Utility Methods
+    // -------- Sort wiring ke Spatie --------
+
+    /**
+     * getAllowedSort
+     * --------------
+     * - Field sort (default)
+     * - Custom sort:
+     *     - callback: AllowedSort::callback
+     *     - Sort object: AllowedSort::custom (mis. AdvancedSort)
+     *
+     * Catatan: wiring AdvancedSort berbasis nested/pivot akan diaktifkan
+     * lewat trait HasSortable (batch berikutnya), supaya bisa menyuntikkan
+     * connectionHints dari Table.
+     */
     public function getAllowedSort(): AllowedSort
     {
         if (! $this->isSortable()) {
             throw new \InvalidArgumentException("Column {$this->name} is not sortable.");
         }
-        // Handle count columns dengan custom sort
+
         if ($this->isCountColumn) {
-            // Count columns need custom sort without table prefix
+            // Count alias di-ORDER langsung sebagai field
             return AllowedSort::callback($this->name, function (Builder $query, bool $descending, string $property) {
                 $direction = $descending ? 'desc' : 'asc';
 
-                // Use alias directly without table prefix
                 return $query->orderBy($this->name, $direction);
             });
         }
@@ -420,10 +387,12 @@ class Column
             'field' => AllowedSort::field($this->name),
             'custom' => $this->customSort
                 ? AllowedSort::custom($this->name, $this->customSort)
-                : throw new \InvalidArgumentException('Custom sortType requires customSort closure.'),
-            default => AllowedSort::field($this->name)
+                : throw new \InvalidArgumentException('Custom sortType requires customSort closure or Sort.'),
+            default => AllowedSort::field($this->name),
         };
     }
+
+    // -------- FE schema --------
 
     public function toArray(): array
     {

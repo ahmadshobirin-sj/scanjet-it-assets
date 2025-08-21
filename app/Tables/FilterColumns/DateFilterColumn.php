@@ -6,14 +6,20 @@ use App\Tables\Enums\AdvanceOperator;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\QueryBuilder\Filters\Filter;
 
+/**
+ * DateFilterColumn
+ * ----------------
+ * - Operator tanggal: =, !=, <, <=, >, >=, BETWEEN/NOT_BETWEEN, IS_SET/IS_NOT_SET.
+ * - BETWEEN otomatis menambahkan boundary hari: 00:00:00 - 23:59:59.
+ * - Single compare menggunakan whereDate untuk presisi tanggal.
+ * - Mendukung nested (dot-notation).
+ */
 class DateFilterColumn extends FilterColumn
 {
     protected string $format = 'Y-m-d';
 
     protected function setDefaultClauses(): void
     {
-        // Date-specific operators
-
         $operators = AdvanceOperator::dateOperators();
 
         $this->clauses = array_map(
@@ -43,7 +49,7 @@ class DateFilterColumn extends FilterColumn
     {
         return [
             'format' => $this->format,
-            'picker' => 'date', // Tell frontend to use date picker
+            'picker' => 'date',
         ];
     }
 
@@ -62,103 +68,138 @@ class DateFilterColumn extends FilterColumn
                     return $query;
                 }
 
-                $operator = $value['op'] ?? null;
-                // dd($operator, $value);
-                if (! $operator) {
+                $op = $value['op'] ?? null;
+                if (! $op) {
                     return $query;
                 }
 
                 try {
-                    $operatorEnum = AdvanceOperator::from($operator);
-                } catch (\ValueError $e) {
+                    $operator = AdvanceOperator::from($op);
+                } catch (\ValueError) {
                     return $query;
                 }
 
-                // ⚠️ FIX: Check if operator requires value BEFORE accessing $value['value']
-                if (! $operatorEnum->requiresValue()) {
-                    // Handle operators that don't need a value (IS_SET, IS_NOT_SET)
-                    if (str_contains($this->property, '.')) {
-                        return $this->applyNestedNullCheck($query, $operatorEnum);
-                    }
-
-                    return match ($operatorEnum) {
-                        AdvanceOperator::IS_SET, AdvanceOperator::IS_NOT_NULL => $query->whereNotNull($this->property),
-                        AdvanceOperator::IS_NOT_SET, AdvanceOperator::IS_NULL => $query->whereNull($this->property),
-                        default => $query,
-                    };
+                // Operator tanpa value (IS_SET / IS_NOT_SET / IS_(NOT)_NULL)
+                if (! $operator->requiresValue()) {
+                    return $this->applyNullCheck($query, $operator);
                 }
 
-                // Now we can safely access $value['value'] for operators that require it
+                // Ambil nilai
                 $filterValue = $value['value'] ?? null;
-
-                // Check if value is provided for operators that require it
-                if ($operatorEnum->requiresValue() && $filterValue === null) {
-                    // Skip filter if value is required but not provided
+                if ($filterValue === null || $filterValue === '') {
                     return $query;
                 }
 
-                // Handle nested properties
+                // Nested?
                 if (str_contains($this->property, '.')) {
-                    return $this->applyNestedFilter($query, $operatorEnum, $filterValue);
+                    return $this->applyNested($query, $operator, $filterValue);
                 }
 
-                // Handle BETWEEN
-                if ($operatorEnum->requiresArrayValue()) {
-                    $values = is_array($filterValue) ? $filterValue : explode(',', $filterValue);
-
-                    if (count($values) < 2) {
+                // BETWEEN / NOT_BETWEEN → boundary harian
+                if ($operator->requiresArrayValue()) {
+                    $arr = is_array($filterValue) ? $filterValue : explode(',', (string) $filterValue);
+                    if (count($arr) < 2) {
                         return $query;
                     }
 
-                    // Add time boundaries for date comparison
-                    $startDate = $values[0].' 00:00:00';
-                    $endDate = $values[1].' 23:59:59';
+                    [$start, $end] = $this->dayBounds($arr[0], $arr[1]);
 
-                    if ($operatorEnum === AdvanceOperator::BETWEEN) {
-                        return $query->whereBetween($this->property, [$startDate, $endDate]);
-                    } else { // NOT_BETWEEN
-                        return $query->whereNotBetween($this->property, [$startDate, $endDate]);
-                    }
+                    return $operator === AdvanceOperator::BETWEEN
+                        ? $query->whereBetween($this->property, [$start, $end])
+                        : $query->whereNotBetween($this->property, [$start, $end]);
                 }
 
-                // Handle single value date comparisons
-                return match ($operatorEnum) {
+                // Single compare → whereDate
+                return match ($operator) {
                     AdvanceOperator::EQUALS => $query->whereDate($this->property, '=', $filterValue),
                     AdvanceOperator::NOT_EQUALS => $query->whereDate($this->property, '!=', $filterValue),
-                    AdvanceOperator::BEFORE, AdvanceOperator::LESS_THAN => $query->whereDate($this->property, '<', $filterValue),
-                    AdvanceOperator::AFTER, AdvanceOperator::GREATER_THAN => $query->whereDate($this->property, '>', $filterValue),
-                    AdvanceOperator::EQUAL_OR_BEFORE, AdvanceOperator::LESS_THAN_OR_EQUAL => $query->whereDate($this->property, '<=', $filterValue),
-                    AdvanceOperator::EQUAL_OR_AFTER, AdvanceOperator::GREATER_THAN_OR_EQUAL => $query->whereDate($this->property, '>=', $filterValue),
+                    AdvanceOperator::BEFORE,
+                    AdvanceOperator::LESS_THAN => $query->whereDate($this->property, '<', $filterValue),
+                    AdvanceOperator::AFTER,
+                    AdvanceOperator::GREATER_THAN => $query->whereDate($this->property, '>', $filterValue),
+                    AdvanceOperator::EQUAL_OR_BEFORE,
+                    AdvanceOperator::LESS_THAN_OR_EQUAL => $query->whereDate($this->property, '<=', $filterValue),
+                    AdvanceOperator::EQUAL_OR_AFTER,
+                    AdvanceOperator::GREATER_THAN_OR_EQUAL => $query->whereDate($this->property, '>=', $filterValue),
                     default => $query,
                 };
             }
 
-            private function applyNestedFilter(Builder $query, AdvanceOperator $operator, $value): Builder
+            private function applyNested(Builder $query, AdvanceOperator $operator, $filterValue): Builder
             {
-                $parts = explode('.', $this->property);
-                $column = array_pop($parts);
-                $relation = implode('.', $parts);
+                [$rel, $col] = $this->splitPath($this->property);
 
-                return $query->whereHas($relation, function (Builder $q) use ($column, $operator, $value) {
-                    // Recursively apply the same logic
-                    $filter = new self($column, $this->format);
-                    $filter($q, ['op' => $operator->value, 'value' => $value], $column);
+                // BETWEEN/NOT_BETWEEN di nested
+                if ($operator->requiresArrayValue()) {
+                    $arr = is_array($filterValue) ? $filterValue : explode(',', (string) $filterValue);
+                    if (count($arr) < 2) {
+                        return $query;
+                    }
+
+                    [$start, $end] = $this->dayBounds($arr[0], $arr[1]);
+
+                    return $query->whereHas($rel, function (Builder $q) use ($col, $operator, $start, $end) {
+                        if ($operator === AdvanceOperator::BETWEEN) {
+                            $q->whereBetween($col, [$start, $end]);
+                        } else {
+                            $q->whereNotBetween($col, [$start, $end]);
+                        }
+                    });
+                }
+
+                // Single compare di nested → whereDate
+                return $query->whereHas($rel, function (Builder $q) use ($col, $operator, $filterValue) {
+                    match ($operator) {
+                        AdvanceOperator::EQUALS => $q->whereDate($col, '=', $filterValue),
+                        AdvanceOperator::NOT_EQUALS => $q->whereDate($col, '!=', $filterValue),
+                        AdvanceOperator::BEFORE,
+                        AdvanceOperator::LESS_THAN => $q->whereDate($col, '<', $filterValue),
+                        AdvanceOperator::AFTER,
+                        AdvanceOperator::GREATER_THAN => $q->whereDate($col, '>', $filterValue),
+                        AdvanceOperator::EQUAL_OR_BEFORE,
+                        AdvanceOperator::LESS_THAN_OR_EQUAL => $q->whereDate($col, '<=', $filterValue),
+                        AdvanceOperator::EQUAL_OR_AFTER,
+                        AdvanceOperator::GREATER_THAN_OR_EQUAL => $q->whereDate($col, '>=', $filterValue),
+                        default => null,
+                    };
                 });
             }
 
-            private function applyNestedNullCheck(Builder $query, AdvanceOperator $operator): Builder
+            private function applyNullCheck(Builder $query, AdvanceOperator $operator): Builder
             {
-                $parts = explode('.', $this->property);
-                $column = array_pop($parts);
-                $relation = implode('.', $parts);
+                if (str_contains($this->property, '.')) {
+                    [$rel, $col] = $this->splitPath($this->property);
 
-                return $query->whereHas($relation, function (Builder $q) use ($column, $operator) {
-                    match ($operator) {
-                        AdvanceOperator::IS_SET, AdvanceOperator::IS_NOT_NULL => $q->whereNotNull($column),
-                        AdvanceOperator::IS_NOT_SET, AdvanceOperator::IS_NULL => $q->whereNull($column),
-                        default => $q,
-                    };
-                });
+                    return $query->whereHas($rel, function (Builder $q) use ($col, $operator) {
+                        match ($operator) {
+                            AdvanceOperator::IS_SET, AdvanceOperator::IS_NOT_NULL => $q->whereNotNull($col),
+                            AdvanceOperator::IS_NOT_SET, AdvanceOperator::IS_NULL => $q->whereNull($col),
+                            default => null,
+                        };
+                    });
+                }
+
+                return match ($operator) {
+                    AdvanceOperator::IS_SET, AdvanceOperator::IS_NOT_NULL => $query->whereNotNull($this->property),
+                    AdvanceOperator::IS_NOT_SET, AdvanceOperator::IS_NULL => $query->whereNull($this->property),
+                    default => $query,
+                };
+            }
+
+            private function splitPath(string $property): array
+            {
+                $parts = explode('.', $property);
+                $col = array_pop($parts);
+
+                return [implode('.', $parts), $col];
+            }
+
+            private function dayBounds(string $start, string $end): array
+            {
+                $start = trim($start).' 00:00:00';
+                $end = trim($end).' 23:59:59';
+
+                return [$start, $end];
             }
         };
     }
@@ -166,13 +207,10 @@ class DateFilterColumn extends FilterColumn
     public function default(mixed $value): static
     {
         if (is_array($value)) {
-            $this->default = array_map(function ($val) {
-                return $this->formatValue($val);
-            }, $value);
+            $this->default = array_map(fn ($v) => $this->formatValue($v), $value);
         } else {
             $this->default = $this->formatValue($value);
         }
-
         $this->hasDefaultValue = true;
 
         return $this;

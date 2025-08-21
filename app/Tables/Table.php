@@ -12,8 +12,18 @@ use App\Tables\Traits\HasToggleable;
 use App\Tables\Traits\TableState;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\QueryBuilder;
 
+/**
+ * Table (kernel)
+ * --------------
+ * Mesin generik untuk membangun tabel berbasis Spatie QueryBuilder:
+ * - Filter (custom & advanced)
+ * - Global Search (nested/pivot/cross-connection via engine)
+ * - Sort (akan di-wire di trait HasSortable batch berikutnya)
+ * - Toggleable columns, pagination, preset, export, dsb.
+ */
 abstract class Table
 {
     use HasFilter;
@@ -23,35 +33,77 @@ abstract class Table
     use HasToggleable;
     use TableState;
 
+    /** Nama instance tabel untuk namespacing state di request */
     protected string $name = 'default';
 
+    /** Kolom PK baris pada hasil */
     protected string $rowId = 'id';
 
+    /** Teks saat kosong */
     protected string $emptyText = 'No data available';
 
+    /** Query utama yang sudah diwrap oleh Spatie QueryBuilder */
     protected QueryBuilder|string $query;
 
-    protected QueryBuilder|string $rawQuery; // Original query without state applied
+    /** Query mentah (tanpa pagination) - untuk export/raw */
+    protected QueryBuilder|string $rawQuery;
 
-    protected LengthAwarePaginator $rawData; // Data without pagination, used for export and raw queries
+    /** Data hasil eksekusi paginated */
+    protected LengthAwarePaginator $rawData;
+
+    /** @var null|callable Hook kustom untuk memodifikasi QueryBuilder (runtime) */
+    protected $customQueryHook = null;
 
     public function __construct(string $name)
     {
         $this->name = $name;
 
+        // Build query 1x
         $this->query = $this->makeQuery();
 
+        // Simpan rawQuery utk export/raw (sebelum pagination)
         $this->rawQuery = clone $this->query;
 
+        // Eksekusi paginate + simpan
         $this->rawData = $this->makeData($this->query);
 
+        // Apply state dari request (page, sort, filters) → berguna untuk toSchema()
         $this->applyStateFromRequest();
     }
 
-    public static function make(string $name): static
+    /** Factory sederhana */
+    public static function make(?string $name = null): static
     {
-        return new static($name);
+        return new static($name ?? 'default');
     }
+
+    // ------- Kontrak dasar yang wajib di-override -------
+
+    /** Resource Eloquent Builder atau FQCN Model */
+    abstract public function resource(): Builder|string;
+
+    /** Definisi kolom-kolom tabel (array of Column) */
+    abstract public function columns(): array;
+
+    /** Definisi filter (array of FilterColumn) */
+    abstract public function filters(): array;
+
+    /** Relasi yang ingin di-eager load */
+    public function with(): array
+    {
+        return [];
+    }
+
+    /** Default pagination */
+    public function pagination(): array
+    {
+        return [
+            'per_page' => 10,
+            'page' => 1,
+        ];
+    }
+
+    // ------- Getter basic -------
 
     public function getName(): string
     {
@@ -68,86 +120,112 @@ abstract class Table
         return $this->emptyText;
     }
 
-    abstract public function resource(): Builder|string;
+    // ------- Hook koneksi lintas DB (opsional override di turunan) -------
 
     /**
-     * Return array of Column instances.
-     *
-     * @return Column[]
+     * filterConnectionHints
+     * ---------------------
+     * Petakan path relasi → nama koneksi, mis:
+     * ['assignments.assigned_user' => 'mysql_crm']
+     * Digunakan oleh layer filter (akan dipass dari trait HasFilter pada batch selanjutnya).
      */
-    abstract public function columns(): array;
-
-    /**
-     * Return array of FilterColumn instances.
-     *
-     * @return FilterColumn[]
-     */
-    abstract public function filters(): array;
-
-    public function with(): array
+    protected function filterConnectionHints(): array
     {
         return [];
     }
 
-    public function pagination(): array
-    {
-        return [
-            'per_page' => 10,
-            'page' => 1,
-        ];
-    }
-
     /**
-     * Define available per page options for dropdown
-     * Override in child class to customize
+     * sortConnectionHints
+     * -------------------
+     * Petakan path relasi → nama koneksi untuk kebutuhan sorting nested/pivot.
+     * Akan dipakai oleh trait HasSortable (batch berikutnya).
      */
-    public function perPageOptions(): array
+    protected function sortConnectionHints(): array
     {
-        return [
-            ['label' => '10', 'value' => 10],
-            ['label' => '25', 'value' => 25],
-            ['label' => '50', 'value' => 50],
-            ['label' => '100', 'value' => 100],
-            ['label' => 'All', 'value' => $this->rawData->total()],
-        ];
+        return [];
     }
 
+    protected function supportsWindowFunctions(?string $connection = null): bool
+    {
+        try {
+            $conn = $connection ? DB::connection($connection) : DB::connection();
+            $driver = $conn->getDriverName(); // mysql|pgsql|sqlsrv|sqlite
+            $version = (string) ($conn->getPdo()->getAttribute(\PDO::ATTR_SERVER_VERSION) ?? '');
+
+            switch ($driver) {
+                case 'mysql':
+                    // MySQL 8+: ada window functions
+                    // MariaDB 10.2+ juga punya
+                    if (stripos($version, 'mariadb') !== false) {
+                        if (preg_match('/(\d+\.\d+\.\d+)/i', $version, $m)) {
+                            return version_compare($m[1], '10.2.0', '>=');
+                        }
+
+                        return true; // bila versi tak terbaca, asumsikan ya (opsional: set false kalau mau konservatif)
+                    }
+
+                    return version_compare($version, '8.0.0', '>=');
+
+                case 'pgsql':
+                    return true; // PostgreSQL sudah lama mendukung
+
+                case 'sqlsrv':
+                    return true; // SQL Server mendukung
+
+                case 'sqlite':
+                    // SQLite 3.25.0+ (2018) mendukung window functions
+                    if (preg_match('/(\d+\.\d+\.\d+)/', $version, $m)) {
+                        return version_compare($m[1], '3.25.0', '>=');
+                    }
+
+                    // jika versi tak bisa dibaca, konservatif: false
+                    return false;
+
+                default:
+                    return false;
+            }
+        } catch (\Throwable $e) {
+            return false; // jika gagal deteksi, fallback aman
+        }
+    }
+
+    // ------- Query Builder lifecycle -------
+
     /**
-     * Build and execute the query
+     * Build dan kembalikan QueryBuilder (belum dipaginate).
+     * - Terapkan withCount untuk count-column sebelum masuk ke Spatie QB
+     * - allowedFilters/Sorts/Fields
+     * - Eager load relasi
+     * - Hook customizeQuery()
      */
     public function makeQuery()
     {
-        // Get active filters
+        // --- Ambil state aktif ---
         $activeFilters = $this->getActiveFilters();
-
-        // Get current sort from state
         $currentSort = $this->getState('sort', $this->defaultSort());
 
-        // Build a clean request for Spatie QueryBuilder
+        // Susun query params "bersih" utk Spatie
         $queryParams = [];
 
-        // Add filters to query params
         if (! empty($activeFilters)) {
             foreach ($activeFilters as $attribute => $filter) {
                 $queryParams['filter'][$attribute] = $filter;
             }
         }
 
-        // Add sort to query params
         if (! empty($currentSort)) {
             $queryParams['sort'] = implode(',', $currentSort);
         }
 
-        // Add search if exists
-        $search = $this->getState('search');
-        if (! empty($search)) {
+        // Global search (opsional)
+        if ($search = $this->getState('search')) {
             $queryParams['filter']['search'] = $search;
         }
 
-        // Create a new request with our parameters
+        // Buat request palsu untuk Spatie QB
         $request = request()->duplicate($queryParams);
 
-        // Get resource first
+        // --- Resource awal (Eloquent\Builder) ---
         $resource = $this->resource();
         if (is_string($resource) && class_exists($resource)) {
             $baseQuery = $resource::query();
@@ -155,83 +233,131 @@ abstract class Table
             $baseQuery = $resource;
         }
 
-        // ⚠️ ADD: Apply count columns BEFORE QueryBuilder
+        // --- Terapkan withCount / self-count lebih dini (alias dipakai utk sort/filter/HAVING) ---
         foreach ($this->columns() as $column) {
             if ($column->isCountColumn()) {
-                $countConfig = $column->getCountConfig();
+                $countConfig = $column->getCountConfig();   // ['relation','column','conditions','distinct']
                 $countAlias = $column->getName();
 
-                // Use withCount for relations
                 if ($countConfig['relation'] !== 'self') {
-                    $relationQuery = [
-                        $countConfig['relation'].' as '.$countAlias => function ($q) use ($countConfig) {
-                            if ($countConfig['conditions']) {
-                                foreach ($countConfig['conditions'] as $field => $value) {
-                                    $q->where($field, $value);
-                                }
-                            }
-                        },
-                    ];
+                    // Count pada relasi: gunakan withCount + kondisi
+                    if ($countConfig['relation'] !== 'self') {
+                        $relation = $countConfig['relation'];
+                        $alias = $countAlias;
 
-                    $baseQuery->withCount($relationQuery);
+                        if ($countConfig['distinct'] && $countConfig['column']) {
+                            // DISTINCT: definisikan ekspresi COUNT(DISTINCT ...) di closure
+                            $baseQuery->withCount([
+                                "{$relation} as {$alias}" => function ($q) use ($countConfig) {
+                                    // kondisi tambahan (opsional)
+                                    if ($countConfig['conditions']) {
+                                        foreach ($countConfig['conditions'] as $field => $value) {
+                                            is_array($value) ? $q->whereIn($field, $value) : $q->where($field, $value);
+                                        }
+                                    }
+                                    $q->selectRaw("COUNT(DISTINCT {$countConfig['column']})");
+                                },
+                            ]);
+                        } else {
+                            // NON-DISTINCT: JANGAN panggil select(); biarkan withCount hitung COUNT(*)
+                            $baseQuery->withCount([
+                                "{$relation} as {$alias}" => function ($q) use ($countConfig) {
+                                    if ($countConfig['conditions']) {
+                                        foreach ($countConfig['conditions'] as $field => $value) {
+                                            is_array($value) ? $q->whereIn($field, $value) : $q->where($field, $value);
+                                        }
+                                    }
+                                    // ❌ jangan panggil $q->select(...)
+                                    // ✅ biarkan withCount menghasilkan COUNT(*)
+                                },
+                            ]);
+                        }
+                    }
+                } else {
+                    // Count pada tabel sendiri (dataset-level): window function kalau ada, else selectSub
+                    $model = $baseQuery->getModel();
+                    $table = $model->getTable();
+                    $colRef = $countConfig['column'] ? "{$table}.{$countConfig['column']}" : '*';
+                    $expr = $countConfig['distinct'] && $countConfig['column']
+                        ? "COUNT(DISTINCT {$colRef})"
+                        : "COUNT({$colRef})";
+
+                    if ($this->supportsWindowFunctions()) {
+                        // Nilai sama di semua baris halaman (global), efisien & rapi
+                        $baseQuery->selectRaw("{$expr} OVER() as {$countAlias}");
+                    } else {
+                        // Fallback portable tanpa window function
+                        $baseQuery->selectSub(function ($q) use ($table, $expr) {
+                            $q->from($table)->selectRaw($expr);
+                        }, $countAlias);
+                    }
                 }
             }
         }
 
-        // Get allowed filters and sorts
+        // --- Build allowed filters & sorts ---
         $allowedFilters = $this->buildFilters();
         $allowedSorts = $this->sorts();
 
-        // Create QueryBuilder with baseQuery that already has counts
-        $query = QueryBuilder::for($baseQuery, $request)
+        // --- Bungkus dengan Spatie QueryBuilder ---
+        /** @var \Spatie\QueryBuilder\QueryBuilder $query */
+        $query = \Spatie\QueryBuilder\QueryBuilder::for($baseQuery, $request)
             ->allowedFilters($allowedFilters)
             ->allowedSorts($allowedSorts);
 
-        // Add relationships
+        // Eager load relasi
         if (! empty($this->with())) {
             $query->with($this->with());
         }
 
-        // Add toggleable columns as allowed fields
+        // Toggleable fields → allowedFields
         $toggleableFields = $this->toggleableColumns();
         if (! empty($toggleableFields)) {
             $query->allowedFields($toggleableFields);
         }
 
-        // Allow customization
+        // Hook akhir (overrideable)
         $query = $this->customizeQuery($query);
+
+        // Hook runtime: Table::make()->customQuery(fn($q) => ...)
+        if (is_callable($this->customQueryHook ?? null)) {
+            $result = call_user_func($this->customQueryHook, $query);
+            if ($result instanceof \Spatie\QueryBuilder\QueryBuilder) {
+                $query = $result;
+            }
+        }
 
         return $query;
     }
 
+    /**
+     * Eksekusi pagination + appends query string untuk navigasi front-end.
+     */
     public function makeData(QueryBuilder $query): LengthAwarePaginator
     {
-        // Paginate and return
         $page = $this->getState('page', $this->pagination()['page']);
         $perPage = $this->getState('perPage', $this->pagination()['per_page']);
 
         $results = $query->paginate(perPage: $perPage, page: $page);
-
-        // Build pagination links with proper parameters
         $results->appends($this->buildPaginationParams());
 
         return $results;
     }
 
     /**
-     * Build filters for QueryBuilder
+     * Build daftar allowed filters (gabungan: filter columns + global search)
      */
     protected function buildFilters(): array
     {
         $filters = [];
 
-        // Add custom filter columns
+        // Filter columns (akan memakai AdvancedFilter sebagai default)
         $filterColumns = $this->filterResolver();
         if (! empty($filterColumns)) {
             $filters = array_merge($filters, $filterColumns);
         }
 
-        // Add global search filter
+        // Global search
         $globalSearch = $this->globalSearchResolver();
         if (! empty($globalSearch)) {
             $filters = array_merge($filters, $globalSearch);
@@ -241,18 +367,16 @@ abstract class Table
     }
 
     /**
-     * Build query parameters for pagination links
+     * Susun parameter query string untuk pagination links.
      */
     protected function buildPaginationParams(): array
     {
         $params = [];
         $tableName = $this->getName();
 
-        // Add active filters with table namespace
         foreach ($this->getActiveFilters() as $attribute => $filter) {
             $params["{$tableName}[filter][{$attribute}][op]"] = $filter['op'];
 
-            // Handle array values
             if (is_array($filter['value'])) {
                 foreach ($filter['value'] as $index => $value) {
                     $params["{$tableName}[filter][{$attribute}][value][{$index}]"] = $value;
@@ -262,18 +386,15 @@ abstract class Table
             }
         }
 
-        // Add search
         if ($search = $this->getState('search')) {
             $params["{$tableName}[search]"] = $search;
         }
 
-        // Add sort
         $sorts = $this->getState('sort', []);
         if (! empty($sorts)) {
             $params["{$tableName}[sort]"] = implode(',', $sorts);
         }
 
-        // Add per page
         $params["{$tableName}[page]"] = $this->getState('page', $this->pagination()['page']);
         $params["{$tableName}[per_page]"] = $this->getState('perPage', $this->pagination()['per_page']);
 
@@ -281,7 +402,7 @@ abstract class Table
     }
 
     /**
-     * Customize query before execution
+     * Hook untuk kustomisasi query terakhir (override di turunan).
      */
     protected function customizeQuery(QueryBuilder $query): QueryBuilder
     {
@@ -289,8 +410,33 @@ abstract class Table
     }
 
     /**
-     * Map columns to schema for frontend
+     * customQuery
+     * ----------
+     * Pasang hook runtime untuk memodifikasi QueryBuilder.
+     * - Callback boleh mengembalikan QueryBuilder baru ATAU hanya memodifikasi by reference.
+     * - Setelah dipasang, kita REBUILD query & data agar hook ikut terpakai.
      */
+    public function customQuery(callable $callback): static
+    {
+        $this->customQueryHook = $callback;
+
+        // rebuild supaya hook langsung terpakai
+        $this->query = $this->makeQuery();
+        $this->rawQuery = clone $this->query;
+        $this->rawData = $this->makeData($this->query);
+
+        return $this;
+    }
+
+    /** Alias nama lain bila suka gaya setter */
+    public function setCustomQuery(callable $callback): static
+    {
+        return $this->customQuery($callback);
+    }
+
+    // ------- Mapping Schema untuk FE -------
+
+    /** Peta Column objects → schema FE */
     public function mapColumnsToSchema(): array
     {
         return array_reduce($this->columns(), function ($carry, Column $column) {
@@ -303,17 +449,13 @@ abstract class Table
         }, []);
     }
 
-    /**
-     * Map filters to schema for frontend
-     */
+    /** Peta FilterColumn objects → schema FE */
     public function mapFiltersToSchema(): array
     {
         return $this->getFiltersArray();
     }
 
-    /**
-     * Get complete table schema
-     */
+    /** Paket lengkap schema tabel untuk FE */
     public function toSchema(): array
     {
         return [
@@ -338,9 +480,18 @@ abstract class Table
         ];
     }
 
-    /**
-     * Get searchable columns
-     */
+    public function perPageOptions(): array
+    {
+        return [
+            ['label' => '10',  'value' => 10],
+            ['label' => '25',  'value' => 25],
+            ['label' => '50',  'value' => 50],
+            ['label' => '100', 'value' => 100],
+            ['label' => 'All', 'value' => $this->rawData->total()],
+        ];
+    }
+
+    /** Kolom yang diikutkan di global search */
     protected function getSearchableColumns(): array
     {
         return collect($this->columns())
@@ -350,23 +501,20 @@ abstract class Table
             ->all();
     }
 
-    /**
-     * Get data without schema (just results)
-     */
+    // ------- Data Helpers -------
+
+    /** Hanya data paginated (tanpa schema) */
     public function getData(): array
     {
         return $this->rawData->toArray();
     }
 
-    /**
-     * Debug query to see what's happening
-     */
+    /** Debugging helper */
     public function debugQuery(): array
     {
         $activeFilters = $this->getActiveFilters();
         $currentSort = $this->getState('sort', $this->defaultSort());
 
-        // Build query params
         $queryParams = [];
         if (! empty($activeFilters)) {
             foreach ($activeFilters as $attribute => $filter) {
@@ -390,9 +538,7 @@ abstract class Table
         ];
     }
 
-    /**
-     * Reset all filters and state
-     */
+    /** Reset semua state ke default */
     public function reset(): void
     {
         $this->clearFilters();
@@ -402,59 +548,45 @@ abstract class Table
         $this->setState('perPage', $this->pagination()['per_page']);
     }
 
-    /**
-     * Export data (without pagination)
-     */
+    /** Export semua data (tanpa pagination) */
     public function export(): array
     {
         return $this->rawQuery->get()->toArray();
     }
 
-    /**
-     * Apply preset filters
-     */
+    /** Apply preset konfigurasi (filters, sort, perPage, search) */
     public function applyPreset(array $preset): void
     {
-        // Apply filters from preset
         if (isset($preset['filters'])) {
             $this->applyFilters($preset['filters']);
         }
 
-        // Apply sort from preset
         if (isset($preset['sort'])) {
             $this->setState('sort', is_array($preset['sort']) ? $preset['sort'] : [$preset['sort']]);
         }
 
-        // Apply per page from preset
         if (isset($preset['perPage'])) {
             $this->setState('perPage', $preset['perPage']);
         }
 
-        // Apply search from preset
         if (isset($preset['search'])) {
             $this->setState('search', $preset['search']);
         }
     }
 
-    /**
-     * Get table as JSON response
-     */
+    /** Response full schema */
     public function toResponse(): \Illuminate\Http\JsonResponse
     {
         return response()->json($this->toSchema());
     }
 
-    /**
-     * Get only the data as JSON response
-     */
+    /** Response hanya data */
     public function dataResponse(): \Illuminate\Http\JsonResponse
     {
         return response()->json($this->getData());
     }
 
-    /**
-     * Check if table has any data
-     */
+    /** Apakah ada data? */
     public function hasData(): bool
     {
         $data = $this->getData();
@@ -462,25 +594,19 @@ abstract class Table
         return isset($data['data']) && count($data['data']) > 0;
     }
 
-    /**
-     * Get total count of records (without pagination)
-     */
+    /** Total count (tanpa pagination) */
     public function getTotalCount(): int
     {
         return $this->query->count();
     }
 
-    /**
-     * Get filtered count (with current filters but without pagination)
-     */
+    /** Filtered count = total (karena filter sudah diquery) */
     public function getFilteredCount(): int
     {
         return $this->getTotalCount();
     }
 
-    /**
-     * Clone table with new state
-     */
+    /** Clone table beserta state */
     public function clone(): static
     {
         $cloned = new static($this->name);
@@ -489,9 +615,7 @@ abstract class Table
         return $cloned;
     }
 
-    /**
-     * Set multiple state values at once
-     */
+    /** Set banyak state sekaligus */
     public function setStates(array $states): void
     {
         foreach ($states as $key => $value) {
@@ -499,9 +623,7 @@ abstract class Table
         }
     }
 
-    /**
-     * Get summary of current table state
-     */
+    /** Ringkasan cepat state tabel */
     public function getSummary(): array
     {
         return [
@@ -516,9 +638,7 @@ abstract class Table
         ];
     }
 
-    /**
-     * Clear all state and reset to defaults
-     */
+    /** Hapus semua state ke default */
     public function clearAll(): void
     {
         $this->reset();
@@ -526,9 +646,7 @@ abstract class Table
         $this->applyStateFromRequest();
     }
 
-    /**
-     * Get URL for current state
-     */
+    /** URL statefull untuk FE */
     public function getUrl(string $baseUrl = ''): string
     {
         $params = $this->buildPaginationParams();
@@ -537,9 +655,7 @@ abstract class Table
         return $baseUrl.(str_contains($baseUrl, '?') ? '&' : '?').$queryString;
     }
 
-    /**
-     * Apply state from URL parameters
-     */
+    /** Apply state dari URL string */
     public function applyFromUrl(string $url): void
     {
         $parsedUrl = parse_url($url);
@@ -550,23 +666,20 @@ abstract class Table
             $tableName = $this->getName();
             $tableParams = $params[$tableName] ?? $params;
 
-            // Apply filters
             if (isset($tableParams['filter'])) {
                 foreach ($tableParams['filter'] as $attribute => $filter) {
                     if ($attribute === 'search') {
                         $this->setState('search', $filter);
-                    } elseif (is_array($filter) && isset($filter['op']) && isset($filter['value'])) {
-                        $this->applyFilter($attribute, $filter['value'], $filter['op']);
+                    } elseif (is_array($filter) && isset($filter['op'])) {
+                        $this->applyFilter($attribute, $filter['value'] ?? null, $filter['op']);
                     }
                 }
             }
 
-            // Apply sort
             if (isset($tableParams['sort'])) {
                 $this->setState('sort', self::parseSort($tableParams['sort']));
             }
 
-            // Apply pagination
             if (isset($tableParams['per_page'])) {
                 $this->setState('perPage', (int) $tableParams['per_page']);
             }
@@ -577,9 +690,7 @@ abstract class Table
         }
     }
 
-    /**
-     * Get available presets for this table
-     */
+    /** Preset bawaan */
     public function getPresets(): array
     {
         return [
@@ -598,9 +709,7 @@ abstract class Table
         ];
     }
 
-    /**
-     * Load a specific preset
-     */
+    /** Load preset by name */
     public function loadPreset(string $presetName): void
     {
         $presets = $this->getPresets();
@@ -610,9 +719,7 @@ abstract class Table
         }
     }
 
-    /**
-     * Get columns configuration
-     */
+    /** Konfigurasi kolom untuk FE (ringkas) */
     public function getColumnsConfig(): array
     {
         return collect($this->columns())
@@ -627,22 +734,17 @@ abstract class Table
             ->toArray();
     }
 
-    /**
-     * Get filters configuration
-     */
+    /** Konfigurasi filter untuk FE (ringkas) */
     public function getFiltersConfig(): array
     {
         return $this->getFiltersArray();
     }
 
-    /**
-     * Validate table configuration
-     */
+    /** Validasi konfigurasi dasar */
     public function validate(): array
     {
         $errors = [];
 
-        // Check if resource is valid
         try {
             $resource = $this->resource();
             if (is_string($resource) && ! class_exists($resource)) {
@@ -652,12 +754,10 @@ abstract class Table
             $errors[] = 'Error loading resource: '.$e->getMessage();
         }
 
-        // Check if columns are defined
         if (empty($this->columns())) {
             $errors[] = 'No columns defined';
         }
 
-        // Check if sortable columns exist
         $sortableColumns = $this->getSortableColumnNames();
         $defaultSort = $this->defaultSort();
         foreach ($defaultSort as $sort) {
@@ -670,9 +770,7 @@ abstract class Table
         return $errors;
     }
 
-    /**
-     * Get table metadata
-     */
+    /** Metadata ringkas */
     public function getMetadata(): array
     {
         return [
@@ -690,9 +788,7 @@ abstract class Table
         ];
     }
 
-    /**
-     * Quick stats about the table
-     */
+    /** Statistik cepat */
     public function getStats(): array
     {
         $data = $this->getData();

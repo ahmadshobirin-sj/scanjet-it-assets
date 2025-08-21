@@ -10,6 +10,13 @@ use Illuminate\Database\Eloquent\Builder;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\Filters\Filter;
 
+/**
+ * FilterColumn (base)
+ * -------------------
+ * - Menyediakan API umum untuk semua filter kolom.
+ * - Mendukung "connectionHints" agar AdvancedFilter bisa melakukan cross-connection lookup
+ *   (akan dipakai oleh AdvancedFilter versi lanjutan).
+ */
 abstract class FilterColumn
 {
     protected string|Closure $name;
@@ -20,6 +27,7 @@ abstract class FilterColumn
 
     protected Filter|Closure|null $customFilter = null;
 
+    /** @var array daftar opsi operator untuk FE: [['label'=>..., 'value'=>...], ...] */
     protected array $clauses = [];
 
     protected string $defaultClause;
@@ -27,6 +35,25 @@ abstract class FilterColumn
     protected bool $allowNested = false;
 
     protected bool $hasDefaultValue = false;
+
+    /**
+     * Hint untuk filter lintas koneksi tabel
+     * Bentuk umum (opsional, fleksibel sesuai kebutuhan AdvancedFilter):
+     * [
+     *   // key spesifik attribute atau prefix path
+     *   'current_assignment.assigned_user.name' => [
+     *       'strategy'   => 'exists',       // atau 'in'
+     *       'connection' => 'mysql_crm',
+     *       'table'      => 'users',
+     *       'local_key'  => 'assigned_user_id', // kolom di tabel relasi/akar yang dibandingkan
+     *       'foreign_key'=> 'id',               // kolom di table external
+     *       'column'     => 'name',             // kolom yang difilter di table external
+     *       // opsional: 'wrap_with' => callback untuk menambah join/constraint terkait
+     *   ],
+     *   // dst...
+     * ]
+     */
+    protected array $connectionHints = [];
 
     public function __construct(string|Closure $name)
     {
@@ -41,7 +68,8 @@ abstract class FilterColumn
         return new static($name);
     }
 
-    // Getters
+    // ── Getters ─────────────────────────────────────────────────────────────────
+
     public function getName(): string
     {
         return ClosureHelper::evaluate($this->name);
@@ -82,7 +110,14 @@ abstract class FilterColumn
         return $this->hasDefaultValue;
     }
 
-    // Setters & fluent
+    /** Ambil connection hints yang terpasang pada kolom ini */
+    public function getConnectionHints(): array
+    {
+        return $this->connectionHints;
+    }
+
+    // ── Setters & fluent ────────────────────────────────────────────────────────
+
     public function label(string|Closure $label): static
     {
         $this->label = $label;
@@ -126,6 +161,19 @@ abstract class FilterColumn
         return $this;
     }
 
+    /**
+     * Pasang connection hints (opsional).
+     * Lihat $connectionHints di atas untuk bentuk umum.
+     */
+    public function connectionHints(array $hints): static
+    {
+        $this->connectionHints = $hints;
+
+        return $this;
+    }
+
+    // ── Introspection ───────────────────────────────────────────────────────────
+
     abstract public function getType(): string;
 
     public function toArray(): array
@@ -141,50 +189,60 @@ abstract class FilterColumn
     }
 
     /**
-     * Get metadata for this filter
+     * Metadata opsional untuk FE (override bila perlu).
      */
     protected function getMeta(): ?array
     {
         return null;
     }
 
+    /**
+     * Build AllowedFilter untuk Spatie.
+     * - Jika ada customFilter (Filter/Closure), pakai itu.
+     * - Default: AdvancedFilter (generic) — saat ini belum menggunakan connectionHints,
+     *   tetapi sudah disiapkan API-nya agar AdvancedFilter versi lanjutan dapat memanfaatkannya.
+     */
     public function getAllowedFilter(): AllowedFilter
     {
-        if ($this->customFilter instanceof Filter) {
+        if ($this->getCustomFilter() instanceof Filter) {
             return AllowedFilter::custom($this->getName(), $this->getCustomFilter());
         }
 
-        if ($this->customFilter instanceof Closure) {
+        if ($this->getCustomFilter() instanceof Closure) {
             return AllowedFilter::custom($this->getName(), $this->getCustomFilter());
         }
 
-        // Default to AdvancedFilter
+        // Default to AdvancedFilter (generic)
+        // (Jika kamu sudah update AdvancedFilter menerima $hints, ganti ctor di bawah menjadi:
+        //   new AdvancedFilter($this->getName(), $this->connectionHints)
+        // )
         return AllowedFilter::custom($this->getName(), $this->createFilter());
     }
 
     /**
-     * Create the filter instance for this column
-     * Override in child classes for custom behavior
+     * Buat instance filter untuk kolom ini.
+     * Override di child untuk perilaku khusus type (Text/Date/Numeric/Boolean).
      */
     protected function createFilter(): Filter|Closure
     {
-        // Default to AdvancedFilter for backward compatibility
         return new AdvancedFilter($this->getName());
     }
 
-    /**
-     * Apply filter logic (can be overridden in child classes)
-     */
+    // ── (Opsional) Helper generik jika child ingin delegasi langsung ────────────
+
     protected function applyFilter(Builder $query, $value, string $property): Builder
     {
         if (! is_array($value) || ! isset($value['op'])) {
             return $query;
         }
+
         $operator = $value['op'] ?? null;
         $filterValue = $value['value'] ?? null;
+
         if (! $operator) {
             return $query;
         }
+
         try {
             $operatorEnum = AdvanceOperator::from($operator);
         } catch (\ValueError $e) {
@@ -194,12 +252,8 @@ abstract class FilterColumn
         return $this->applyOperator($query, $property, $operatorEnum, $filterValue);
     }
 
-    /**
-     * Apply the operator (override in child classes for custom logic)
-     */
     protected function applyOperator(Builder $query, string $column, AdvanceOperator $operator, $value): Builder
     {
-        // Default implementation - can be overridden
         return match ($operator) {
             AdvanceOperator::EQUALS => $query->where($column, '=', $value),
             AdvanceOperator::NOT_EQUALS => $query->where($column, '!=', $value),

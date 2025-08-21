@@ -4,112 +4,119 @@ namespace App\Tables\Traits;
 
 use App\Tables\Enums\AdvanceOperator;
 
+/**
+ * TableState
+ * ----------
+ * Menyimpan & mem-parsing state tabel dari request:
+ * - filters (op/value) dengan default & validasi operator
+ * - sort (array dari string)
+ * - pagination (page, perPage)
+ * - search (global search)
+ *
+ * Catatan:
+ * - parseFilters() fleksibel: mendukung beberapa bentuk payload.
+ * - mergeWithDefaultFilters() memastikan semua FilterColumn punya state.
+ */
 trait TableState
 {
     use HasFilter;
 
     protected array $state = [];
 
+    /**
+     * Ambil state awal dari request (dengan namespace nama tabel jika ada).
+     * Dipanggil saat konstruksi Table & saat clearAll().
+     */
     public function applyStateFromRequest(): void
     {
-        // Ambil nama tabel
         $tableName = $this->getName();
-
-        // Ambil data dari request dengan namespace tabel
         $requestData = request()->input($tableName, request()->all());
 
-        // Parse filters dari request
+        // Filters
         $filters = $this->parseFilters($requestData['filter'] ?? []);
         $this->state['filters'] = $this->mergeWithDefaultFilters($filters);
 
-        // Parse sort dari request
+        // Sort
         $requestSort = $requestData['sort'] ?? request()->query('sort', '');
         $this->state['sort'] = ! empty($requestSort)
             ? self::parseSort($requestSort)
             : $this->defaultSort();
 
-        // Parse pagination
+        // Pagination
         $this->state['page'] = (int) ($requestData['page'] ?? request()->query('page', $this->pagination()['page']));
         $this->state['perPage'] = (int) ($requestData['per_page'] ?? request()->query('per_page', $this->pagination()['per_page']));
 
-        // Parse search
+        // Global search
         $this->state['search'] = $requestData['search'] ?? request()->query('search');
     }
 
+    /**
+     * Parser fleksibel untuk berbagai format filter dari FE.
+     * Menghasilkan bentuk normal:
+     *   [attr => ['enabled'=>bool, 'value'=>mixed, 'clause'=>string]]
+     */
     protected function parseFilters(array $requestFilters): array
     {
-        $parsedFilters = [];
+        $parsed = [];
 
         foreach ($requestFilters as $attribute => $filter) {
-            // Skip 'search' as it's handled separately
+            // 'search' ditangani terpisah (HasGlobalSearch)
             if ($attribute === 'search') {
                 continue;
             }
 
             if (is_array($filter)) {
-                // ⚠️ FIX: Check structure more carefully
-
-                // Case 1: Filter with op and value structure
-                // Example: ['op' => 'equals', 'value' => 'something']
+                // Format A: ['op' => 'equals', 'value' => 'abc']
                 if (isset($filter['op']) && array_key_exists('value', $filter)) {
-                    $parsedFilters[$attribute] = [
+                    $parsed[$attribute] = [
                         'enabled' => $this->isValueValid($filter['value']),
                         'value' => $filter['value'],
                         'clause' => $filter['op'],
                     ];
+
+                    continue;
                 }
-                // Case 2: Filter with only op (for operators that don't need value)
-                // Example: ['op' => 'is_not_set']
-                elseif (isset($filter['op']) && ! array_key_exists('value', $filter)) {
-                    // Check if this operator requires a value
+
+                // Format B: hanya 'op' (operator tak butuh value)
+                if (isset($filter['op']) && ! array_key_exists('value', $filter)) {
                     try {
-                        $operatorEnum = AdvanceOperator::from($filter['op']);
-                        if (! $operatorEnum->requiresValue()) {
-                            // This is valid - operator doesn't need value
-                            $parsedFilters[$attribute] = [
-                                'enabled' => true,
-                                'value' => null,
-                                'clause' => $filter['op'],
-                            ];
-                        } else {
-                            // Operator requires value but none provided - skip
-                            $parsedFilters[$attribute] = [
-                                'enabled' => false,
-                                'value' => null,
-                                'clause' => $filter['op'],
-                            ];
-                        }
+                        $op = AdvanceOperator::from($filter['op']);
+                        $parsed[$attribute] = [
+                            'enabled' => ! $op->requiresValue(),
+                            'value' => null,
+                            'clause' => $op->value,
+                        ];
                     } catch (\ValueError $e) {
-                        // Invalid operator - skip
-                        continue;
+                        // operator invalid → skip
                     }
+
+                    continue;
                 }
-                // Case 3: Alternative format with 'clause' instead of 'op'
-                elseif (isset($filter['clause']) && array_key_exists('value', $filter)) {
-                    $parsedFilters[$attribute] = [
+
+                // Format C: ['clause' => 'equals', 'value' => 'abc'] (alias)
+                if (isset($filter['clause']) && array_key_exists('value', $filter)) {
+                    $parsed[$attribute] = [
                         'enabled' => $this->isValueValid($filter['value']),
                         'value' => $filter['value'],
                         'clause' => $filter['clause'],
                     ];
-                }
-                // Case 4: Direct value array (for backward compatibility)
-                // Example: ['2024-01-01', '2024-12-31']
-                else {
-                    // Check if all elements are non-associative (numeric keys)
-                    $isNumericArray = array_keys($filter) === range(0, count($filter) - 1);
 
-                    if ($isNumericArray) {
-                        $parsedFilters[$attribute] = [
-                            'enabled' => $this->isValueValid($filter),
-                            'value' => $filter,
-                            'clause' => $this->getDefaultClause($attribute),
-                        ];
-                    }
-                    // Otherwise, it might be malformed - skip
+                    continue;
                 }
+
+                // Format D: array nilai langsung (untuk BETWEEN/IN)
+                $isNumericArray = array_keys($filter) === range(0, count($filter) - 1);
+                if ($isNumericArray) {
+                    $parsed[$attribute] = [
+                        'enabled' => $this->isValueValid($filter),
+                        'value' => $filter,
+                        'clause' => $this->getDefaultClause($attribute),
+                    ];
+                }
+                // selain itu dianggap malformed → skip
             } else {
-                // Simple filter value (string, number, etc.)
-                $parsedFilters[$attribute] = [
+                // Nilai sederhana (string/number/bool)
+                $parsed[$attribute] = [
                     'enabled' => $this->isValueValid($filter),
                     'value' => $filter,
                     'clause' => $this->getDefaultClause($attribute),
@@ -117,31 +124,31 @@ trait TableState
             }
         }
 
-        return $parsedFilters;
+        return $parsed;
     }
 
+    /**
+     * Menyatukan request filters dengan default filters dari FilterColumn.
+     * Setiap FilterColumn dipastikan punya state.
+     */
     protected function mergeWithDefaultFilters(array $filters): array
     {
-        $mergedFilters = [];
+        $merged = [];
 
         foreach ($this->getFilterColumns() as $column) {
             $attribute = $column->getName();
 
-            // Check if filter exists in request
             if (isset($filters[$attribute])) {
-                // Use request filter
-                $mergedFilters[$attribute] = $filters[$attribute];
+                $merged[$attribute] = $filters[$attribute];
             } else {
-                // Use default filter if column has default value
                 if ($column->hasDefaultValue()) {
-                    $mergedFilters[$attribute] = [
+                    $merged[$attribute] = [
                         'enabled' => true,
                         'value' => $column->getDefault(),
                         'clause' => $column->getDefaultClause(),
                     ];
                 } else {
-                    // No filter applied
-                    $mergedFilters[$attribute] = [
+                    $merged[$attribute] = [
                         'enabled' => false,
                         'value' => null,
                         'clause' => $column->getDefaultClause(),
@@ -150,28 +157,30 @@ trait TableState
             }
         }
 
-        return $mergedFilters;
+        return $merged;
     }
 
+    /**
+     * Validasi nilai filter: null valid untuk op tertentu (ditangani belakangan).
+     */
     protected function isValueValid($value): bool
     {
-        // Null is valid for some operators (will be checked later)
         if ($value === null) {
             return true;
         }
-
         if ($value === '') {
             return false;
         }
-
         if (is_array($value)) {
-            // Check if all array values are valid
             return count(array_filter($value, fn ($v) => $v !== null && $v !== '')) > 0;
         }
 
         return true;
     }
 
+    /**
+     * Ambil default clause dari FilterColumn (fallback ke equals).
+     */
     protected function getDefaultClause(string $attribute): string
     {
         $column = $this->getFilterColumn($attribute);
@@ -179,6 +188,9 @@ trait TableState
         return $column ? $column->getDefaultClause() : AdvanceOperator::EQUALS->value;
     }
 
+    /**
+     * Getter state (lazy-init jika kosong).
+     */
     public function getState(?string $key = null, mixed $default = null): mixed
     {
         if ($this->state === []) {
@@ -192,11 +204,13 @@ trait TableState
         return $this->state[$key] ?? $default;
     }
 
+    /** Setter state */
     public function setState(string $key, mixed $value): void
     {
         $this->state[$key] = $value;
     }
 
+    /** Snapshot state lengkap untuk FE */
     public function getFullState(): array
     {
         return [
@@ -208,12 +222,15 @@ trait TableState
         ];
     }
 
+    /** Parser sort CSV → array */
     private static function parseSort(string $sort): array
     {
         return array_filter(explode(',', $sort));
     }
 
+    /** Kontrak: disediakan Table turunan */
     abstract protected function defaultSort(): array;
 
+    /** Kontrak: disediakan Table turunan */
     abstract protected function pagination(): array;
 }

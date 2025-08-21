@@ -6,6 +6,14 @@ use App\Tables\Enums\AdvanceOperator;
 use Illuminate\Database\Eloquent\Builder;
 use Spatie\QueryBuilder\Filters\Filter;
 
+/**
+ * BooleanFilterColumn
+ * -------------------
+ * - Menerima:
+ *   * value sederhana: true/false/"1"/"0"
+ *   * atau format {op: IS_TRUE|IS_FALSE}
+ * - Mendukung nested (dot-notation).
+ */
 class BooleanFilterColumn extends FilterColumn
 {
     protected function setDefaultClauses(): void
@@ -36,35 +44,56 @@ class BooleanFilterColumn extends FilterColumn
 
             public function __invoke(Builder $query, $value, string $property): Builder
             {
-                // Handle simple boolean value
-                if (is_bool($value) || in_array($value, ['true', 'false', '1', '0', 1, 0])) {
-                    $boolValue = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+                // 1) Nilai boolean sederhana (true/false/"1"/"0")
+                if (is_bool($value) || in_array($value, ['true', 'false', '1', '0', 1, 0], true)) {
+                    $bool = filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE);
+                    if ($bool === null) {
+                        return $query;
+                    }
 
-                    return $query->where($this->property, '=', $boolValue);
+                    if (str_contains($this->property, '.')) {
+                        [$rel, $col] = $this->splitPath($this->property);
+
+                        return $query->whereHas($rel, fn (Builder $q) => $q->where($col, '=', $bool));
+                    }
+
+                    return $query->where($this->property, '=', $bool);
                 }
 
-                // Handle operator format
+                // 2) Format { op: ..., value?: ... }
                 if (! is_array($value) || ! isset($value['op'])) {
                     return $query;
                 }
 
-                $operator = $value['op'] ?? null;
-
-                if (! $operator) {
-                    return $query;
-                }
-
                 try {
-                    $operatorEnum = AdvanceOperator::from($operator);
-                } catch (\ValueError $e) {
+                    $op = AdvanceOperator::from($value['op']);
+                } catch (\ValueError) {
                     return $query;
                 }
 
-                return match ($operatorEnum) {
-                    AdvanceOperator::IS_TRUE => $query->where($this->property, '=', true),
-                    AdvanceOperator::IS_FALSE => $query->where($this->property, '=', false),
-                    default => $query,
+                $apply = function (Builder $q, string $col) use ($op) {
+                    return match ($op) {
+                        AdvanceOperator::IS_TRUE => $q->where($col, '=', true),
+                        AdvanceOperator::IS_FALSE => $q->where($col, '=', false),
+                        default => $q,
+                    };
                 };
+
+                if (str_contains($this->property, '.')) {
+                    [$rel, $col] = $this->splitPath($this->property);
+
+                    return $query->whereHas($rel, fn (Builder $q) => $apply($q, $col));
+                }
+
+                return $apply($query, $this->property);
+            }
+
+            private function splitPath(string $property): array
+            {
+                $parts = explode('.', $property);
+                $col = array_pop($parts);
+
+                return [implode('.', $parts), $col];
             }
         };
     }

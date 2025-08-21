@@ -3,25 +3,45 @@
 namespace App\Tables\Supports;
 
 use App\Tables\Enums\AdvanceOperator;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Spatie\QueryBuilder\Filters\Filter;
 
 /**
- * Generic Advanced Filter for basic operations
- * Used as fallback when FilterColumns don't define their own filter
+ * AdvancedFilter (final)
+ * ----------------------
+ * Fallback filter generik untuk segala jenis property:
+ * - Direct column: "name"
+ * - Nested relation: "assignments.assigned_user.name"
+ * - Pivot column: "assignments.pivot.returned_at"
+ * - Cross-connection: ditangani oleh AdvancedFilterEngine
+ *
+ * Catatan:
+ * - Parsing nilai (op/value) mengikuti konvensi TableState::parseFilters().
+ * - Operator level diterapkan via applyDirect() agar reusable & mudah diuji.
  */
 class AdvancedFilter implements Filter
 {
+    /** @var string Path property (boleh nested/pivot) */
     protected string $property;
 
-    public function __construct(string $property)
+    /** @var array<string,string> Mapping "relation.path" => "connection_name" (opsional) */
+    protected array $connectionHints;
+
+    public function __construct(string $property, array $connectionHints = [])
     {
         $this->property = $property;
+        $this->connectionHints = $connectionHints;
     }
 
-    public function __invoke(Builder $query, $value, string $property): Builder
+    /**
+     * Titik masuk Spatie QueryBuilder.
+     * - Validasi format (op/value)
+     * - Delegasi ke AdvancedFilterEngine::apply()
+     */
+    public function __invoke(EloquentBuilder $query, $value, string $property) /* no return type */
     {
-        // If value is not an array with 'op' and 'value', skip
+        // 1) Validasi payload minimal
         if (! is_array($value) || ! isset($value['op'])) {
             return $query;
         }
@@ -34,120 +54,124 @@ class AdvancedFilter implements Filter
         }
 
         try {
-            $operatorEnum = AdvanceOperator::from($operator);
+            $op = AdvanceOperator::from($operator);
         } catch (\ValueError $e) {
-            return $query;
+            return $query; // operator tidak dikenal → no-op
         }
 
-        // Check if property contains dot notation for nested relations
-        if (str_contains($this->property, '.')) {
-            return $this->applyNestedFilter($query, $this->property, $operatorEnum, $filterValue);
-        }
-
-        // Apply filter to direct property
-        return $this->applyDirectFilter($query, $this->property, $operatorEnum, $filterValue);
-    }
-
-    /**
-     * Apply filter to nested relation
-     */
-    protected function applyNestedFilter(Builder $query, string $property, AdvanceOperator $operator, $filterValue): Builder
-    {
-        $parts = explode('.', $property);
-        $column = array_pop($parts);
-        $relation = implode('.', $parts);
-
-        return $query->whereHas($relation, function (Builder $q) use ($column, $operator, $filterValue) {
-            $this->applyDirectFilter($q, $column, $operator, $filterValue);
-        });
-    }
-
-    /**
-     * Apply filter directly to a column
-     * This is a generic implementation for basic operations
-     */
-    protected function applyDirectFilter(Builder $query, string $column, AdvanceOperator $operator, $filterValue): Builder
-    {
-        // Handle operators that don't require values
-        if (! $operator->requiresValue()) {
-            return match ($operator) {
-                AdvanceOperator::IS_NULL, AdvanceOperator::IS_NOT_SET => $query->whereNull($column),
-                AdvanceOperator::IS_NOT_NULL, AdvanceOperator::IS_SET => $query->whereNotNull($column),
-                default => $query,
-            };
-        }
-
-        // Handle array value operators
-        if ($operator->requiresArrayValue()) {
-            $values = is_array($filterValue) ? $filterValue : explode(',', $filterValue);
-
-            // Validate array has required values for BETWEEN operations
-            if (in_array($operator, [AdvanceOperator::BETWEEN, AdvanceOperator::NOT_BETWEEN]) && count($values) < 2) {
+        // 2) Operator butuh value → pastikan ada & tidak kosong
+        if ($op->requiresValue()) {
+            if (! array_key_exists('value', $value)) {
                 return $query;
             }
-
-            return match ($operator) {
-                AdvanceOperator::BETWEEN => $query->whereBetween($column, [$values[0], $values[1]]),
-                AdvanceOperator::NOT_BETWEEN => $query->whereNotBetween($column, [$values[0], $values[1]]),
-                AdvanceOperator::IN => $query->whereIn($column, $values),
-                AdvanceOperator::NOT_IN => $query->whereNotIn($column, $values),
-                default => $query,
-            };
+            // treat '' sebagai kosong; kalau kamu butuh '' sebagai nilai sah, hapus guard ini
+            if (is_string($filterValue) && $filterValue === '') {
+                return $query;
+            }
+            if (is_array($filterValue) && count(array_filter($filterValue, fn ($v) => $v !== '' && $v !== null)) === 0) {
+                return $query;
+            }
         }
 
-        // Handle boolean operators
-        if (in_array($operator, [AdvanceOperator::IS_TRUE, AdvanceOperator::IS_FALSE])) {
-            return match ($operator) {
-                AdvanceOperator::IS_TRUE => $query->where($column, '=', true),
-                AdvanceOperator::IS_FALSE => $query->where($column, '=', false),
-                default => $query,
-            };
-        }
-
-        // Handle string/text operators
-        if ($this->isTextOperator($operator)) {
-            return $this->applyTextOperator($query, $column, $operator, $filterValue);
-        }
-
-        // Handle basic comparison operators
-        return match ($operator) {
-            AdvanceOperator::EQUALS => $query->where($column, '=', $filterValue),
-            AdvanceOperator::NOT_EQUALS => $query->where($column, '!=', $filterValue),
-            AdvanceOperator::GREATER_THAN, AdvanceOperator::AFTER => $query->where($column, '>', $filterValue),
-            AdvanceOperator::GREATER_THAN_OR_EQUAL, AdvanceOperator::EQUAL_OR_AFTER => $query->where($column, '>=', $filterValue),
-            AdvanceOperator::LESS_THAN, AdvanceOperator::BEFORE => $query->where($column, '<', $filterValue),
-            AdvanceOperator::LESS_THAN_OR_EQUAL, AdvanceOperator::EQUAL_OR_BEFORE => $query->where($column, '<=', $filterValue),
-            default => $query,
-        };
+        // 3) Delegasikan ke engine (engine handle direct/nested/pivot/cross-conn)
+        return AdvancedFilterEngine::apply(
+            $query,
+            $this->property,
+            $op,
+            $filterValue,
+            // applyDirect: implementasi SQL untuk tiap operator (kolom SUDAH qualified oleh engine)
+            function (EloquentBuilder|QueryBuilder $qb, string $qualifiedColumn, AdvanceOperator $op, mixed $val) {
+                $this->applyDirect($qb, $qualifiedColumn, $op, $val);
+                // NOTE: kalau engine kamu mengharuskan return, ganti jadi:
+                // return $this->applyDirect($qb, $qualifiedColumn, $op, $val);
+            },
+            ['connectionHints' => $this->connectionHints]
+        );
     }
 
     /**
-     * Check if operator is text-specific
+     * Terapkan operator ke kolom yang sudah "qualified" pada builder saat ini.
+     * Tidak mengurus relasi/pivot—itu tanggung jawab engine.
      */
-    protected function isTextOperator(AdvanceOperator $operator): bool
+    protected function applyDirect(EloquentBuilder|QueryBuilder $qb, string $col, AdvanceOperator $op, mixed $val): void
     {
-        return in_array($operator, [
+        // A) Operator tanpa nilai (IS_*)
+        if (! $op->requiresValue()) {
+            match ($op) {
+                AdvanceOperator::IS_NULL, AdvanceOperator::IS_NOT_SET => $qb->whereNull($col),
+                AdvanceOperator::IS_NOT_NULL, AdvanceOperator::IS_SET => $qb->whereNotNull($col),
+                default => null,
+            };
+
+            return;
+        }
+
+        // B) Operator bernilai array (BETWEEN/NOT_BETWEEN/IN/NOT_IN)
+        if ($op->requiresArrayValue()) {
+            $values = is_array($val) ? $val : explode(',', (string) $val);
+
+            if (in_array($op, [AdvanceOperator::BETWEEN, AdvanceOperator::NOT_BETWEEN], true)) {
+                if (count($values) < 2) {
+                    return;
+                }
+                [$a, $b] = [$values[0], $values[1]];
+                match ($op) {
+                    AdvanceOperator::BETWEEN => $qb->whereBetween($col, [$a, $b]),
+                    AdvanceOperator::NOT_BETWEEN => $qb->whereNotBetween($col, [$a, $b]),
+                    default => null,
+                };
+
+                return;
+            }
+
+            match ($op) {
+                AdvanceOperator::IN => $qb->whereIn($col, $values),
+                AdvanceOperator::NOT_IN => $qb->whereNotIn($col, $values),
+                default => null,
+            };
+
+            return;
+        }
+
+        // C) Boolean literal
+        if (in_array($op, [AdvanceOperator::IS_TRUE, AdvanceOperator::IS_FALSE], true)) {
+            $qb->where($col, '=', $op === AdvanceOperator::IS_TRUE);
+
+            return;
+        }
+
+        // D) Text-ish
+        if (in_array($op, [
             AdvanceOperator::CONTAINS,
             AdvanceOperator::NOT_CONTAINS,
             AdvanceOperator::STARTS_WITH,
             AdvanceOperator::ENDS_WITH,
-        ]);
-    }
+        ], true)) {
+            $s = (string) $val;
+            match ($op) {
+                AdvanceOperator::CONTAINS => $qb->where($col, 'LIKE', '%'.$s.'%'),
+                AdvanceOperator::NOT_CONTAINS => $qb->where($col, 'NOT LIKE', '%'.$s.'%'),
+                AdvanceOperator::STARTS_WITH => $qb->where($col, 'LIKE', $s.'%'),
+                AdvanceOperator::ENDS_WITH => $qb->where($col, 'LIKE', '%'.$s),
+                default => null,
+            };
 
-    /**
-     * Apply text-specific operators
-     */
-    protected function applyTextOperator(Builder $query, string $column, AdvanceOperator $operator, $value): Builder
-    {
-        // Ensure value is string
-        $stringValue = (string) $value;
+            return;
+        }
 
-        return match ($operator) {
-            AdvanceOperator::CONTAINS => $query->where($column, 'LIKE', '%'.$stringValue.'%'),
-            AdvanceOperator::NOT_CONTAINS => $query->where($column, 'NOT LIKE', '%'.$stringValue.'%'),
-            AdvanceOperator::STARTS_WITH => $query->where($column, 'LIKE', $stringValue.'%'),
-            AdvanceOperator::ENDS_WITH => $query->where($column, 'LIKE', '%'.$stringValue),
-            default => $query,
+        // E) Numeric/Date compare & equals/not_equals
+        match ($op) {
+            AdvanceOperator::EQUALS => $qb->where($col, '=', $val),
+            AdvanceOperator::NOT_EQUALS => $qb->where($col, '!=', $val),
+            AdvanceOperator::GREATER_THAN,
+            AdvanceOperator::AFTER => $qb->where($col, '>', $val),
+            AdvanceOperator::GREATER_THAN_OR_EQUAL,
+            AdvanceOperator::EQUAL_OR_AFTER => $qb->where($col, '>=', $val),
+            AdvanceOperator::LESS_THAN,
+            AdvanceOperator::BEFORE => $qb->where($col, '<', $val),
+            AdvanceOperator::LESS_THAN_OR_EQUAL,
+            AdvanceOperator::EQUAL_OR_BEFORE => $qb->where($col, '<=', $val),
+            default => null,
         };
     }
 }

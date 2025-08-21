@@ -4,10 +4,19 @@ namespace App\Tables\Traits;
 
 use App\Tables\Columns\Column;
 
+/**
+ * HasSortable
+ * -----------
+ * Mengumpulkan konfigurasi sorting dari daftar Column:
+ * - Only columns yang ditandai sortable() akan diikutkan.
+ * - Count column disort via alias (sudah di-handle dalam Column::getAllowedSort()).
+ */
 trait HasSortable
 {
     /**
-     * Return array of AllowedSort instances for QueryBuilder.
+     * Return array of AllowedSort instances untuk Spatie QueryBuilder.
+     *
+     * @return array<\Spatie\QueryBuilder\AllowedSort>
      */
     public function sorts(): array
     {
@@ -19,7 +28,7 @@ trait HasSortable
     }
 
     /**
-     * Get sortable column names as strings for frontend/meta
+     * Diberikan untuk FE/meta: daftar nama kolom yang bisa disort.
      */
     public function getSortableColumnNames(): array
     {
@@ -30,6 +39,10 @@ trait HasSortable
             ->toArray();
     }
 
+    /**
+     * Default sort order (override di Table turunan bila perlu).
+     * Format: ['name', '-created_at'] dst.
+     */
     public function defaultSort(): array
     {
         return [];
