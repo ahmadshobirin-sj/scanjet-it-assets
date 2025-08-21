@@ -2,9 +2,9 @@ import { TransformersTableResolver } from '@/components/data-grid';
 import { Badge } from '@/components/ui/badge';
 import { AssetStatusHelper } from '@/constants/asset-status';
 import { formatWithBrowserTimezone } from '@/lib/date';
-import { Asset } from '@/types/model';
+import { AssetWithCurrentAssignment } from '@/types/model';
 
-export const columns: TransformersTableResolver<Asset> = {
+export const columns: TransformersTableResolver<AssetWithCurrentAssignment> = {
     'category.name': (column) => ({
         ...column,
         header: 'Category',
@@ -39,6 +39,12 @@ export const columns: TransformersTableResolver<Asset> = {
                     {AssetStatusHelper.getLabel(row.original.status)}
                 </Badge>
             );
+        },
+    }),
+    'current_assignment.assigned_user.name': (column) => ({
+        ...column,
+        cell: ({ row }) => {
+            return row.original.current_assignment ? row.original.current_assignment.assigned_user.name : '-';
         },
     }),
 };

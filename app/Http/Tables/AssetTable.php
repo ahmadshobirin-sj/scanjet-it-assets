@@ -4,8 +4,10 @@ namespace App\Http\Tables;
 
 use App\Models\Asset;
 use App\Tables\Columns\Column;
+use App\Tables\FilterColumns\TextFilterColumn;
 use App\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Spatie\QueryBuilder\QueryBuilder;
 
 class AssetTable extends Table
 {
@@ -47,6 +49,10 @@ class AssetTable extends Table
                 ->sortable()
                 ->globallySearchable()
                 ->toggleable(),
+            Column::make('current_assignment.assigned_user.name')
+                ->label('Assigned To')
+                ->globallySearchable()
+                ->toggleable(),
             Column::make('status')
                 ->sortable()
                 ->globallySearchable()
@@ -56,16 +62,29 @@ class AssetTable extends Table
 
     public function filters(): array
     {
-        return [];
+        return [
+            TextFilterColumn::make('current_assignment.assigned_user.email')
+                ->label('Assigned To'),
+        ];
     }
 
     public function with(): array
     {
-        return ['category', 'manufacture'];
+        return [
+            'category',
+            'manufacture',
+            'current_assignment:id,assigned_user_id',
+            'current_assignment.assigned_user:id,name,email,job_title,office_location',
+        ];
     }
 
     public function defaultSort(): array
     {
         return ['-created_at'];
+    }
+
+    protected function customizeQuery(QueryBuilder $query): QueryBuilder
+    {
+        return $query;
     }
 }

@@ -187,3 +187,12 @@ export interface AssetAssignmentReturnLogAssignment {
     reference_code: string;
     status: string;
 }
+
+export interface AssetWithCurrentAssignment extends Asset {
+    current_assignment: AssetCurrentAssignment | null;
+}
+export interface AssetCurrentAssignment {
+    id: string;
+    assigned_user_id: string;
+    assigned_user: UserLite;
+}

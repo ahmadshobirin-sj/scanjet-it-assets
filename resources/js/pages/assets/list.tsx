@@ -7,7 +7,7 @@ import { usePermission } from '@/hooks/use-permissions';
 import AppLayout from '@/layouts/app-layout';
 import { confirmDialog } from '@/lib/confirmDialog';
 import { SharedData } from '@/types';
-import { Asset } from '@/types/model';
+import { AssetWithCurrentAssignment } from '@/types/model';
 import { router, usePage } from '@inertiajs/react';
 import { Plus } from 'lucide-react';
 import { columns } from './column';
@@ -17,18 +17,18 @@ const AssetListPage = () => {
     const {
         component,
         props: { assets },
-    } = usePage<SharedData & { assets: DataTableResource<Asset> }>();
+    } = usePage<SharedData & { assets: DataTableResource<AssetWithCurrentAssignment> }>();
     const breadcrumbs = useBreadcrumb(component);
 
-    const handleView = (row: Asset) => {
+    const handleView = (row: AssetWithCurrentAssignment) => {
         router.visit(route('asset.show', { id: row.id }));
     };
 
-    const handleEdit = (row: Asset) => {
+    const handleEdit = (row: AssetWithCurrentAssignment) => {
         router.visit(route('asset.edit', { id: row.id }));
     };
 
-    const handleDelete = (row: Asset) => {
+    const handleDelete = (row: AssetWithCurrentAssignment) => {
         confirmDialog({
             title: 'Delete asset',
             description: (
