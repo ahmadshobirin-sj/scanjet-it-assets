@@ -7,7 +7,7 @@ export function filterItems(items: NavItem[], permissions?: string[]): NavItem[]
                 const filteredChildren = filterItems(item.items, permissions);
                 return {
                     ...item,
-                    items: filteredChildren.length ? filteredChildren : undefined,
+                    items: filteredChildren.length > 0 ? filteredChildren : [],
                 };
             }
             return item;
