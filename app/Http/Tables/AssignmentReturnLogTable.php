@@ -18,7 +18,7 @@ class AssignmentReturnLogTable extends Table
         parent::__construct($name);
     }
 
-    public static function make(string $name, ?string $asset_assignment_id = null): static
+    public static function make(?string $name = null, ?string $asset_assignment_id = null): static
     {
         return new static($name, $asset_assignment_id);
     }
