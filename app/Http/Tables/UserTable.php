@@ -58,7 +58,6 @@ class UserTable extends Table
                 ->label('Roles')
                 ->multiple()
                 ->nested()
-                ->remoteUrl(route('role.index'))
                 ->options(function () {
                     return Role::query()
                         ->select(['id as value', 'name as label'])
