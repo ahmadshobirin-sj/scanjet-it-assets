@@ -29,15 +29,15 @@ const UserCreatePage = () => {
         props: { roles },
     } = usePage<SharedData & { roles: ResponseCollection<Role> }>();
 
-    const { data, setData, post, processing, errors, reset, isDirty } = useForm<{ email: string; roles: string[] }>({
+    const { data, setData, post, processing, errors, resetAndClearErrors, isDirty } = useForm<{ email: string; roles: string[] }>({
         email: '',
         roles: [],
     });
 
     const { open, setOpen, handleChange } = useControlledModal({
         shouldConfirmClose: () => isDirty,
-        onConfirmClose: reset,
-        onCloseClean: reset,
+        onConfirmClose: resetAndClearErrors,
+        onCloseClean: resetAndClearErrors,
     });
 
     useBeforeUnloadPrompt(isDirty);
@@ -54,8 +54,7 @@ const UserCreatePage = () => {
     const postData = () => {
         post('/user/create', {
             onSuccess: () => {
-                reset();
-                setOpen(false);
+                handleChange(false, { force: true });
             },
         });
     };
@@ -83,7 +82,7 @@ const UserCreatePage = () => {
     }, [roles.data]);
 
     return (
-        <Sheet onOpenChange={handleChange} open={open}>
+        <Sheet onOpenChange={(next) => handleChange(next)} open={open}>
             <SheetTrigger asChild>
                 <Button variant="fill" leading={<Plus />} onClick={() => setOpen(true)}>
                     New user
