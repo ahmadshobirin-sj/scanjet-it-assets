@@ -18,7 +18,7 @@ class DatabaseSeeder extends Seeder
             AssetCategorySeeder::class,
             ManufactureSeeder::class,
             AssetSeeder::class,
-            AssetAssignmentSeeder::class,
+            // AssetAssignmentSeeder::class,
         ]);
     }
 }
