@@ -12,6 +12,18 @@ class AssetCategorySeeder extends Seeder
      */
     public function run(): void
     {
-        AssetCategory::factory()->count(10)->create();
+        $data = [
+            'Laptop',
+            'Monitor',
+            'Mobile Device',
+            'Headset',
+            'Keyboard',
+            'Mouse',
+        ];
+        foreach ($data as $item) {
+            AssetCategory::factory()->create([
+                'name' => $item,
+            ]);
+        }
     }
 }

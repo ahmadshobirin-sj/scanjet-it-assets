@@ -12,18 +12,6 @@ class AssetCategoryFactory extends Factory
     public function definition()
     {
         return [
-            'name' => $this->faker->unique()->randomElement([
-                'Laptop',
-                'Desktop',
-                'Monitor (primary)',
-                'Monitor (secondary)',
-                'Printer',
-                'Router',
-                'Switch',
-                'Tablet',
-                'Mobile Phone',
-                'Projector',
-            ]),
             'description' => $this->faker->sentence(),
             'created_at' => now(),
             'updated_at' => now(),
