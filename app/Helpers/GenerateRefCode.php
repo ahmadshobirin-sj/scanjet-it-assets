@@ -12,7 +12,7 @@ class GenerateRefCode
     public static function generate(): string
     {
         $prefix = 'sj-itam';
-        $date = now()->format('Ym');
+        $date = now()->format('ym');
         $time = now()->format('dHis');
         $random = Str::upper(Str::random(4));
 
