@@ -2,13 +2,10 @@
 
 namespace App\Providers;
 
-use App\Listeners\NewMicrosoft365SignInListener;
-use Dcblogdev\MsGraph\Events\NewMicrosoft365SignInEvent;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -113,10 +110,5 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('webhook', function (Request $request) {
             return Limit::perMinute(60)->by($request->ip());
         });
-
-        Event::listen(
-            NewMicrosoft365SignInEvent::class,
-            [NewMicrosoft365SignInListener::class, 'handle']
-        );
     }
 }

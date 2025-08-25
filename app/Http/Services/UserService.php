@@ -64,4 +64,13 @@ class UserService
     {
         DB::transaction(fn () => $user->delete());
     }
+
+    public function updateOrCreate(array $data)
+    {
+        $user = User::updateOrCreate([
+            'email' => $data['email'],
+        ], $data);
+
+        return $user;
+    }
 }

@@ -8,7 +8,7 @@ export default function Login() {
             <Head title="Log in" />
 
             <Button asChild intent="primary" variant="fill">
-                <a href={route('connect')}>Login with your Microsoft Account</a>
+                <a href={route('authorize')}>Login with your Microsoft Account</a>
             </Button>
         </AuthLayout>
     );

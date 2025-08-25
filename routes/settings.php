@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::middleware('auth')->group(function () {
+Route::middleware('MsGraphAuthenticated')->group(function () {
     Route::get('settings', function () {
         return redirect()->route('appearance');
     })->name('settings');

@@ -23,7 +23,9 @@ return new class extends Migration
             $table->string('job_title')->nullable()->default('');
             $table->string('mobile_phone')->nullable()->default('');
             $table->string('office_location')->nullable()->default('');
+            $table->string('department')->nullable()->default('');
             $table->string('surname')->nullable()->default('');
+            $table->string('manager_email')->nullable()->default('');
             $table->timestamps();
             $table->softDeletes();
         });

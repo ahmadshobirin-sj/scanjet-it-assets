@@ -11,13 +11,14 @@
     "require": {
         "php": "^8.2",
         "barryvdh/laravel-dompdf": "^3.1",
-        "dcblogdev/laravel-microsoft-graph": "^4.0",
         "inertiajs/inertia-laravel": "^2.0",
         "laravel/framework": "^12.0",
         "laravel/reverb": "^1.0",
         "laravel/telescope": "^5.10",
         "laravel/tinker": "^2.10.1",
-        "saloonphp/laravel-plugin": "^3.0",
+        "saloonphp/laravel-plugin": "^3.6",
+        "saloonphp/rate-limit-plugin": "^2.1",
+        "saloonphp/saloon": "^3.14",
         "spatie/laravel-permission": "^6.20",
         "spatie/laravel-query-builder": "^6.3",
         "tightenco/ziggy": "^2.4"

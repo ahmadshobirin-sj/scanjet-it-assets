@@ -30,6 +30,8 @@ class User extends Authenticatable
         'mobile_phone',
         'job_title',
         'office_location',
+        'department',
+        'manager_email',
     ];
 
     protected $casts = [
@@ -56,5 +58,10 @@ class User extends Authenticatable
     public function asset_assignments()
     {
         return $this->hasMany(AssetAssignment::class, 'user_id');
+    }
+
+    public function msgraph_token()
+    {
+        return $this->hasOne(MsGraphToken::class);
     }
 }
