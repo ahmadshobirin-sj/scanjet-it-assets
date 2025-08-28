@@ -53,7 +53,6 @@ export default function AppFlashMessage({
     notify: Notify; // contoh: (p) => toast({ description: p.message, variant: p.intent === 'destructive' ? 'destructive' : 'default' })
 }) {
     const { props } = usePage<SharedData>();
-
     // Sumber utama: props.flash
     const flash = props?.flash;
 
