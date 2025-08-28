@@ -14,6 +14,7 @@ interface AppLayoutProps {
 export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => {
     return (
         <AppLayoutTemplate breadcrumbs={breadcrumbs} {...props}>
+            <Toaster richColors position="top-right" />
             <AppFlashMessage
                 notify={({ intent, message }) => {
                     AppToast({ message, intent });
@@ -21,7 +22,6 @@ export default ({ children, breadcrumbs, ...props }: AppLayoutProps) => {
             />
 
             {children}
-            <Toaster richColors position="top-right" />
             <ConfirmDialog />
         </AppLayoutTemplate>
     );
