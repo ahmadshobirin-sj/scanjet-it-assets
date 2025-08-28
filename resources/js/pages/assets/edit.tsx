@@ -1,5 +1,7 @@
 import AppContainer from '@/components/app-container';
 import AppTitle from '@/components/app-title';
+import { MediaLibraryInput } from '@/components/media-library';
+import { MediaItem } from '@/components/media-library/helpers/mediaLibraryApi';
 import { MultipleSelector, Option } from '@/components/multiple-selector';
 import { Button } from '@/components/ui/button';
 import { CalendarDatePicker } from '@/components/ui/calendar-date-picker';
@@ -13,12 +15,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { AssetStatusHelper } from '@/constants/asset-status';
 import { useBreadcrumb } from '@/hooks/use-breadcrumb';
 import AppLayout from '@/layouts/app-layout';
+import { mediaLibraryApi } from '@/lib/api';
 import { SharedData } from '@/types';
 import { Asset, AssetCategory, Manufacture, ResponseCollection, ResponseResource } from '@/types/model';
 import { router, useForm, usePage } from '@inertiajs/react';
 import { SelectValue } from '@radix-ui/react-select';
 import { Globe } from 'lucide-react';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 import { UpdateFormField } from './type';
 
@@ -28,7 +31,7 @@ const AssetUpdatePage = () => {
         props: { asset },
     } = usePage<SharedData & { asset: ResponseResource<Asset> }>();
     const breadcrumbs = useBreadcrumb(component);
-
+    const [rawPoAttachments, setRawPoAttachments] = useState<MediaItem[]>(asset.data.po_attachments || []);
     const { data, setData, processing, errors, reset, put, setDefaults } = useForm<UpdateFormField>({
         name: '',
         category_id: '',
@@ -52,6 +55,7 @@ const AssetUpdatePage = () => {
             warranty_expired: asset.data.warranty_expired ? new Date(asset.data.warranty_expired) : undefined,
             purchase_date: asset.data.purchase_date ? new Date(asset.data.purchase_date) : undefined,
             status: asset.data.status || '',
+            po_attachments: asset.data.po_attachments ? asset.data.po_attachments.flatMap((item) => item.id) : undefined,
         };
 
         setDefaults(value);
@@ -59,6 +63,24 @@ const AssetUpdatePage = () => {
 
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [asset]);
+
+    const handleChangePoAttachments = (value: MediaItem[]) => {
+        const ids = value.map((item) => item.id);
+        setRawPoAttachments(value);
+        setData('po_attachments', ids);
+    };
+
+    const handleDeletePoAttachments = (value: MediaItem['id']) => {
+        const ids = data.po_attachments?.filter((item) => item !== value);
+        const picked = rawPoAttachments.filter((item) => item.id !== value);
+        setRawPoAttachments(picked);
+        setData('po_attachments', ids);
+    };
+
+    const handleReset = () => {
+        reset();
+        setRawPoAttachments(asset.data.po_attachments || []);
+    };
 
     const onSearchCategory = (value: string): Promise<Option[]> => {
         return new Promise((resolve) => {
@@ -151,7 +173,7 @@ const AssetUpdatePage = () => {
                             <Button intent="primary" variant="outline" onClick={() => router.visit(route('asset.index'))}>
                                 Cancel
                             </Button>
-                            <Button intent="warning" onClick={() => reset()}>
+                            <Button intent="warning" onClick={handleReset}>
                                 Reset
                             </Button>
                             <Button onClick={putAsset} loading={processing}>
@@ -294,6 +316,19 @@ const AssetUpdatePage = () => {
                                             </SelectContent>
                                         </Select>
                                         {errors.status && <FormMessage error>{errors.status}</FormMessage>}
+                                    </GroupFormField>
+                                </GroupFormItem>
+
+                                <GroupFormItem>
+                                    <GroupFormField>
+                                        <Label>Pre Order Attachments</Label>
+                                        <MediaLibraryInput
+                                            api={mediaLibraryApi}
+                                            value={rawPoAttachments}
+                                            onChange={handleChangePoAttachments}
+                                            onDelete={handleDeletePoAttachments}
+                                        />
+                                        {errors.po_attachments && <FormMessage error>{errors.po_attachments}</FormMessage>}
                                     </GroupFormField>
                                 </GroupFormItem>
                             </GroupFormGroup>

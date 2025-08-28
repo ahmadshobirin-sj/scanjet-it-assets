@@ -1,5 +1,7 @@
 import AppContainer from '@/components/app-container';
 import AppTitle from '@/components/app-title';
+import { MediaLibraryInput } from '@/components/media-library';
+import { MediaItem } from '@/components/media-library/helpers/mediaLibraryApi';
 import { MultipleSelector, Option } from '@/components/multiple-selector';
 import { Button } from '@/components/ui/button';
 import { CalendarDatePicker } from '@/components/ui/calendar-date-picker';
@@ -11,16 +13,18 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useBreadcrumb } from '@/hooks/use-breadcrumb';
 import AppLayout from '@/layouts/app-layout';
+import { mediaLibraryApi } from '@/lib/api';
 import { AssetCategory, Manufacture, ResponseCollection } from '@/types/model';
 import { router, useForm, usePage } from '@inertiajs/react';
 import { Globe } from 'lucide-react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { FormField } from './type';
 
 const AssetsCreatePage = () => {
     const { component } = usePage();
     const breadcrumbs = useBreadcrumb(component);
-
+    const [rawPoAttachments, setRawPoAttachments] = useState<MediaItem[]>([]);
     const { data, setData, processing, errors, reset, post } = useForm<FormField>({
         name: '',
         category_id: '',
@@ -30,6 +34,24 @@ const AssetsCreatePage = () => {
         reference_link: '',
         note: '',
     });
+
+    const handleChangePoAttachments = (value: MediaItem[]) => {
+        const ids = value.map((item) => item.id);
+        setRawPoAttachments(value);
+        setData('po_attachments', ids);
+    };
+
+    const handleDeletePoAttachments = (value: MediaItem['id']) => {
+        const ids = data.po_attachments?.filter((item) => item !== value);
+        const picked = rawPoAttachments.filter((item) => item.id !== value);
+        setRawPoAttachments(picked);
+        setData('po_attachments', ids);
+    };
+
+    const handleReset = () => {
+        reset();
+        setRawPoAttachments([]);
+    };
 
     const onSearchCategory = (value: string): Promise<Option[]> => {
         return new Promise((resolve) => {
@@ -117,6 +139,9 @@ const AssetsCreatePage = () => {
                     subtitle="Add a new asset to your inventory"
                     actions={
                         <>
+                            <Button intent="warning" onClick={handleReset}>
+                                Reset
+                            </Button>
                             <Button onClick={postAsset} loading={processing}>
                                 Save
                             </Button>
@@ -231,6 +256,19 @@ const AssetsCreatePage = () => {
                                         <Label htmlFor="reference-link">Note</Label>
                                         <Textarea id="reference-link" value={data.note} onChange={(e) => setData('note', e.target.value)} />
                                         {errors.note && <FormMessage error>{errors.note}</FormMessage>}
+                                    </GroupFormField>
+                                </GroupFormItem>
+
+                                <GroupFormItem>
+                                    <GroupFormField>
+                                        <Label>Pre Order Attachments</Label>
+                                        <MediaLibraryInput
+                                            api={mediaLibraryApi}
+                                            value={rawPoAttachments}
+                                            onChange={handleChangePoAttachments}
+                                            onDelete={handleDeletePoAttachments}
+                                        />
+                                        {errors.po_attachments && <FormMessage error>{errors.po_attachments}</FormMessage>}
                                     </GroupFormField>
                                 </GroupFormItem>
                             </GroupFormGroup>

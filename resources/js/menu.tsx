@@ -3,10 +3,12 @@ import {
     Boxes,
     Building2,
     ClipboardList,
+    Cpu,
     LayoutGrid,
     NotebookPen,
     PackagePlus,
     ShieldUser,
+    SquareLibraryIcon,
     SquareUser,
     Table,
     Tags,
@@ -75,7 +77,7 @@ export const mainNavItemsRaw: NavItem[] = [
         ],
     },
     {
-        title: 'Manage',
+        title: 'User Manage',
         icon: UserCogIcon,
         items: [
             {
@@ -92,6 +94,20 @@ export const mainNavItemsRaw: NavItem[] = [
                 icon: ShieldUser,
                 meta: {
                     permission: ['role.viewAny'],
+                },
+            },
+        ],
+    },
+    {
+        title: 'System',
+        icon: Cpu,
+        items: [
+            {
+                title: 'Media Library',
+                href: route('media-library.index'),
+                icon: SquareLibraryIcon,
+                meta: {
+                    permission: ['media_library.viewAny', 'media_library.create'],
                 },
             },
         ],

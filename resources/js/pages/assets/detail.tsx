@@ -1,6 +1,7 @@
 import AppContainer from '@/components/app-container';
 import AppTitle from '@/components/app-title';
 import { DataGrid } from '@/components/data-grid';
+import { MediaLibraryInputItem } from '@/components/media-library';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -82,6 +83,22 @@ const AssetsDetailPage = () => {
                                         <Badge intent={AssetStatusHelper.getIntent(asset.data.status) as any} size="md">
                                             {AssetStatusHelper.getLabel(asset.data.status)}
                                         </Badge>
+                                    </InfoListContent>
+                                </InfoList>
+                                <InfoList direction="column">
+                                    <InfoListLabel>Pre-order Attachments</InfoListLabel>
+                                    <InfoListContent>
+                                        {asset.data.po_attachments && asset.data.po_attachments.length > 0 ? (
+                                            <div className="space-y-3">
+                                                {asset.data.po_attachments.map((file, index) => (
+                                                    <div className="w-fit">
+                                                        <MediaLibraryInputItem file={file} key={index} />
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            '-'
+                                        )}
                                     </InfoListContent>
                                 </InfoList>
                             </InfoListGroup>

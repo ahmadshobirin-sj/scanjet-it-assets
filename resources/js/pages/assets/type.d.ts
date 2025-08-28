@@ -8,6 +8,7 @@ export type FormField = {
     purchase_date?: Date;
     note?: string;
     reference_link?: string;
+    po_attachments?: number[];
 };
 
 export type UpdateFormField = FormField & {

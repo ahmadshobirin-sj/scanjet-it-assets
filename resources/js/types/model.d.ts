@@ -1,3 +1,4 @@
+import { MediaItem } from '@/components/media-library/helpers/mediaLibraryApi';
 import { AssetStatus } from '@/constants/asset-status';
 export interface TableServerState {
     sort: string[];
@@ -120,6 +121,7 @@ export interface Asset {
     reference_link: string | null;
     created_at: string;
     updated_at: string;
+    po_attachments?: MediaItem[];
 }
 
 export type AssetColumn = Omit<Asset, 'category' | 'manufacture' | 'assignedUser'> & {
