@@ -39,6 +39,7 @@ class AssetReturn extends Model
     public function assets()
     {
         return $this->belongsToMany(Asset::class, 'asset_assignment_has_assets', 'asset_return_id', 'asset_id')
+            ->using(AssetAssignmentItem::class)
             ->withPivot(['asset_assignment_id', 'condition', 'returned_at', 'created_at', 'updated_at'])
             ->withTimestamps();
     }
