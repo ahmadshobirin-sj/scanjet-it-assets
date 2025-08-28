@@ -78,7 +78,7 @@ header {
 }
 
 .hdc-logo-wrapper {
-    width: 25pt;
+    width: 80pt;
 }
 .hdc-logo {
     width: 100%;
@@ -147,4 +147,28 @@ header {
     height: 0.2px;
     background-color: black;
     width: 100%;
+}
+
+.w-full {
+    width: 100%;
+}
+
+.notes-input {
+    border: 1px solid black;
+    height: 60pt;
+    padding: 2pt 6pt;
+}
+
+.tb-art tr td,
+.tb-art tr th {
+    padding: 0 5pt;
+}
+
+.tb-rf tr td,
+.tb-rf tr th {
+    padding: 2pt 5pt;
+}
+.tb-ui tr td,
+.tb-ui tr th {
+    padding: 2pt 5pt;
 }
