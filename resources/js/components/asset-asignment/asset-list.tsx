@@ -27,15 +27,15 @@ interface AssetListProps {
 }
 
 const AssetList: FC<AssetListProps> = ({
-    name,
-    manufactureName,
-    serialNumber,
-    assetTag,
-    categoryName,
+    name = '-',
+    manufactureName = '-',
+    serialNumber = '-',
+    assetTag = '-',
+    categoryName = '-',
     bordered = false,
     className,
-    condition,
-    showCondition,
+    condition = 'ok',
+    showCondition = false,
 }) => {
     return (
         <div className="flex w-full flex-col rounded-md">
