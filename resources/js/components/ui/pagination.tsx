@@ -65,6 +65,27 @@ function PaginationLink({
     )
 }
 
+type PaginationButtonProps = {
+    isActive?: boolean
+} & React.ComponentProps<typeof Button>
+
+function PaginationButton({
+    isActive,
+    size = "icon",
+    ...props
+}: PaginationButtonProps) {
+    return (
+        <Button
+            aria-current={isActive ? "page" : undefined}
+            data-slot="pagination-button"
+            data-active={isActive}
+            variant={isActive ? 'fill' : 'outline'}
+            size={size}
+            {...props}
+        />
+    )
+}
+
 function PaginationPrevious({
     className,
     ...props
@@ -124,4 +145,5 @@ export {
     PaginationPrevious,
     PaginationNext,
     PaginationEllipsis,
+    PaginationButton
 }
