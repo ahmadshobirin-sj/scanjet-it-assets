@@ -109,6 +109,7 @@ export interface Asset {
     name: string;
     location: string | null;
     serial_number: string | null;
+    asset_tag: string | null;
     purchase_date: string | null;
     warranty_expired: string | null;
     last_maintenance: string | null;
@@ -197,4 +198,14 @@ export interface AssetCurrentAssignment {
     id: string;
     assigned_user_id: string;
     assigned_user: UserLite;
+}
+
+export interface AssetReturnAssets extends Asset {
+    pivot: {
+        asset_return_id: string;
+        asset_id: string;
+        condition: string;
+        returned_at: string;
+        updated_at: string;
+    }[];
 }
