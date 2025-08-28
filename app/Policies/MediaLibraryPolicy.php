@@ -46,12 +46,4 @@ class MediaLibraryPolicy
     {
         return $user->can('mediaLibrary.delete');
     }
-
-    /**
-     * Determine whether the user can restore the model.
-     */
-    public function restore(User $user, Media $media): bool
-    {
-        return $user->can('mediaLibrary.restore');
-    }
 }
