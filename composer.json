@@ -19,8 +19,10 @@
         "saloonphp/laravel-plugin": "^3.6",
         "saloonphp/rate-limit-plugin": "^2.1",
         "saloonphp/saloon": "^3.14",
+        "spatie/laravel-medialibrary": "^11.14",
         "spatie/laravel-permission": "^6.20",
         "spatie/laravel-query-builder": "^6.3",
+        "sunspikes/clamav-validator": "^3.0",
         "tightenco/ziggy": "^2.4"
     },
     "require-dev": {
