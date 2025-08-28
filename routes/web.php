@@ -22,5 +22,6 @@ require __DIR__.'/settings.php';
 require __DIR__.'/user.php';
 require __DIR__.'/role.php';
 require __DIR__.'/auth.php';
+require __DIR__.'/media-library.php';
 
 require __DIR__.'/test.php';
