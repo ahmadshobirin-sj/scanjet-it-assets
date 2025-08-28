@@ -46,4 +46,9 @@ class AssetReturnPolicy
     {
         return $user->can('asset_return.delete');
     }
+
+    public function exportPdf(User $user): bool
+    {
+        return $user->can('asset_return.exportPdf');
+    }
 }

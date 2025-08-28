@@ -22,7 +22,7 @@ class AssetReturnService
         return $query->get();
     }
 
-    public function getByReferenceCode(string $reference_code, array $with = []): AssetAssignment
+    public function getAssignmentByReferenceCode(string $reference_code, array $with = []): AssetAssignment
     {
         try {
             $assetAssignment = AssetAssignment::where('reference_code', $reference_code)
@@ -60,7 +60,7 @@ class AssetReturnService
             }
 
             // 1) Ambil assignment
-            $assignment = $this->getByReferenceCode($reference_code);
+            $assignment = $this->getAssignmentByReferenceCode($reference_code);
 
             if (empty($assignment->confirmed_at)) {
                 throw new ClientException('Failed to return asset, this assignment has not been confirmed by the user');
@@ -145,5 +145,27 @@ class AssetReturnService
                 $return->fresh('received_by'),
             );
         });
+    }
+
+    public function getDataExportById(string $id)
+    {
+        try {
+            $assetReturn = AssetReturn::where('id', $id)
+                ->with([
+                    'received_by:id,name,email,job_title,office_location',
+                    'assignment:id,assigned_user_id,reference_code',
+                    'assignment.assigned_user:id,name,email,job_title,office_location',
+                    'assets:id,category_id',
+                    'assets.category:id,name',
+                ])
+                ->firstOrFail();
+
+            return $assetReturn;
+        } catch (\Throwable $th) {
+            throw new ClientException(
+                message: 'Asset return form not found',
+                description: 'No asset return form found with the provided id.',
+            );
+        }
     }
 }

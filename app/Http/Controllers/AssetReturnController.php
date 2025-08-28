@@ -10,9 +10,9 @@ use App\Exceptions\ClientException;
 use App\Http\Filters\GlobalSearchNew;
 use App\Http\Requests\AssetReturn\AssetReturnStoreRequest;
 use App\Http\Services\AssetReturnService;
-use App\Http\Tables\AssignmentReturnLogTable;
 use App\Models\AssetReturn;
 use App\Notifications\AppNotification;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -35,10 +35,9 @@ class AssetReturnController
         $this->authorize('create', AssetReturn::class);
         $assetAssignment = null;
         $assets = [];
-        $returnLog = [];
 
         try {
-            $assetAssignment = $this->assetReturnService->getByReferenceCode($reference_code, [
+            $assetAssignment = $this->assetReturnService->getAssignmentByReferenceCode($reference_code, [
                 'assigned_user:id,name,email,job_title,office_location',
                 'assigned_by:id,name,email,job_title,office_location',
             ]);
@@ -46,8 +45,6 @@ class AssetReturnController
             if (empty($assetAssignment->confirmed_at)) {
                 throw new ClientException('This assignment has not been confirmed by the user', code: 404);
             }
-
-            $returnLog = AssignmentReturnLogTable::make('returnLog', $assetAssignment->id)->toSchema();
 
             $assets = Inertia::optional(fn () => $this->assetReturnService->getAssets($this->assetsQueryBuilder($request, $assetAssignment->assigned_assets())));
         } catch (\Throwable $th) {
@@ -61,7 +58,6 @@ class AssetReturnController
         return Inertia::render('asset-assignment/return', [
             'assetAssignment' => $assetAssignment,
             'assets' => $assets,
-            'returnLog' => $returnLog,
         ]);
     }
 
@@ -72,16 +68,15 @@ class AssetReturnController
         try {
             $data = $request->validated();
 
-            // default: penerima adalah user yang sedang login (jika tidak diisi)
             $data['received_by_user_id'] = $data['received_by_user_id'] ?? Auth::id();
 
             /** @var AssetReturnResult $result */
             $result = $this->assetReturnService->returnAssets($data, $reference_code);
 
-            $assignment = $result->assignment->loadMissing('assigned_by'); // jaga-jaga
+            $assignment = $result->assignment->loadMissing('assigned_by');
             $return = $result->return->loadMissing('received_by');
-            $actor = Auth::user();               // yang mengeksekusi aksi
-            $assignedBy = $assignment->assigned_by;    // pembuat assignment (bisa null)
+            $actor = Auth::user();
+            $assignedBy = $assignment->assigned_by;
 
             $handledByOther = $assignedBy->id !== $actor->id;
 
@@ -125,7 +120,7 @@ class AssetReturnController
              * TODO:
              * pindah ke halaman detail return
              */
-            return redirect()->route('asset-assignment.index');
+            return redirect()->route('asset-assignment.show', ['reference_code' => $assignment->reference_code]);
         } catch (\Throwable $th) {
             if (app()->isProduction()) {
                 report($th);
@@ -134,6 +129,48 @@ class AssetReturnController
             }
 
             return back();
+        }
+    }
+
+    public function exportPdf(Request $request, string $id)
+    {
+        $this->authorize('exportPdf', AssetReturn::class);
+        try {
+            $assetReturn = $this->assetReturnService->getDataExportById($id);
+            // dd($assetReturn->toArray());
+            $data = [
+                'header' => [
+                    'title' => 'IT Hardware Asset Return Form',
+                    'code' => 'FRM-IT-01-HW-2025',
+                    'version' => '1.0',
+                    'last_revised' => '21-Aug-2025',
+                    'issued_by' => 'Wibowo, Rio Eibat',
+                    'approved_by' => 'Wibowo, Rio Eibat',
+                    'issue_date' => '21-Aug-2025',
+                    'approved_date' => '21-Aug-2025',
+                    'company_name' => 'PT. Scanjet Production Indah',
+                ],
+                'data' => $assetReturn->toArray(),
+            ];
+
+            $pdf = Pdf::loadView('pdf.asset_return', $data)
+                ->setOption([
+                    'isPhpEnabled' => true,
+                    'isRemoteEnabled' => true,
+                ])
+                ->setPaper('A4', 'portrait'); // ukuran A4
+
+            return $pdf->stream('Test.pdf');
+        } catch (\Throwable $th) {
+            if (app()->isProduction()) {
+                report($th);
+            } else {
+                throw $th;
+            }
+
+            return back()->withErrors([
+                'message' => 'Failed to export the PDF. Please try again later.',
+            ]);
         }
     }
 

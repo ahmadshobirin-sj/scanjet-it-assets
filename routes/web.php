@@ -23,5 +23,8 @@ require __DIR__.'/user.php';
 require __DIR__.'/role.php';
 require __DIR__.'/auth.php';
 require __DIR__.'/media-library.php';
+require __DIR__.'/asset_return.php';
 
-require __DIR__.'/test.php';
+if (env('APP_ENV') === 'local') {
+    require __DIR__.'/test.php';
+}
