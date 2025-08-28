@@ -11,6 +11,8 @@ use Illuminate\Support\Facades\Schema;
 
 class AssetService extends Service
 {
+    public function __construct(protected MediaLibraryService $mediaLibraryService) {}
+
     /**
      * Store a new asset.
      */
@@ -19,6 +21,8 @@ class AssetService extends Service
         return DB::transaction(function () use ($data) {
             $data['status'] = AssetStatus::AVAILABLE;
             $asset = Asset::create(Arr::only($data, $this->attributes()));
+
+            $this->mediaLibraryService->linkByMediaIds(Asset::class, $asset->id, $data['po_attachments'], 'po');
 
             return $asset;
         });
@@ -39,6 +43,16 @@ class AssetService extends Service
     {
         return DB::transaction(function () use ($asset, $data) {
             $asset->update(Arr::only($data, $this->attributes()));
+
+            $ids = $data['po_attachments'] ?? [];
+
+            $this->mediaLibraryService->syncLinksByMediaIds(
+                Asset::class,
+                (string) $asset->id,
+                $ids,
+                'po',
+                false
+            );
 
             return $asset;
         });

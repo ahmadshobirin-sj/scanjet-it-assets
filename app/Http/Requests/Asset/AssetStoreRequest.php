@@ -31,6 +31,8 @@ class AssetStoreRequest extends FormRequest
             'purchase_date' => 'date|nullable',
             'note' => 'string|nullable',
             'reference_link' => 'string|nullable|max:255',
+            'po_attachments' => ['required', 'array'],
+            'po_attachments.*' => ['integer', 'distinct'],
         ];
     }
 }

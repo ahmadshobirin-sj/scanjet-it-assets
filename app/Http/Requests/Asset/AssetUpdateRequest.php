@@ -35,6 +35,8 @@ class AssetUpdateRequest extends FormRequest
             'note' => 'string|nullable',
             'reference_link' => 'string|nullable|max:255',
             'status' => ['required', 'string',  new Enum(AssetStatus::class)],
+            'po_attachments' => ['required', 'array'],
+            'po_attachments.*' => ['integer', 'distinct'],
         ];
     }
 }

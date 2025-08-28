@@ -4,6 +4,7 @@ namespace App\Http\Resources\Asset;
 
 use App\Http\Resources\AssetCategoryResource;
 use App\Http\Resources\ManufactureResource;
+use App\Http\Resources\MediaItemResource;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -31,6 +32,13 @@ class AssetResource extends JsonResource
             'status' => $this->status,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            // === PO Attachments (role pivot: 'po_attachment')
+            'po_attachments' => $this->whenLoaded('poAttachmentLibraries', function () {
+                // flatten media dari tiap MediaLibrary yang sudah di-eager load
+                $media = $this->poAttachmentLibraries->flatMap->media->values();
+
+                return MediaItemResource::collection($media);
+            }),
         ];
     }
 }

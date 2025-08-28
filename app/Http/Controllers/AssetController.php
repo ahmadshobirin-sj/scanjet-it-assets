@@ -97,6 +97,7 @@ class AssetController extends Controller
         $asset->loadMissing([
             'category',
             'manufacture',
+            'poAttachmentLibraries.media',
         ]);
 
         return Inertia::render('assets/detail', [
@@ -114,6 +115,7 @@ class AssetController extends Controller
         $asset->loadMissing([
             'category',
             'manufacture',
+            'poAttachmentLibraries.media',
         ]);
 
         $manufactures = Inertia::optional(fn () => $this->manufactureService->getAll());

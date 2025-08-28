@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasMediaLibrary;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Asset extends Model
+class Asset extends Model implements HasMedia
 {
-    use HasFactory, HasUuids;
+    use HasFactory, HasMediaLibrary, HasUuids, InteractsWithMedia;
 
     protected $keyType = 'string';
 
@@ -32,6 +35,7 @@ class Asset extends Model
         'last_maintenance' => 'datetime',
     ];
 
+    // Relational
     public function category()
     {
         return $this->belongsTo(AssetCategory::class, 'category_id');
@@ -76,5 +80,10 @@ class Asset extends Model
         return $this->belongsToMany(AssetReturn::class, 'asset_assignment_has_assets', 'asset_id', 'asset_return_id')
             ->withPivot(['asset_assignment_id', 'condition', 'returned_at', 'created_at', 'updated_at'])
             ->withTimestamps();
+    }
+
+    public function poAttachmentLibraries()
+    {
+        return $this->mediaLibraries()->wherePivot('collection_name', 'po');
     }
 }
