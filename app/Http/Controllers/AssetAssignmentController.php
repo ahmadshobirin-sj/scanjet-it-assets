@@ -9,6 +9,7 @@ use App\Http\Filters\GlobalSearchNew;
 use App\Http\Requests\AssetAssignment\AssetAssigmentRequest;
 use App\Http\Services\AssetAsignmentService;
 use App\Http\Tables\AssetAssignmentTable;
+use App\Http\Tables\AssignmentReturnLogTable;
 use App\Models\Asset;
 use App\Models\AssetAssignment;
 use App\Models\ExternalUser;
@@ -170,9 +171,34 @@ class AssetAssignmentController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(AssetAssignment $assetAssignment)
+    public function show(Request $request, string $reference_code)
     {
-        //
+        $this->authorize('view', AssetAssignment::class);
+        $assetAssignment = null;
+        $returnLog = [];
+
+        try {
+            $assetAssignment = $this->assetAssignmentService->getByReferenceCode($reference_code, [
+                'assigned_user:id,name,email,job_title,office_location',
+                'assigned_by:id,name,email,job_title,office_location',
+                'assets',
+                'assets.category:id,name',
+                'assets.manufacture:id,name',
+            ]);
+
+            $returnLog = AssignmentReturnLogTable::make('returnLog', $assetAssignment->id)->toSchema();
+        } catch (\Throwable $th) {
+            if (app()->isProduction()) {
+                report($th);
+            } else {
+                throw $th;
+            }
+        }
+
+        return Inertia::render('asset-assignment/detail', [
+            'assetAssignment' => $assetAssignment,
+            'returnLog' => $returnLog,
+        ]);
     }
 
     public function exportPDF(Request $request, string $reference_code)

@@ -17,6 +17,8 @@ Route::middleware('MsGraphAuthenticated')->prefix('asset-assignment')->group(fun
         ->name('asset-assignment.storeReturn');
     Route::get('/export/pdf/{reference_code}', [AssetAssignmentController::class, 'exportPdf'])
         ->name('asset-assignment.exportPdf');
+    Route::get('{reference_code}', [AssetAssignmentController::class, 'show'])
+        ->name('asset-assignment.show');
 });
 
 Route::middleware('signed')->prefix('asset-assignment')->group(function () {

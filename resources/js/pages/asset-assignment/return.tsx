@@ -2,7 +2,6 @@ import AppContainer from '@/components/app-container';
 import AppTitle from '@/components/app-title';
 import AssetList, { AssetListSelector } from '@/components/asset-asignment/asset-list';
 import AssignmentConfirmation from '@/components/asset-asignment/assignment-confirmation';
-import { DataTable, DataTableResource } from '@/components/data-table';
 import MemberPill from '@/components/member-pill';
 import { MultipleSelector, Option } from '@/components/multiple-selector';
 import { Badge } from '@/components/ui/badge';
@@ -18,10 +17,10 @@ import { useBreadcrumb } from '@/hooks/use-breadcrumb';
 import AppLayout from '@/layouts/app-layout';
 import { formatWithBrowserTimezone } from '@/lib/date';
 import { SharedData } from '@/types';
-import { AssetAssignment, AssetAssignmentReturnLog } from '@/types/model';
+import { AssetAssignment } from '@/types/model';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router, useForm as useFormInertia, usePage } from '@inertiajs/react';
-import { Boxes, Check, LogsIcon, Notebook, X } from 'lucide-react';
+import { Boxes, Check, Notebook, ViewIcon, X } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { ReturnFormFields, returnFormSchema } from './form.schema';
@@ -29,8 +28,8 @@ import { ReturnFormFields, returnFormSchema } from './form.schema';
 const AssetAssignmentReturn = () => {
     const {
         component,
-        props: { assetAssignment, returnLog },
-    } = usePage<SharedData & { assetAssignment: AssetAssignment; returnLog: DataTableResource<AssetAssignmentReturnLog> }>();
+        props: { assetAssignment },
+    } = usePage<SharedData & { assetAssignment: AssetAssignment }>();
     const breadcrumbs = useBreadcrumb(component);
     const [assetsSelected, setAssetsSelected] = useState<Option[]>([]);
     const [confirmationOpen, setConfirmationOpen] = useState(false);
@@ -129,7 +128,27 @@ const AssetAssignmentReturn = () => {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <AppContainer className="space-y-6">
-                <AppTitle title={`Asset Return Form | ${assetAssignment.reference_code}`} subtitle="Return assets assigned to IT department." />
+                <AppTitle
+                    title={`Asset Return Form | ${assetAssignment.reference_code}`}
+                    subtitle="Return assets assigned to IT department."
+                    actions={
+                        <>
+                            <Button
+                                leading={<ViewIcon />}
+                                intent="info"
+                                onClick={() => {
+                                    router.visit(
+                                        route('asset-assignment.show', {
+                                            reference_code: assetAssignment.reference_code,
+                                        }),
+                                    );
+                                }}
+                            >
+                                View
+                            </Button>
+                        </>
+                    }
+                />
                 <div className="flex flex-col gap-4 xl:flex-row">
                     <Card className="xl:h-fit xl:w-sm xl:max-w-sm">
                         <CardHeader>
@@ -390,65 +409,6 @@ const AssetAssignmentReturn = () => {
                         </Form>
                     </div>
                 </div>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Badge size="md" className="p-1.5" intent="success" variant="light">
-                                <LogsIcon className="!size-5" />
-                            </Badge>
-                            Return Log
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <DataTable
-                            resource={returnLog}
-                            bulkActions={[]}
-                            exportActions={[]}
-                            transformerColumns={{
-                                'received_by.email': (column) => ({
-                                    ...column,
-                                    cell: ({ row }) => {
-                                        return (
-                                            <MemberPill
-                                                user={[
-                                                    {
-                                                        label: 'Name',
-                                                        value: row.original.received_by.name || '?',
-                                                    },
-                                                    {
-                                                        label: 'Email',
-                                                        value: row.original.received_by.email || '-',
-                                                    },
-                                                    {
-                                                        label: 'Job Title',
-                                                        value: (
-                                                            <Badge intent="info" variant="light">
-                                                                {row.original.received_by.job_title || 'N/A'}
-                                                            </Badge>
-                                                        ),
-                                                    },
-                                                    {
-                                                        label: 'Office Location',
-                                                        value: row.original.received_by.office_location || '-',
-                                                    },
-                                                ]}
-                                                text={row.original.received_by.name || row.original.received_by.email || '?'}
-                                                intent="info"
-                                                variant="light"
-                                                size="sm"
-                                            />
-                                        );
-                                    },
-                                }),
-                                returned_at: (column) => ({
-                                    ...column,
-                                    cell: ({ row }) => formatWithBrowserTimezone(row.original.returned_at),
-                                }),
-                            }}
-                        />
-                    </CardContent>
-                </Card>
 
                 {assetsSelected.length > 0 && (
                     <AssignmentConfirmation
