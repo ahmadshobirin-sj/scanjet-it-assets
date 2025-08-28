@@ -1,7 +1,9 @@
 <?php
 
+use App\Exceptions\ApiException;
 use App\Helpers\ExceptionReport;
 use App\Http\Middleware\EnsureHasAuthorizationCode;
+use App\Http\Middleware\ForceJsonResponse;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\MsGraphAuthenticated;
@@ -16,12 +18,17 @@ use Symfony\Component\HttpFoundation\Response;
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
         commands: __DIR__.'/../routes/console.php',
         channels: __DIR__.'/../routes/channels.php',
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
+
+        $middleware->group('api', [
+            ForceJsonResponse::class,
+        ]);
 
         $middleware->web(append: [
             HandleAppearance::class,
@@ -35,6 +42,14 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
+        $exceptions->render(function (Throwable $e, Request $request) {
+            if (ApiException::shouldHandle($request)) {
+                return ApiException::render($e, $request);
+            }
+
+            return null;
+        });
+
         if (app()->isProduction()) {
             $exceptions->reportable(function (Throwable $e) {
                 ExceptionReport::report($e);
