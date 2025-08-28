@@ -53,7 +53,7 @@
             <p class="pg-section-title">
                 Section 2: Assignment Reference Code Identification
             </p>
-            <table class="tb-full tb-medium">
+            <table class="tb-full tb-rf">
                 <tr>
                     <td style="width: 100px">
                         Ref. Code
@@ -103,7 +103,7 @@
             <p class="pg-section-title">
                 Section 4: User Acknowledgment
             </p>
-            <table class="tb-full">
+            <table class="tb-full tb-ui">
                 <tr>
                     <td style="width: 150px">User Name</td>
                     <td>
@@ -180,7 +180,7 @@
             <p class="pg-section-title">
                 Section 5: Assignment Performed By
             </p>
-            <table class="tb-full">
+            <table class="tb-full tb-ui">
                 <tr>
                     <td style="width: 150px">Name</td>
                     <td>{{ $assignment['assigned_by']['name'] }}</td>
